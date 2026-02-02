@@ -133,10 +133,7 @@ class SimpleSIPAWithTeachers:
             (U_students, U_businesses, U_teachers, U_joint)
         """
         n = self.number_students
-
-        U_s = 0.0
-        U_b = 0.0
-        U_t = 0.0
+        U_s, U_b, U_t = 0, 0, 0
 
         for (i, j, t) in assignments_ijt:
             U_s += self._tao[i, j]
@@ -162,6 +159,7 @@ class SimpleSIPAWithTeachers:
 
     def get_company_id(self, placement_id):
         return self.placement_info[placement_id]["company_id"]
+
 
     # Internal helpers
     def _zscore_rows(self, m):

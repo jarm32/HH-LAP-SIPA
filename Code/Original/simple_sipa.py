@@ -525,9 +525,3 @@ class SimpleSIPA:
         
         return total_utility/self.number_students
         
-
-
-
-
-
-    
