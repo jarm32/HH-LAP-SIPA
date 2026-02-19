@@ -19,7 +19,14 @@ Esta carpeta contiene lo esencial para la implementación original del modelo SI
 - **`tools/`**  
   Carpeta que contiene código auxiliar utilizado por los componentes principales del modelo. Incluye funciones de apoyo para el preprocesado de datos, normalización, cálculo de utilidades u otras operaciones comunes reutilizadas por el modelo del problema y los algoritmos de resolución.
 
-Existen otros archivos en el repositorio original destinados a la ejecución de experimentos a gran escala, permitiendo realizar múltiples pruebas con distintos parámetros, solvers y configuraciones, así como scripts para la ejecución de metaheurísticas y la generación de datos sintéticos. No obstante, en esta carpeta se incluye únicamente el conjunto mínimo de archivos necesarios para que el modelo funcione correctamente. El objetivo es facilitar la comprensión del procedimiento completo de construcción y resolución del modelo, de modo que pueda replicarse y adaptarse a nuevos modelos en el futuro, dejando el resto de componentes como extensiones añadibles posteriormente.
+- **`instance_creator.py`**
+  Generador de instancias sintéticas del problema SIPA. Crea automáticamente estudiantes, empresas, prácticas, competencias, dependencias y matrices de distancias, validando cada instancia mediante el solver ILP antes de guardarla.
+
+- **`create_instance.py`**
+  Script alternativo de generación de instancias sintéticas, orientado a la creación masiva de problemas con distintos tamaños y configuraciones, incluyendo cálculo automático de matrices de distancia.
+
+- **`multiple_instance_creator.sh`**
+  Script de automatización para la generación por lotes de múltiples instancias con distintos parámetros (surplus, dependencias, competencias), ejecutando repetidamente el generador principal.
 
 ## Requisitos
 
