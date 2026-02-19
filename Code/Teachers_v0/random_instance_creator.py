@@ -42,7 +42,7 @@ class GeneratorConfig:
     prof_capacity_max: int = 25
 
     # ORS // Distancias sintéticas
-    use_ors: bool = True
+    use_ors: bool = True 
     ors_base_url: str = "http://localhost:8080/ors"
 
     synthetic_dist_mu: float = 1500.0

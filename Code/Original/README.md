@@ -13,6 +13,9 @@ Esta carpeta contiene lo esencial para la implementación original del modelo SI
 - **`simple_sipa_milp.py`**  
   Implementación del modelo ILP. Define variables, restricciones y función objetivo, y resuelve el problema con un solver.
 
+- **`simple_sipa_matheuristic.py`**
+  Implementación del modelo a partir de metaheurísticas.
+
 - **`prueba_modelo_simple.py`**  
   Script de prueba que actúa como lanzadera técnica: carga los datos, construye el modelo y ejecuta el ILP.
 
