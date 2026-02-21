@@ -158,29 +158,37 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
            # su vector de desarrollo de competencias y su vector de preferencias de competencias (en ambos casos, solo el bloque de su perfil tiene valores; el resto son ceros)
 
 
-
-##################################################
-
 # ----------------------------
-# Bloque: empresas, plazas y dependencias (ajustado para factibilidad)
+# Hacer la instancia factible por construcción (se amolda a las restricciones de empresa y dependencias)
 # ----------------------------
 
 def number_placements_for_business(number_businesses, base_per_business, surplus, percentage=0.25, prob_major=0.8):
+                                   # número de empresas, plazas por empresa (n_placements/n_companies), número de plazas sobrantes a repartir, 
+                                   # porcentaje de empresas importantes para el reparto del surplus, probabilidad de que el surplus vaya a una empresa importante
+    """ 
+    Distribuye el total de plazas entre empresas (todas parten de un valor base
+    y el surplus se reparte de forma sesgada para generar empresas más grandes que otras)
+    """
+    # Nº de plazas inicial
     placement_vec = np.full(number_businesses, base_per_business, dtype=int)
     businesses_to_consider = np.random.choice(number_businesses, max(1, int(number_businesses * percentage)), replace=False)
+    
+    # Reparte el surplus
     for _ in range(surplus):
         if random.random() <= prob_major:
             rnd_idx = int(random.choice(businesses_to_consider))
         else:
             rnd_idx = random.randint(0, number_businesses - 1)
         placement_vec[rnd_idx] += 1
-    return placement_vec
+    return placement_vec # [5, 8, 4, 6, 9, 3, ...]; Cada índice representa una empresa, y el valor en ese índice es el número de plazas que tiene esa empresa (sumará n_placements)
 
 
-def create_dependencies(placements: List[int], percentage_dependencies: float) -> List[List[int]]:
+def create_dependencies(placements, percentage_dependencies):
+                        # Lista de índices de plazas de la empresa, porcentaje de plazas que estarán involucradas en dependencias
     """
-    Genera grupos de dependencias (tamaño >=2) dentro de una lista de plazas.
+    Genera grupos de dependencias (tamaño >=2) entre plazas de una empresa.
     """
+    # Selecciona las plazas que estarán en dependencias (no necesariamente entre ellas, sino que tendrán alguna)
     if len(placements) < 2:
         return []
 
@@ -191,6 +199,7 @@ def create_dependencies(placements: List[int], percentage_dependencies: float) -
     placements_in_dep = np.random.choice(placements, count, replace=False)
     n_dependent = len(placements_in_dep)
 
+    # Divide las plazas dependientes en grupos de tamaño aleatorio (entre 2 y n_dependent-1) hasta que queden menos de 2 sin agrupar
     sizes = []
     while n_dependent >= 2:
         if n_dependent <= 3:
@@ -200,6 +209,7 @@ def create_dependencies(placements: List[int], percentage_dependencies: float) -
         sizes.append(s)
         n_dependent -= s
 
+    # Crea cada grupo de dependencias como lista de plazas
     deps = []
     k = 0
     for s in sizes:
@@ -207,13 +217,17 @@ def create_dependencies(placements: List[int], percentage_dependencies: float) -
         k += s
         if len(dep) >= 2:
             deps.append(dep)
-    return deps
+    return deps # [[3, 6], [4, 7, 5]]...; cada sublista representa un grupo de plazas que dependen entre sí
 
 
-def build_company_blocks(placements_of_company: List[int], dep_groups_in_company: List[List[int]]) -> List[List[int]]:
+
+###################################################
+
+def build_company_blocks(placements_of_company, dep_groups_in_company):
+                        # Lista de índices de plazas de la empresa, lista de grupos de dependencias (cada grupo es una lista de índices de plazas)
     """
-    Convierte "dependencias" en bloques indivisibles (cada grupo es un bloque),
-    y añade como bloques singleton las plazas que no están en ningún grupo.
+    Convierte las dependencias en bloques indivisibles (cada grupo es un bloque),
+    y añade como bloques aislados las plazas que no están en ningún grupo.
     """
     used = set()
     blocks = []
