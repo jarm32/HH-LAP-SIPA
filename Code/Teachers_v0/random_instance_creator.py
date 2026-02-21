@@ -10,6 +10,7 @@ import sys
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional
 
+
 # ----------------------------
 # Configuración inicial // helpers
 # ----------------------------
@@ -34,8 +35,6 @@ class GeneratorConfig:
     # Profesores / centros
     n_centers_min: int = 2
     n_centers_max: int = 6
-    profs_per_center_min: int = 3
-    profs_per_center_max: int = 12
 
     # Capacidad por profesor (Ct)
     prof_capacity_min: int = 5
@@ -220,11 +219,8 @@ def create_dependencies(placements, percentage_dependencies):
     return deps # [[3, 6], [4, 7, 5]]...; cada sublista representa un grupo de plazas que dependen entre sí
 
 
-
-###################################################
-
 def build_company_blocks(placements_of_company, dep_groups_in_company):
-                        # Lista de índices de plazas de la empresa, lista de grupos de dependencias (cada grupo es una lista de índices de plazas)
+                        # Lista de índices de plazas de la empresa, lista de grupos de dependencias (lista de listas de índices de plazas)
     """
     Convierte las dependencias en bloques indivisibles (cada grupo es un bloque),
     y añade como bloques aislados las plazas que no están en ningún grupo.
@@ -238,15 +234,17 @@ def build_company_blocks(placements_of_company, dep_groups_in_company):
     for j in placements_of_company:
         if j not in used:
             blocks.append([j])
-    return blocks
+    return blocks # [[3, 6], [4, 7, 5], [2], [8], ...]; cada sublista representa un bloque de plazas que deben asignarse juntas)
 
 
-def choose_min_quota_from_blocks(blocks: List[List[int]], max_students: int) -> int:
+def choose_min_quota_from_blocks(blocks, max_students):
+                                # lista de bloques de una empresa, número máximo de estudiantes que la empresa puede aceptar
     """
-    El mínimo de empresa se construye como suma de bloques completos.
-    Así evitamos pedir "1 plaza" que pertenezca a un grupo de tamaño 3.
+    Construye la cuota mínima de estudiantes para una empresa como suma de bloques completos
+    (dependencias o plazas individuales), garantizando que nunca se exija una parte de un bloque dependiente,
+    y que no se supere el máximo permitido por la empresa
     """
-    # Elegimos cuántos bloques exigir (al azar), sin pasarnos de max_students
+    # Elige cuántos bloques exigir (al azar), sin pasarnos de max_students
     sizes = [len(b) for b in blocks]
     order = list(range(len(blocks)))
     random.shuffle(order)
@@ -256,27 +254,29 @@ def choose_min_quota_from_blocks(blocks: List[List[int]], max_students: int) -> 
         if min_q + sizes[idx] <= max_students and random.random() <= 0.35:
             min_q += sizes[idx]
 
-    # Asegura al menos 0 o 1 bloque a veces (si cabe)
+    # Asegura al menos 0 o 1 bloque, a veces, si cabe
     if min_q == 0 and blocks and random.random() <= 0.25:
-        # mete un bloque pequeño si cabe
         smallest = min(sizes)
         if smallest <= max_students:
             min_q = smallest
 
-    return min_q
+    return min_q # número entero que representa el mínimo de estudiantes exigidos para la empresa
 
 
-def adjust_max_quotas(max_q: List[int], placements_per_company: List[int], n_students: int) -> List[int]:
+def adjust_max_quotas(max_q, placements_per_company, n_students):
+                     # nº máximo de estudiantes por empresa (preliminar, nº de plazas reales de la empresa), número de plazas por empresa, número total de estudiantes a asignarse
     """
-    Garantiza: max_q[k] <= plazas_empresa[k] y sum(max_q) >= n_students.
-    Si sum(max_q) es pequeño, incrementa (sin pasar de plazas).
+    Ajusta las cuotas máximas por empresa garantizando que no superen
+    las plazas reales disponibles y que la suma total permita asignar
+    a todos los estudiantes.
     """
+    # Ajusta para no superar las plazas reales
     max_q = [min(max_q[k], placements_per_company[k]) for k in range(len(max_q))]
     total = sum(max_q)
     if total >= n_students:
         return max_q
 
-    # Reparte incrementos donde haya margen
+    # Reparte incrementos donde haya margen si no hay capacidad suficiente
     idxs = list(range(len(max_q)))
     while total < n_students:
         random.shuffle(idxs)
@@ -291,16 +291,18 @@ def adjust_max_quotas(max_q: List[int], placements_per_company: List[int], n_stu
         if not progressed:
             # No hay más margen, debería no ocurrir si n_placements >= n_students
             break
-    return max_q
+    return max_q # [5, 10, 4, 9]; lista de máximos ajustados y factibles
 
 
 # ----------------------------
-# Bloque: centros y profesores (nuevo, factible por construcción)
+# Hacer la instancia factible por construcción (se amolda a las restricciones de centros y profesores)
 # ----------------------------
 
-def sample_geo_points_from_locations(n: int, location_names: List[str]) -> List[Tuple[float, float]]:
+def sample_geo_points_from_locations(n, location_names):
+                                    # nº de puntos a generar, lista de nombres de localizaciones disponibles (cada nombre corresponde a un archivo geojson)
     """
-    Toma puntos (lat,lon) de los geojson de locations.
+    Genera n coordenadas geográficas aleatorias a partir 
+    de los geojson de las localizaciones disponibles
     """
     points = []
     for _ in range(n):
@@ -309,12 +311,12 @@ def sample_geo_points_from_locations(n: int, location_names: List[str]) -> List[
             obj = json.load(f)
         (lat, lon) = random.choice(obj["features"])["geometry"]["coordinates"]
         points.append((lat, lon))
-    return points
+    return points # [(lat1, lon1), (lat2, lon2), ...]; lista de coordenadas
 
 
-def create_centers_and_professors(n_students: int,
-                                 location_names: List[str],
-                                 cfg: GeneratorConfig) -> Tuple[List[Tuple[float, float]], List[int], List[int]]:
+def create_centers_and_professors(n_students, location_names, cfg):
+                                 # nº total de estudiante a asignar, lista de localizaciones disponibles
+                                 # configuración del generador (rangos para número de centros y capacidad de cada profesor)
     """
     Devuelve:
       - centers_coords: [(lat,lon) por centro]
@@ -327,13 +329,13 @@ def create_centers_and_professors(n_students: int,
 
     prof_center = []
     prof_capacity = []
-
+    
     # Genera un nº de profes por centro
-    for c in range(n_centers):
-        n_profs_c = random.randint(cfg.profs_per_center_min, cfg.profs_per_center_max)
-        for _ in range(n_profs_c):
-            prof_center.append(c)
-            prof_capacity.append(random.randint(cfg.prof_capacity_min, cfg.prof_capacity_max))
+    n_professors = random.randint(n_centers, 3 * n_centers)
+    for t in range(n_professors):
+        c = random.randint(0, n_centers - 1)
+        prof_center.append(c)
+        prof_capacity.append(random.randint(cfg.prof_capacity_min, cfg.prof_capacity_max))
 
     # Asegura capacidad total
     total_cap = sum(prof_capacity)
@@ -347,8 +349,12 @@ def create_centers_and_professors(n_students: int,
             need -= add
             i = (i + 1) % len(prof_capacity)
 
-    return centers_coords, prof_center, prof_capacity
+    return centers_coords, prof_center, prof_capacity # [(lat1, lon1), (lat2, lon2), ...]; lista de coordenadas de cada centro
+                                                      # [c1, c2, c3, ...]; lista donde el índice es el profesor (t) y el valor es el centro al que está asignado (e(t))
+                                                      # [Ct1, Ct2, Ct3, ...]; lista donde el índice es el profesor (t) y el valor es su capacidad (Ct)
 
+
+#############################################################################
 
 # ----------------------------
 # Escritura de instancia (backward-friendly)
