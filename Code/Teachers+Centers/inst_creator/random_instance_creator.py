@@ -149,7 +149,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
     w_distance = round(random.random() * 0.5, 2)
     w_dev = round(1 - w_distance, 2)
 
-    loc_file = open(f"../data/points/{location_name}.geojson", "r")
+    loc_file = open(f"data/points/{location_name}.geojson", "r")
     loc_obj = json.load(loc_file)
     (latitude, longitude) = random.choice(loc_obj["features"])["geometry"]["coordinates"]
     loc_file.close()
@@ -309,7 +309,7 @@ def sample_geo_points_from_locations(n, location_names):
     points = []
     for _ in range(n):
         loc = random.choice(location_names)
-        with open(f"../data/points/{loc}.geojson", "r") as f:
+        with open(f"data/points/{loc}.geojson", "r") as f:
             obj = json.load(f)
         (lat, lon) = random.choice(obj["features"])["geometry"]["coordinates"]
         points.append((lat, lon))
@@ -456,13 +456,13 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     """
     # Carga distribuciones de localización
     all_student_locations_prop = []
-    with open("../data/proportion_home.csv", "r") as f: # distribución de vivienda estudiantes
+    with open("data/proportion_home.csv", "r") as f: # distribución de vivienda estudiantes
         for line in f.readlines():
             tokens = line.split("\t")
             all_student_locations_prop.append((tokens[0], float(tokens[1])))
 
     all_business_locations = []
-    with open("../data/placement_locations.csv", "r") as f: # coordenadas posibles de empresas
+    with open("data/placement_locations.csv", "r") as f: # coordenadas posibles de empresas
         for line in f.readlines():
             tokens = line.split("\t")
             all_business_locations.append((float(tokens[1]), float(tokens[0])))
