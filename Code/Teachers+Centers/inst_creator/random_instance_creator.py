@@ -306,13 +306,30 @@ def sample_geo_points_from_locations(n, location_names):
     Genera n coordenadas geográficas aleatorias a partir 
     de los geojson de las localizaciones disponibles
     """
-    points = []
-    for _ in range(n):
-        loc = random.choice(location_names)
+    # Cargar todos los puntos disponibles (únicos)
+    pool = []
+    seen = set()
+    for loc in location_names:
         with open(f"data/points/{loc}.geojson", "r") as f:
             obj = json.load(f)
-        (lat, lon) = random.choice(obj["features"])["geometry"]["coordinates"]
-        points.append((lat, lon))
+        for feat in obj.get("features", []):
+            coords = feat["geometry"]["coordinates"]
+            # coords viene como (lat, lon) en tu código actual
+            p = (float(coords[0]), float(coords[1]))
+            if p not in seen:
+                seen.add(p)
+                pool.append(p)
+
+    if not pool:
+        raise ValueError("No se han encontrado puntos en los geojson de data/points/")
+
+    # Muestreo sin repetición si se puede
+    if n <= len(pool):
+        return random.sample(pool, n)
+
+    # Si se piden más de los que hay, devuelve todos y completa con reemplazo
+    points = list(pool)
+    points.extend(random.choice(pool) for _ in range(n - len(pool)))
     return points # [(lat1, lon1), (lat2, lon2), ...]; lista de coordenadas
 
 
@@ -320,11 +337,8 @@ def create_centers_and_professors(n_students, location_names, cfg):
                                  # nº total de estudiante a asignar, lista de localizaciones disponibles
                                  # configuración del generador (rangos para número de centros y capacidad de cada profesor)
     """
-    Devuelve:
-      - centers_coords: [(lat,lon) por centro]
-      - prof_center: center_id de cada profesor
-      - prof_capacity: Ct de cada profesor
-    Factibilidad: sum(Ct) >= n_students.
+    Crea los centros y los profesores asignados a cada centro de forma aleatoria,
+    garantizando que la capacidad total de los profesores sea suficiente para cubrir a todos los estudiantes
     """
     n_centers = random.randint(cfg.n_centers_min, cfg.n_centers_max)
     centers_coords = sample_geo_points_from_locations(n_centers, location_names)
@@ -458,14 +472,16 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     all_student_locations_prop = []
     with open("data/proportion_home.csv", "r") as f: # distribución de vivienda estudiantes
         for line in f.readlines():
-            tokens = line.split("\t")
-            all_student_locations_prop.append((tokens[0], float(tokens[1])))
+            line = line.strip().lstrip("\ufeff")  # quita BOM si existe
+            tokens = line.split(";")
+            all_student_locations_prop.append((tokens[0].strip(), float(tokens[1].strip())))
 
     all_business_locations = []
     with open("data/placement_locations.csv", "r") as f: # coordenadas posibles de empresas
         for line in f.readlines():
-            tokens = line.split("\t")
-            all_business_locations.append((float(tokens[1]), float(tokens[0])))
+            line = line.strip().lstrip("\ufeff")  # quita BOM si existe
+            tokens = line.split(";")
+            all_business_locations.append((float(tokens[1].strip()), float(tokens[0].strip())))
 
     location_names = [x[0] for x in all_student_locations_prop]
 
@@ -527,7 +543,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 placement_comp_needs.append(needs)
 
             # Elige número de empresas en rango razonable
-            n_companies = random.randint(max(2, n_placements // 10), max(2, int(cfg.placement_dep_prob / 100 * n_placements / 2)))
+            lower = max(2, n_placements // 10)
+            upper = max(2, int(cfg.placement_dep_prob / 100 * n_placements / 2))
+            upper = max(upper, lower)
+
+            n_companies = random.randint(lower, upper)
 
             # Distribuye las plazas entre empresas
             base = n_placements // n_companies
