@@ -2,7 +2,9 @@
 # Librerías
 # ----------------------------
 
+# from fileinput import filename
 import random
+# from openrouteservice import Client, distance_matrix
 import numpy as np
 import json
 import math
@@ -15,8 +17,8 @@ from typing import List, Tuple, Dict, Optional
 # Configuración inicial // helpers
 # ----------------------------
 
-# from openrouteservice import Client, distance_matrix
-# ORS_AVAILABLE = True
+#from openrouteservice import Client, distance_matrix
+#ORS_AVAILABLE = True
 
 ORS_AVAILABLE = False # Distancias sintéticas
 
@@ -44,11 +46,11 @@ class GeneratorConfig:
     use_ors: bool = True 
     ors_base_url: str = "http://localhost:8080/ors"
 
-    synthetic_dist_mu: float = 1500.0
-    synthetic_dist_sigma: float = 250.0
+    #synthetic_dist_mu: float = 1500.0
+    #synthetic_dist_sigma: float = 250.0
 
 
-# En caso de que usemos ORS, esta función hace la matriz de tiempos con valores reales
+# En caso de usar ORS, esta función hace la matriz de tiempos con valores reales
 def request_matrix_api(client, sources, destinations):
     resp = distance_matrix.distance_matrix(client, sources + destinations,
         sources=[i for i in range(len(sources))],
@@ -330,7 +332,7 @@ def create_centers_and_professors(n_students, location_names, cfg):
     prof_center = []
     prof_capacity = []
     
-    # Genera un nº de profes por centro
+    # Genera un nº de profesores y los asigna a centros
     n_professors = random.randint(n_centers, 3 * n_centers)
     for t in range(n_professors):
         c = random.randint(0, n_centers - 1)
@@ -354,32 +356,22 @@ def create_centers_and_professors(n_students, location_names, cfg):
                                                       # [Ct1, Ct2, Ct3, ...]; lista donde el índice es el profesor (t) y el valor es su capacidad (Ct)
 
 
-#############################################################################
-
 # ----------------------------
-# Escritura de instancia (backward-friendly)
+# Escritura de instancia
 # ----------------------------
 
-def write_instance_file(filename: str,
-                        n_students: int,
-                        n_companies: int,
-                        n_placements: int,
-                        n_competences_total: int,
-                        dependencies_all: List[List[int]],
-                        student_info_rows: List[Tuple],
-                        company_min: List[int],
-                        company_max: List[int],
-                        placement_company: List[int],
-                        placement_comp_needs: List[List[float]],
-                        student_company_matrix: List[List[float]],
-                        # Nuevos: companies coords
-                        company_coords: List[Tuple[float, float]],
-                        # Nuevos: centers/profs
-                        centers_coords: List[Tuple[float, float]],
-                        prof_center: List[int],
-                        prof_capacity: List[int],
-                        # Nuevo: matriz centro->empresa
-                        center_company_matrix: List[List[float]]):
+def write_instance_file(filename, n_students, n_companies, n_placements, n_competences_total, dependencies_all, 
+                        # nombre del archivo, número de estudiantes, de empresas, de plazas, total de competencias (nº competencias * nº de perfiles), lista de dependencias (lista de listas de índices de plazas),
+                        student_info_rows, company_min, company_max, placement_company, 
+                        # info de cada estudiante (id, pesos de distancia/desarrollo, vectores de competencias y preferencias), cuota mínima y máxima de estudiantes por empresa, lista que indica la empresa a la que pertenece cada plaza
+                        placement_comp_needs, student_company_matrix, company_coords, centers_coords, 
+                        # vector de necesidades de competencias asociado a cada plaza, matriz de distancias/tiempos entre estudiantes y empresas, listas de coordenadas de las empresas y los centros educativos,
+                        prof_center, prof_capacity, center_company_matrix, company_company_matrix):
+                        # lista que indica el centro asignado a cada profesor (e(t)), lista que indica la capacidad de cada profesor (Ct), matriz de distancias/tiempos entre centros y empresas y entre empresas mismas
+    """
+    Crea un archivo .txt con la instancia completa del problema
+    """
+    # Cabecera 
     with open(filename, "w") as fd:
         fd.write(f"n_students\t{n_students}\n")
         fd.write(f"n_companies\t{n_companies}\n")
@@ -387,10 +379,10 @@ def write_instance_file(filename: str,
         fd.write(f"n_competences\t{n_competences_total}\n")
         fd.write(f"n_dependent\t{len(dependencies_all)}\n")
 
-        # --- Original blocks ---
+        # Pesos y vectores de competencias de cada estudiante.
         fd.write("STUDENT_INFO\n")
         for row in student_info_rows:
-            # row: (i, w_distance, w_dev, dev_vec, pref_vec)
+            # row --> (id, w_distance, w_development, development_vector_real, development_vector_preference)
             i, w_dist, w_dev, dev_vec, pref_vec = row
             fd.write(
                 "{}\t{}\t{}\t{}\t{}\n".format(
@@ -402,70 +394,88 @@ def write_instance_file(filename: str,
                 )
             )
 
+        # Cuotas mínima y máxima por empresa.
         fd.write("COMPANY_INFO\n")
         for k in range(n_companies):
             fd.write(f"{k}\t{int(company_min[k])}\t{int(company_max[k])}\n")
 
+        # Empresa asociada y necesidades de competencias de cada plaza
         fd.write("PLACEMENT_INFO\n")
         for j in range(n_placements):
             needs = placement_comp_needs[j]
             fd.write(f"{j}\t{placement_company[j]}\t" + "\t".join([str(round(x, 2)) for x in needs]) + "\n")
 
+        # Grupos de plazas dependientes
         fd.write("PLACEMENT_DEPENDENCIES\n")
         for dep in dependencies_all:
             fd.write("\t".join(str(x) for x in dep) + "\n")
 
+        # Matriz distancia estudiante → empresa
         fd.write("DISTANCE_MATRIX\n")
         for row in student_company_matrix:
             fd.write("\t".join(str(d) for d in row) + "\n")
 
-        # --- New blocks (Extended model) ---
+        # Coordenadas de cada empresa
         fd.write("COMPANY_LOCATIONS\n")
         for k, (lat, lon) in enumerate(company_coords):
             fd.write(f"{k}\t{lat}\t{lon}\n")
 
+        # Nº de centros y profesores
         fd.write("n_centers\t{}\n".format(len(centers_coords)))
         fd.write("n_professors\t{}\n".format(len(prof_center)))
 
+        # Coordenadas de centros
         fd.write("CENTER_LOCATIONS\n")
         for c, (lat, lon) in enumerate(centers_coords):
             fd.write(f"{c}\t{lat}\t{lon}\n")
-
+        
+        # Para cada profesor (t, e(t), Ct)
         fd.write("PROFESSOR_INFO\n")
         for t in range(len(prof_center)):
             fd.write(f"{t}\t{prof_center[t]}\t{prof_capacity[t]}\n")
 
+        # Matriz distancia centro → empresa
         fd.write("CENTER_COMPANY_DISTANCE\n")
         for row in center_company_matrix:
             fd.write("\t".join(str(d) for d in row) + "\n")
 
+        # Matriz distancia empresa → empresa
+        fd.write("COMPANY_COMPANY_DISTANCE\n")
+        for row in company_company_matrix:
+            fd.write("\t".join(str(d) for d in row) + "\n")
+
 
 # ----------------------------
-# Main generator (factible por construcción)
+# Generador de instancias
 # ----------------------------
 
-def generate_instances(cfg: GeneratorConfig):
-    # Carga distribuciones de localización (igual que original)
+def generate_instances(cfg): # Configuración global del generador (tamaños, nº de instancias, parámetros de competencias, cuotas, dependencias y rutas de salida)
+    """
+    Genera archivos .txt de instancias factibles por construcción.
+    Además, calcula las matrices de distancia
+    """
+    # Carga distribuciones de localización
     all_student_locations_prop = []
-    with open("../data/proportion_home.csv", "r") as f:
+    with open("../data/proportion_home.csv", "r") as f: # distribución de vivienda estudiantes
         for line in f.readlines():
             tokens = line.split("\t")
             all_student_locations_prop.append((tokens[0], float(tokens[1])))
 
     all_business_locations = []
-    with open("../data/placement_locations.csv", "r") as f:
+    with open("../data/placement_locations.csv", "r") as f: # coordenadas posibles de empresas
         for line in f.readlines():
             tokens = line.split("\t")
             all_business_locations.append((float(tokens[1]), float(tokens[0])))
 
     location_names = [x[0] for x in all_student_locations_prop]
 
-    # ORS client (si procede)
+    # ORS client (en caso de usarse) // Si no, se usan distancias sintéticas
     client = None
     use_ors = cfg.use_ors and ORS_AVAILABLE
     if use_ors:
         client = Client(base_url=cfg.ors_base_url)
-
+    
+    # Genera instancias para distintos tamaños de estudiantes dados unos parámetros
     number_profiles = 8
     p_excellent_student = 0.05
     p_notable_student = 0.25
@@ -473,12 +483,13 @@ def generate_instances(cfg: GeneratorConfig):
     for n_students in range(cfg.start_size, cfg.end_size + 100, 200):
         n_instance = 0
 
+        # Para cada tamaño n_students, genera varias instancias distintas
         while n_instance < cfg.number_instances:
-            # perfiles
+            # perfiles (probabilidad aleatoria de cada uno)
             profile_prob = np.random.random(number_profiles)
             profile_prob = profile_prob / np.sum(profile_prob)
 
-            # ---- Students ----
+            # estudiantes (localización, coche, peso distancia/desarrollo, vector de desarrollo, vector de preferencias)
             student_info = []
             profiles_used = []
             for i in range(n_students):
@@ -492,10 +503,11 @@ def generate_instances(cfg: GeneratorConfig):
                 profiles_used.append(pref_vec)
                 student_info.append((lat, lon, has_car, w_dist, w_dev, dev_vec, pref_vec))
 
-            # ---- Placements ----
+            # nº plazas (más plazas que estudiantes por el surplus)
             n_placements = int(math.ceil(n_students * (1.0 + cfg.surplus / 100.0)))
             placement_comp_needs = []
 
+            # vector de necesidades de las plazas (reutiliza perfiles ligeramente modificados o crea nuevos aleatorios)
             np.random.shuffle(profiles_used)
             for j in range(n_placements):
                 if j < len(profiles_used):
@@ -514,28 +526,28 @@ def generate_instances(cfg: GeneratorConfig):
                             ([0.0] * ((number_profiles - profile - 1) * cfg.number_competences))
                 placement_comp_needs.append(needs)
 
-            # ---- Companies ----
-            # Elegimos nº empresas en rango razonable (como original)
+            # Elige número de empresas en rango razonable
             n_companies = random.randint(max(2, n_placements // 10), max(2, int(cfg.placement_dep_prob / 100 * n_placements / 2)))
 
+            # Distribuye las plazas entre empresas
             base = n_placements // n_companies
             surplus_placements = n_placements % n_companies
             placements_per_company = number_placements_for_business(n_companies, base, surplus_placements)
 
-            # asignación empresa por plaza
+            # Construye el vector que asigna cada plaza a una empresa
             placement_company = []
             for k in range(n_companies):
                 placement_company.extend([k] * int(placements_per_company[k]))
             placement_company = placement_company[:n_placements]
 
-            # --- company placements list
-            company_placements: Dict[int, List[int]] = {k: [] for k in range(n_companies)}
+            # Construye, para cada empresa, la lista de plazas que le pertenecen
+            company_placements = {k: [] for k in range(n_companies)}
             for j, k in enumerate(placement_company):
                 company_placements[int(k)].append(j)
 
-            # --- dependencies per company
-            dependencies_all: List[List[int]] = []
-            dep_groups_per_company: Dict[int, List[List[int]]] = {k: [] for k in range(n_companies)}
+            # Genera los grupos de plazas dependientes por empresa y construye la lista global de dependencias
+            dependencies_all = []
+            dep_groups_per_company = {k: [] for k in range(n_companies)}
             for k in range(n_companies):
                 deps = create_dependencies(company_placements[k], cfg.placement_dep_prob)
                 # filtra grupos tamaño 1
@@ -543,11 +555,11 @@ def generate_instances(cfg: GeneratorConfig):
                 dep_groups_per_company[k] = deps
                 dependencies_all.extend(deps)
 
-            # ---- Quotas factibles por construcción ----
+            # Inicializa las cuotas mínimas y máximas por empresa
             company_min = [0] * n_companies
             company_max = [0] * n_companies
 
-            # Primero max = algo razonable, luego ajustamos para sumar >= n_students
+            # Ajusta las cuotas máximas para garantizar que sea posible asignar a todos los estudiantes
             for k in range(n_companies):
                 # max al menos 1 y como mucho plazas de empresa
                 cap = len(company_placements[k])
@@ -555,16 +567,15 @@ def generate_instances(cfg: GeneratorConfig):
 
             company_max = adjust_max_quotas(company_max, [len(company_placements[k]) for k in range(n_companies)], n_students)
 
-            # Ahora min se elige en función de bloques (dep grupos + singletons), y respetando max
+            # Calcula la cuota mínima de cada empresa respetando bloques de dependencias y la cota máxima
             for k in range(n_companies):
                 blocks = build_company_blocks(company_placements[k], dep_groups_per_company[k])
                 company_min[k] = choose_min_quota_from_blocks(blocks, company_max[k])
 
-            # Asegura suma(min) <= n_students (si no, reduce)
+            # Verifica que la suma de cuotas mínimas no supere el número de estudiantes y reduce si es necesario
             total_min = sum(company_min)
             if total_min > n_students:
                 # reduce mins aleatoriamente (quitando bloques completos implícitamente al bajar el mínimo)
-                # (En la práctica, solo necesitamos que la cota no haga imposible asignar todos.)
                 excess = total_min - n_students
                 idxs = list(range(n_companies))
                 random.shuffle(idxs)
@@ -576,20 +587,18 @@ def generate_instances(cfg: GeneratorConfig):
                         company_min[k] -= dec
                         excess -= dec
 
-            # ---- Locations companies ----
-            # Tomamos coords de placement_locations.csv
-            # (repetimos si n_companies > len(list), usamos choice con replacement)
+            # Asigna coordenadas geográficas a cada empresa seleccionándolas del conjunto disponible (si n_companies > len(list), usamos choice con replacement)
             company_coords = [all_business_locations[i] for i in np.random.choice(len(all_business_locations), n_companies, replace=True)]
 
-            # ---- Centers / Professors (nuevo) ----
+            # Genera centros educativos y profesores, garantizando capacidad total suficiente
             centers_coords, prof_center, prof_capacity = create_centers_and_professors(n_students, location_names, cfg)
 
-            # ---- Distance matrices ----
-            # Student -> Company
+            # Extrae coordenadas de estudiantes y empresas para calcular matrices de distancia
             student_coords = [(x[0], x[1]) for x in student_info]
             company_coords_ors = [(x[0], x[1]) for x in company_coords]
 
-            student_company_matrix: List[List[float]] = []
+            # Construye la matriz de distancias estudiante → empresa
+            student_company_matrix = []
             if use_ors:
                 # pedimos fila a fila como en tu original para evitar tamaños enormes
                 for i in range(len(student_coords)):
@@ -600,8 +609,8 @@ def generate_instances(cfg: GeneratorConfig):
                 for _ in range(n_students):
                     student_company_matrix.append([float(synthetic_duration()) for _ in range(n_companies)])
 
-            # Center -> Company (nuevo)
-            center_company_matrix: List[List[float]] = []
+            # Construye la matriz de distancias centro → empresa
+            center_company_matrix = []
             if use_ors:
                 for c in range(len(centers_coords)):
                     resp = request_matrix_api(client, [centers_coords[c]], company_coords_ors)
@@ -611,9 +620,26 @@ def generate_instances(cfg: GeneratorConfig):
                 for _ in range(len(centers_coords)):
                     center_company_matrix.append([float(synthetic_duration()) for _ in range(n_companies)])
 
-            # ---- Write file ----
+            # Construye la matriz de distancias empresa → empresa
+            company_company_matrix = []
+            if use_ors:
+                for k in range(len(company_coords)):
+                    resp = request_matrix_api(client, [company_coords_ors[k]], company_coords_ors)
+                    durations = resp["durations"][0]
+                    company_company_matrix.append(
+                        [float(d) if d else float(synthetic_duration()) for d in durations]
+                    )
+            else:
+                for _ in range(n_companies):
+                    row = []
+                    for _ in range(n_companies):
+                        row.append(float(synthetic_duration()))
+                    company_company_matrix.append(row)
+
+            # Archivo de salida
             out = f"{cfg.result_path}/problem_instance_ext_{n_students}_{n_instance}.txt"
 
+            # Extrae la información de cada estudiante para escribirla en el fichero
             student_rows = []
             for i in range(n_students):
                 (_, _, _, w_dist, w_dev, dev_vec, pref_vec) = student_info[i]
@@ -636,36 +662,33 @@ def generate_instances(cfg: GeneratorConfig):
                 centers_coords=centers_coords,
                 prof_center=prof_center,
                 prof_capacity=prof_capacity,
-                center_company_matrix=center_company_matrix
+                center_company_matrix=center_company_matrix,
+                company_company_matrix=company_company_matrix
             )
 
+            # Incrementa el contador de instancias generadas para el tamaño actual
             n_instance += 1
             print(f"[OK] written: {out}", flush=True)
 
 
-def parse_args_to_config(argv) -> GeneratorConfig:
+def parse_args_to_config(argv): # Lista de argumentos pasados por línea de comandos
     """
-    Mantiene la interfaz similar a tu instance_creator.py original:
-      python extended_instance_creator.py <result_path> <start> <end> <num_instances> <surplus> <dep_prob> <n_comp> <most_important>
+    Valida que se hayan proporcionado todos los argumentos necesarios por línea de comandos, 
+    convierte cada uno al tipo correspondiente (int o float) y construye el objeto GeneratorConfig
+    que contiene la configuración global utilizada por el generador de instancias
+
+    python random_instance_creator.py <result_path> <start> <end> <num_instances> <surplus> <dep_prob> <n_comp> <most_important>
     """
+    # Comprueba que se han pasado todos los argumentos necesarios
     if len(argv) < 9:
         raise SystemExit(
-            "Usage: python extended_instance_creator.py <result_path> <start_size> <end_size> "
+            "Usage: python random_instance_creator.py <result_path> <start_size> <end_size> "
             "<number_instances> <surplus> <placement_dep_prob> <number_competences> <most_important_competences>"
         )
 
-    return GeneratorConfig(
-        result_path=argv[1],
-        start_size=int(argv[2]),
-        end_size=int(argv[3]),
-        number_instances=int(argv[4]),
-        surplus=int(argv[5]),
-        placement_dep_prob=float(argv[6]),
-        number_competences=int(argv[7]),
-        most_important_competences=int(argv[8]),
-        # Si no tienes ORS levantado, pon use_ors=False aquí o modifica el default
-        use_ors=True
-    )
+    return GeneratorConfig(result_path=argv[1], start_size=int(argv[2]), end_size=int(argv[3]), number_instances=int(argv[4]), surplus=int(argv[5]),
+                          placement_dep_prob=float(argv[6]), number_competences=int(argv[7]), most_important_competences=int(argv[8]), use_ors=False)
+                          # Convierte los argumentos recibidos a sus tipos adecuados y construye el objeto de configuración que usará el generador de instancias
 
 
 if __name__ == "__main__":
