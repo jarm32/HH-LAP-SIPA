@@ -1,0 +1,10 @@
+from tools.problem import load_instance
+
+p = load_instance("inst_creator/output/problem_instance_ext_200_0.txt")
+
+print("Students:", p.n_students)
+print("Companies:", p.n_companies)
+print("Centers:", p.n_centers)
+print("Professors:", p.n_professors)
+print("Total company capacity:", p.total_company_capacity())
+print("Total professor capacity:", p.total_professor_capacity())
