@@ -1,78 +1,70 @@
 # Representación interna del problema (loader de instancias .txt)
 # Ni genera soluciones, ni evalúa la función objetivo, ni optimiza
 
+
+# ----------------------------
+# Librerías
+# ----------------------------
+
 import numpy as np
 
 
+# ----------------------------
+# Cargador del problema
+# ----------------------------
+
 class Problem:
     """
-    Representación en memoria de una instancia del SIPA ampliado
-    (estudiantes, empresas, dependencias, centros y profesores).
+    Representación en memoria de una instancia del problema
+    (estudiantes, empresas, dependencias, centros y profesores)
     """
-
     def __init__(self):
-
-        # -----------------
         # Dimensiones
-        # -----------------
-        self.n_students = 0
-        self.n_companies = 0
-        self.n_placements = 0
-        self.n_competences = 0
-        self.n_centers = 0
-        self.n_professors = 0
+        self.n_students = 0 #S
+        self.n_companies = 0 #B
+        self.n_placements = 0 #P
+        self.n_competences = 0 #C
+        self.n_centers = 0 #E
+        self.n_professors = 0 #T
 
-        # -----------------
         # Empresas
-        # -----------------
-        self.company_min = []
-        self.company_max = []
+        self.company_min = [] #qk
+        self.company_max = [] # Qk
 
-        # -----------------
         # Plazas
-        # -----------------
-        self.placement_company = []
-        self.dependencies = []
+        self.placement_company = [] # empresa a la que pertenece cada plaza
+        self.dependencies = [] # grupo de plazas que deben asignarse juntas
 
-        # -----------------
         # Estudiantes
-        # -----------------
-        self.student_w_distance = []
-        self.student_w_dev = []
-        self.student_dev = []
-        self.student_pref = []
+        self.student_w_distance = [] # peso de i a la distancia
+        self.student_w_dev = [] # peso de i al desarrollo profesional
+        self.student_dev = [] # vector real de competencias de i
+        self.student_pref = [] # vector de preferencias de i
 
-        # -----------------
         # Distancias
-        # -----------------
-        self.student_company_dist = None
-        self.center_company_dist = None
-        self.company_company_dist = None
+        self.student_company_dist = None # matriz distancia estudiante → empresa
+        self.center_company_dist = None # matriz distancia centro → empresa
+        self.company_company_dist = None # matriz distancia empresa → empresa
 
-        # -----------------
         # Centros y profesores
-        # -----------------
-        self.centers_coords = []
-        self.prof_center = []
-        self.prof_capacity = []
+        self.centers_coords = [] # coordenadas del centro c
+        self.prof_center = [] # centro al que pertenece el profesor t
+        self.prof_capacity = [] # capacidad máxima de supervisión Ct
 
-    # -------------------------------------------------
     # Métodos auxiliares útiles más adelante
-    # -------------------------------------------------
 
-    def total_company_capacity(self):
-        return sum(self.company_max)
+    def total_company_capacity(self): # -
+        return sum(self.company_max) # suma de las cuotas máximas de todas las empresas
 
-    def total_professor_capacity(self):
-        return sum(self.prof_capacity)
+    def total_professor_capacity(self): # -
+        return sum(self.prof_capacity) # suma de las capacidades totales de supervisión de todos los profesores
 
 
-def load_instance(filename):
+def load_instance(filename): # ruta del archivo .txt que contiene la instancia
     """
-    Lee un archivo .txt generado por random_instance_creator
-    y construye un objeto Problem.
+    Lee un archivo .txt generado por random_instance_creator y construye un objeto Problem
     """
-
+    # Creación del objeto y lectura del archivo
     problem = Problem()
 
     with open(filename, "r") as f:
@@ -80,9 +72,7 @@ def load_instance(filename):
 
     idx = 0
 
-    # =============================
-    # CABECERA
-    # =============================
+    # Cabecera con las dimensiones
     while not lines[idx].startswith("STUDENT_INFO"):
         key, value = lines[idx].split("\t")
 
@@ -97,46 +87,49 @@ def load_instance(filename):
 
         idx += 1
 
-    # =============================
-    # STUDENT_INFO
-    # =============================
+    # Información de los estudiantes --> id | w_dist | w_dev | dev_vector | pref_vector
     idx += 1
     for _ in range(problem.n_students):
-
+        
         tokens = lines[idx].split("\t")
 
+        # Pesos (distancia y desarrollo)
         problem.student_w_distance.append(float(tokens[1]))
         problem.student_w_dev.append(float(tokens[2]))
 
         start_dev = 3
         end_dev = start_dev + problem.n_competences
 
-        dev_vector = list(map(float, tokens[start_dev:end_dev]))
-        pref_vector = list(map(float, tokens[end_dev:end_dev + problem.n_competences]))
+        dev_vector = list(map(float, tokens[start_dev:end_dev])) # Vector de desarrollo
+        pref_vector = list(map(float, tokens[end_dev:end_dev + problem.n_competences])) # Vector de preferencias
 
         problem.student_dev.append(dev_vector)
         problem.student_pref.append(pref_vector)
 
         idx += 1
 
-    # =============================
-    # COMPANY_INFO
-    # =============================
+    # Información de las empresas --> id | qk | Qk
     idx += 1
     for _ in range(problem.n_companies):
+
         tokens = lines[idx].split("\t")
+
+        # Cuotas mínimas y máximas de cada empresa
         problem.company_min.append(int(tokens[1]))
         problem.company_max.append(int(tokens[2]))
         idx += 1
 
-    # =============================
-    # PLACEMENT_INFO
-    # =============================
+    # Información de las plazas --> id | empresa a la que pertenece cada plaza
     idx += 1
     for _ in range(problem.n_placements):
+
         tokens = lines[idx].split("\t")
+
+        # Empresa a la que pertenece cada plaza
         problem.placement_company.append(int(tokens[1]))
         idx += 1
+
+    ###################################################################
 
     # =============================
     # DEPENDENCIES
@@ -226,4 +219,4 @@ def load_instance(filename):
 
     problem.company_company_dist = np.array(company_company_matrix)
 
-    return problem
+    return problem # Un objeto Problem con la información de la instancia
