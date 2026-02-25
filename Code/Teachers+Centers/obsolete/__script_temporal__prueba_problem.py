@@ -1,6 +1,6 @@
 from tools.problem import load_instance
 
-p = load_instance("inst_creator/output/problem_instance_ext_200_0.txt")
+p = load_instance("Code/Teachers+Centers/inst_creator/output/problem_instance_ext_400_1.txt")
 
 print("Students:", p.n_students)
 print("Companies:", p.n_companies)

@@ -1,17 +1,11 @@
 # Representación interna del problema (loader de instancias .txt)
-# Ni genera soluciones, ni evalúa la función objetivo, ni optimiza
 
-
-# ----------------------------
 # Librerías
-# ----------------------------
 
 import numpy as np
 
 
-# ----------------------------
 # Cargador del problema
-# ----------------------------
 
 class Problem:
     """
@@ -129,22 +123,16 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
         problem.placement_company.append(int(tokens[1]))
         idx += 1
 
-    ###################################################################
-
-    # =============================
-    # DEPENDENCIES
-    # =============================
+    # Dependencias entre plazas (lista de listas)
     idx += 1
     while not lines[idx].startswith("DISTANCE_MATRIX"):
         dep_group = list(map(int, lines[idx].split("\t")))
         problem.dependencies.append(dep_group)
         idx += 1
 
-    # =============================
-    # DISTANCE_MATRIX (student → company)
-    # =============================
+    # Matriz de distancias: student → company (student_company_dist[i][k] del estudiante i a la empresa k)
     idx += 1
-    student_company_matrix = []
+    student_company_matrix = [] # n_students x n_companies
 
     for _ in range(problem.n_students):
         row = list(map(float, lines[idx].split("\t")))
@@ -153,15 +141,11 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
 
     problem.student_company_dist = np.array(student_company_matrix)
 
-    # =============================
-    # COMPANY_LOCATIONS (no necesario guardarlas)
-    # =============================
+    # Localización de las empresas (no se guarda y solo se usa para avanzar en la instancia)
     idx += 1
     idx += problem.n_companies
 
-    # =============================
-    # n_centers / n_professors
-    # =============================
+    # Dimensiones faltantes (n_centers, n_professors)
     key, value = lines[idx].split("\t")
     if key == "n_centers":
         problem.n_centers = int(value)
@@ -172,32 +156,30 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
         problem.n_professors = int(value)
     idx += 1
 
-    # =============================
-    # CENTER_LOCATIONS
-    # =============================
+    # Localización de los centros --> c | latitud | longitud
     idx += 1
     for _ in range(problem.n_centers):
+
         tokens = lines[idx].split("\t")
+
         lat = float(tokens[1])
         lon = float(tokens[2])
         problem.centers_coords.append((lat, lon))
         idx += 1
 
-    # =============================
-    # PROFESSOR_INFO
-    # =============================
+    # Información de los profesores --> t | e(t) | Ct
     idx += 1
     for _ in range(problem.n_professors):
+
         tokens = lines[idx].split("\t")
+        
         problem.prof_center.append(int(tokens[1]))
         problem.prof_capacity.append(int(tokens[2]))
         idx += 1
 
-    # =============================
-    # CENTER_COMPANY_DISTANCE
-    # =============================
+    # Matriz de distancias: center → company (center_company_dist[c][k] del centro c a la empresa k)
     idx += 1
-    center_company_matrix = []
+    center_company_matrix = [] # n_centers x n_companies
 
     for _ in range(problem.n_centers):
         row = list(map(float, lines[idx].split("\t")))
@@ -206,11 +188,9 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
 
     problem.center_company_dist = np.array(center_company_matrix)
 
-    # =============================
-    # COMPANY_COMPANY_DISTANCE
-    # =============================
+    # Matriz de distancias: company → company (company_company_dist[k][k'] de la empresa k a la empresa k')
     idx += 1
-    company_company_matrix = []
+    company_company_matrix = [] # n_companies x n_companies
 
     for _ in range(problem.n_companies):
         row = list(map(float, lines[idx].split("\t")))
@@ -219,4 +199,4 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
 
     problem.company_company_dist = np.array(company_company_matrix)
 
-    return problem # Un objeto Problem con la información de la instancia
+    return problem # Un objeto Problem con la información de la instancia (dimensiones, datos de estudiantes, empresas, plazas, dependencias, distancias, centros y profesores)
