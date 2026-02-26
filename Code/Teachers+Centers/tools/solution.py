@@ -22,14 +22,38 @@ class Solution:
     # Métodos básicos
     def assign(self, student, placement, professor):
         """
-        Asigna el estudiante i a la plaza j supervisada por el profesor t
-        No valida restricciones, solo actualiza la estructura
+        Asigna el estudiante i a la plaza j supervisada por el profesor t.
+        Valida, también, restricciones básicas (ocupación y capacidades) antes de actualizar la estructura
         """
+        # Validaciones
+
+        # Índices válidos
+        if not (0 <= student < self.problem.n_students):
+            raise ValueError("Invalid student index")
+        if not (0 <= placement < self.problem.n_placements):
+            raise ValueError("Invalid placement index")
+        if not (0 <= professor < self.problem.n_professors):
+            raise ValueError("Invalid professor index")
+        
+        if self.student_to_placement[student] != -1: 
+            raise ValueError("Student already assigned") # El estudiante ya está asignado
+
+        if self.placement_filled[placement]:
+            raise ValueError("Placement already filled") # La plaza ya está ocupada
+
+        company = self.problem.placement_company[placement] # empresa a la que pertenece la plaza j
+
+        if self.company_load[company] + 1 > self.problem.company_max[company]:
+            raise ValueError("Company capacity exceeded") # Capacidad de empresa excedida
+        
+        if self.professor_load[professor] + 1 > self.problem.prof_capacity[professor]:
+            raise ValueError("Professor capacity exceeded") # Capacidad de profesor excedida
+        
+
+        # Asignaciones
 
         self.student_to_placement[student] = placement # i → j
         self.placement_to_professor[placement] = professor # j → t
-
-        company = self.problem.placement_company[placement] # empresa a la que pertenece la plaza j
         
         self.company_load[company] += 1 # actualiza la carga de la empresa
         self.professor_load[professor] += 1 # actualiza la carga del profesor
@@ -41,8 +65,14 @@ class Solution:
         Deshace la asignación de un estudiante
         (libera la plaza y al profesor)
         """
+        # Validación de índices
+        if not (0 <= student < self.problem.n_students):
+            raise ValueError("Invalid student index")
 
         placement = self.student_to_placement[student] # plaza a la que estaba asignado el estudiante
+        if placement == -1:
+            raise ValueError(f"Student {student} is not assigned to any placement")
+    
         professor = self.placement_to_professor[placement] # profesor que supervisaba esa plaza
 
         company = self.problem.placement_company[placement] # empresa a la que pertenece la plaza
@@ -63,11 +93,3 @@ class Solution:
 
     def professor_capacity_ok(self, professor): # Comprueba si el profesor respeta su capacidad de supervisión
         return self.professor_load[professor] <= self.problem.prof_capacity[professor]
-
-
-# Librerías
-from problem import load_instance
-
-problem = load_instance("Code/Teachers+Centers/inst_creator/output/problem_instance_ext_400_1.txt")
-sol = Solution(problem)
-print(sol.is_complete())  # debería ser False
