@@ -43,14 +43,15 @@ def _pick_professor(sol, problem):
     """
     Elige un profesor con capacidad disponible
     """
-    candidates = [t for t in range(problem.n_professors)
-                  if sol.professor_load[t] < problem.prof_capacity[t]]
+    candidates = [p for p in range(problem.n_professors) if sol.professor_load[p] < problem.prof_capacity[p]]
+
     if not candidates:
         return None
-    return random.choice(candidates) # Un profesor aleatorio entre los que tienen capacidad disponible
+
+    return max(candidates, key=lambda p: problem.prof_capacity[p] - sol.professor_load[p]) # Elige el profesor que más capacidad restante tenga
 
 
-def generate_random_feasible(problem, seed=None): # objeto Problem ya cargado y una semilla para reproducibilidad
+def _build_once(problem, seed=None): # objeto Problem ya cargado y una semilla para reproducibilidad
     """
     Construye una solución factible aleatoria (sin optimizar).
     Primero satisface los mínimos por empresa usando bloques (dependencias),
@@ -72,9 +73,11 @@ def generate_random_feasible(problem, seed=None): # objeto Problem ya cargado y 
         needed = problem.company_min[k]
         if needed <= 0:
             continue
+        
+        blocks = sorted(blocks_by_company[k], key=lambda b: len(b), reverse=True)
 
         # Selecciona bloques hasta cubrir qk sin superar Qk
-        for block in blocks_by_company[k]:
+        for block in blocks:
             if needed <= 0:
                 break
 
@@ -146,4 +149,15 @@ def generate_random_feasible(problem, seed=None): # objeto Problem ya cargado y 
         if not assigned:
             raise ValueError("Cannot complete assignment with given quotas/capacities")
 
-    return sol # objeto Solution factible (si se puede construir). Si no, lanza ValueError.
+    return sol # objeto Solution factible (si se puede construir, si no, ValueError)
+
+
+def generate_random_feasible(problem, seed=None, max_attempts=50):
+    for _ in range(max_attempts):
+        try:
+            sol = _build_once(problem, seed)
+            if sol.validate():
+                return sol
+        except ValueError:
+            continue
+    raise RuntimeError("No feasible solution found after multiple attempts")
