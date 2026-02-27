@@ -32,10 +32,6 @@ def _build_company_blocks(problem): # objeto Problem
         k = problem.placement_company[j]
         blocks_by_company[k].append([j])
 
-    # Aleatoriza el orden dentro de cada empresa para generar variedad
-    for k in blocks_by_company:
-        random.shuffle(blocks_by_company[k])
-
     return blocks_by_company # blocks_by_company[k] = lista de bloques, donde cada block es lista de plazas [j1, j2, ...]
 
 
@@ -74,7 +70,9 @@ def _build_once(problem, seed=None): # objeto Problem ya cargado y una semilla p
         if needed <= 0:
             continue
         
-        blocks = sorted(blocks_by_company[k], key=lambda b: len(b), reverse=True)
+        blocks = blocks_by_company[k][:]  
+        random.shuffle(blocks)             # aleatoriza desempates
+        blocks.sort(key=len, reverse=True) # grandes primero
 
         # Selecciona bloques hasta cubrir qk sin superar Qk
         for block in blocks:
@@ -153,9 +151,10 @@ def _build_once(problem, seed=None): # objeto Problem ya cargado y una semilla p
 
 
 def generate_random_feasible(problem, seed=None, max_attempts=50):
-    for _ in range(max_attempts):
+    for attempt in range(max_attempts):
         try:
-            sol = _build_once(problem, seed)
+            s = None if seed is None else seed + attempt
+            sol = _build_once(problem, s)
             if sol.validate():
                 return sol
         except ValueError:
