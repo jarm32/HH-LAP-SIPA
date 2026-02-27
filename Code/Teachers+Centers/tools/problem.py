@@ -1,11 +1,6 @@
 # Representación interna del problema (loader de instancias .txt)
 
-# Librerías
-
 import numpy as np
-
-
-# Cargador del problema
 
 class Problem:
     """
