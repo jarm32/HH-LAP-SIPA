@@ -93,3 +93,35 @@ class Solution:
 
     def professor_capacity_ok(self, professor): # Comprueba si el profesor respeta su capacidad de supervisión
         return self.professor_load[professor] <= self.problem.prof_capacity[professor]
+    
+    def dependencies_ok(self): # Comprueba que se respetan las dependencias (si un bloque de plazas dependientes está parcialmente asignado, devuelve False)
+        for dep in self.problem.dependencies:
+            if not dep:
+                continue
+            assigned = [self.placement_filled[j] for j in dep]
+            if any(assigned) and not all(assigned):
+                return False
+        return True
+    
+    def validate(self):
+        # Todos los estudiantes asignados
+        if not self.is_complete():
+            return False
+
+        # Mínimos y máximos por empresa
+        for k in range(self.problem.n_companies):
+            if self.company_load[k] < self.problem.company_min[k]:
+                return False
+            if self.company_load[k] > self.problem.company_max[k]:
+                return False
+
+        # Capacidad de profesores
+        for t in range(self.problem.n_professors):
+            if self.professor_load[t] > self.problem.prof_capacity[t]:
+                return False
+
+        # Dependencias
+        if not self.dependencies_ok():
+            return False
+
+        return True
