@@ -44,7 +44,7 @@ class GeneratorConfig:
     prof_capacity_max: int = 25
 
     # ORS // Distancias sintéticas
-    use_ors: bool = True 
+    use_ors: bool = False 
     ors_base_url: str = "http://localhost:8080/ors"
 
     #synthetic_dist_mu: float = 1500.0
@@ -362,9 +362,10 @@ def create_centers_and_professors(n_students, location_names, cfg):
 
     # Asegura capacidad total
     total_cap = sum(prof_capacity)
-    if total_cap < n_students:
+    target_cap = int(math.ceil(n_students * (1.0 + cfg.slack_ratio))) # Holgura
+    if total_cap < target_cap:
         # Sube capacidades hasta cubrir
-        need = n_students - total_cap
+        need = target_cap - total_cap
         i = 0
         while need > 0:
             add = min(need, 5)
@@ -704,7 +705,7 @@ def parse_args_to_config(argv): # Lista de argumentos pasados por línea de coma
     convierte cada uno al tipo correspondiente (int o float) y construye el objeto GeneratorConfig
     que contiene la configuración global utilizada por el generador de instancias
 
-    python random_instance_creator.py <result_path> <start> <end> <num_instances> <surplus> <dep_prob> <n_comp> <most_important>
+    python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences>
     """
     # Comprueba que se han pasado todos los argumentos necesarios
     if len(argv) < 10:
