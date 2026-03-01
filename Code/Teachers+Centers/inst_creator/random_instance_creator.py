@@ -33,6 +33,7 @@ class GeneratorConfig:
     placement_dep_prob: float
     number_competences: int
     most_important_competences: int
+    slack_ratio: float = 0.0
 
     # Profesores / centros
     n_centers_min: int = 2
@@ -264,23 +265,28 @@ def choose_min_quota_from_blocks(blocks, max_students):
 
     return min_q # número entero que representa el mínimo de estudiantes exigidos para la empresa
 
-
-def adjust_max_quotas(max_q, placements_per_company, n_students):
-                     # nº máximo de estudiantes por empresa (preliminar, nº de plazas reales de la empresa), número de plazas por empresa, número total de estudiantes a asignarse
+def adjust_max_quotas(max_q, placements_per_company, n_students, slack_ratio=0.0):
+                      # nº máximo de estudiantes por empresa (preliminar, nº de plazas reales de la empresa), número de plazas por empresa, número total de estudiantes a asignarse
     """
     Ajusta las cuotas máximas por empresa garantizando que no superen
     las plazas reales disponibles y que la suma total permita asignar
     a todos los estudiantes.
-    """
-    # Ajusta para no superar las plazas reales
+    """    
+    # Objetivo con holgura, pero nunca podemos superar plazas reales totales
     max_q = [min(max_q[k], placements_per_company[k]) for k in range(len(max_q))]
     total = sum(max_q)
-    if total >= n_students:
+
+    total_placements = sum(placements_per_company)
+    target = int(math.ceil(n_students * (1.0 + slack_ratio)))
+    target = min(target, total_placements)
+    target = max(target, n_students)
+
+    if total >= target:
         return max_q
 
     # Reparte incrementos donde haya margen si no hay capacidad suficiente
     idxs = list(range(len(max_q)))
-    while total < n_students:
+    while total < target:
         random.shuffle(idxs)
         progressed = False
         for k in idxs:
@@ -288,11 +294,12 @@ def adjust_max_quotas(max_q, placements_per_company, n_students):
                 max_q[k] += 1
                 total += 1
                 progressed = True
-                if total >= n_students:
+                if total >= target:
                     break
         if not progressed:
             # No hay más margen, debería no ocurrir si n_placements >= n_students
             break
+
     return max_q # [5, 10, 4, 9]; lista de máximos ajustados y factibles
 
 
@@ -585,7 +592,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 cap = len(company_placements[k])
                 company_max[k] = random.randint(max(1, cap // 2), cap) if cap > 1 else 1
 
-            company_max = adjust_max_quotas(company_max, [len(company_placements[k]) for k in range(n_companies)], n_students)
+            company_max = adjust_max_quotas(company_max, [len(company_placements[k]) for k in range(n_companies)], n_students, cfg.slack_ratio)
 
             # Calcula la cuota mínima de cada empresa respetando bloques de dependencias y la cota máxima
             for k in range(n_companies):
@@ -700,14 +707,14 @@ def parse_args_to_config(argv): # Lista de argumentos pasados por línea de coma
     python random_instance_creator.py <result_path> <start> <end> <num_instances> <surplus> <dep_prob> <n_comp> <most_important>
     """
     # Comprueba que se han pasado todos los argumentos necesarios
-    if len(argv) < 9:
+    if len(argv) < 10:
         raise SystemExit(
             "Usage: python random_instance_creator.py <result_path> <start_size> <end_size> "
-            "<number_instances> <surplus> <placement_dep_prob> <number_competences> <most_important_competences>"
+            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences>"
         )
 
     return GeneratorConfig(result_path=argv[1], start_size=int(argv[2]), end_size=int(argv[3]), number_instances=int(argv[4]), surplus=int(argv[5]),
-                          placement_dep_prob=float(argv[6]), number_competences=int(argv[7]), most_important_competences=int(argv[8]), use_ors=False)
+            slack_ratio=float(argv[6]), placement_dep_prob=float(argv[7]), number_competences=int(argv[8]), most_important_competences=int(argv[9]), use_ors=False)
                           # Convierte los argumentos recibidos a sus tipos adecuados y construye el objeto de configuración que usará el generador de instancias
 
 
