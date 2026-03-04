@@ -1,0 +1,287 @@
+# Evalúa un objeto Solution que contenga el resultado de una asignación, calculando su función objetivo
+
+# Librerías
+from dataclasses import dataclass
+from typing import Dict, Any, List, Tuple
+import math
+import numpy as np
+from tools.solution import Solution
+
+
+# 
+@dataclass
+class ObjectiveWeights:
+    alpha: float = 0.25
+    beta: float = 0.25
+    gamma: float = 0.25
+    delta: float = 0.25
+
+    def validate(self) -> None:
+        for name, v in [("alpha", self.alpha), ("beta", self.beta), ("gamma", self.gamma), ("delta", self.delta)]:
+            if v < 0 or v > 1:
+                raise ValueError(f"{name} must be in [0,1], got {v}")
+        s = self.alpha + self.beta + self.gamma + self.delta
+        if abs(s - 1.0) > 1e-9:
+            raise ValueError(f"alpha+beta+gamma+delta must be 1. Got {s}")
+
+
+def evaluate_solution(
+    sol: Solution,
+    weights: ObjectiveWeights,
+    normalize_student_dist: bool = True,
+    normalize_supervision_dist: bool = True,
+) -> Dict[str, Any]:
+    """
+    Calcula las 4 partes de la función objetivo extendida:
+
+      α * sum τ_ij + β * sum η_ij  - γ * sum Lbar_t - δ * sum σ_e
+
+    Devuelve un dict con componentes y fitness final (objective_value).
+
+    Requiere:
+      - Problem.student_company_dist, student_w_distance, student_w_dev,
+        student_pref (Θ_i), student_dev (Ψ_i)
+      - Problem.placement_comp_needs (Φ_j)   <-- IMPORTANTE
+      - Problem.center_company_dist, company_company_dist, placement_company
+      - Problem.prof_center, prof_capacity
+      - Solution.student_to_placement, Solution.placement_to_professor
+    """
+    weights.validate()
+    p = sol.problem
+
+    if not sol.validate():
+        # Si quieres, aquí puedes devolver penalización; yo lo dejo explícito
+        return {
+            "valid": False,
+            "objective_value": float("-inf"),
+            "reason": "Solution is not valid according to sol.validate()",
+        }
+
+    # -------------- 1) tau_ij and eta_ij --------------
+    tau_sum, eta_sum = _compute_student_and_company_utilities(
+        sol,
+        normalize_student_dist=normalize_student_dist
+    )
+
+    # -------------- 2) Lbar_t --------------
+    lbar_by_t = _compute_lbar_by_professor(
+        sol,
+        normalize_supervision_dist=normalize_supervision_dist
+    )
+    lbar_sum = float(sum(lbar_by_t))
+
+    # -------------- 3) sigma_e --------------
+    sigma_by_e = _compute_sigma_by_center(sol)
+    sigma_sum = float(sum(sigma_by_e))
+
+    # -------------- objective --------------
+    obj = (
+        weights.alpha * tau_sum
+        + weights.beta * eta_sum
+        - weights.gamma * lbar_sum
+        - weights.delta * sigma_sum
+    )
+
+    return {
+        "valid": True,
+        "objective_value": float(obj),
+        "components": {
+            "tau_sum": float(tau_sum),
+            "eta_sum": float(eta_sum),
+            "lbar_sum": float(lbar_sum),
+            "sigma_sum": float(sigma_sum),
+        },
+        "details": {
+            "lbar_by_professor": lbar_by_t,
+            "sigma_by_center": sigma_by_e,
+        }
+    }
+
+
+def _compute_student_and_company_utilities(sol: Solution, normalize_student_dist: bool) -> Tuple[float, float]:
+    p = sol.problem
+
+    # Matrices/vectores necesarios
+    dist = np.array(p.student_company_dist, dtype=float)  # [n_students, n_companies]
+    if normalize_student_dist:
+        dist_norm = _minmax_normalize_rows(dist)
+    else:
+        dist_norm = dist
+
+    # Φ_j (por plaza)
+    if not hasattr(p, "placement_comp_needs") or len(p.placement_comp_needs) != p.n_placements:
+        raise ValueError("Problem is missing placement_comp_needs (Φ_j) for each placement. Update problem.py loader.")
+
+    Phi = np.array(p.placement_comp_needs, dtype=float)  # [n_placements, n_competences]
+    Theta = np.array(p.student_pref, dtype=float)         # [n_students, n_competences]
+    Psi = np.array(p.student_dev, dtype=float)            # [n_students, n_competences]
+
+    tau_sum = 0.0
+    eta_sum = 0.0
+
+    for i in range(p.n_students):
+        j = sol.student_to_placement[i]
+        if j == -1:
+            continue
+        k = p.placement_company[j]
+
+        w_dist = p.student_w_distance[i]
+        w_comp = p.student_w_dev[i]
+
+        dij = dist_norm[i, k]
+        # τ_ij = w_dist*(1-dij) + w_comp*(Φ_j · Θ_i)
+        tau_ij = w_dist * (1.0 - dij) + w_comp * float(np.dot(Phi[j], Theta[i]))
+
+        # η_ij = Φ_j · Ψ_i
+        eta_ij = float(np.dot(Phi[j], Psi[i]))
+
+        tau_sum += tau_ij
+        eta_sum += eta_ij
+
+    return float(tau_sum), float(eta_sum)
+
+
+def _compute_lbar_by_professor(sol: Solution, normalize_supervision_dist: bool) -> List[float]:
+    """
+    Calcula Lbar_t por profesor:
+      - At = {origin center of t} U {placements supervised by t}
+      - Lt = MST length over At using normalized duv
+      - Lbar_t = Lt/Nt if Nt>0 else 0
+    """
+    p = sol.problem
+
+    # Distancias base (centro->empresa y empresa->empresa)
+    center_company = np.array(p.center_company_dist, dtype=float)   # [n_centers, n_companies]
+    company_company = np.array(p.company_company_dist, dtype=float) # [n_companies, n_companies]
+
+    if normalize_supervision_dist:
+        # normaliza globalmente ambas matrices juntas a [0,1]
+        cc_min = float(min(center_company.min(), company_company.min()))
+        cc_max = float(max(center_company.max(), company_company.max()))
+        if cc_max > cc_min:
+            center_company = (center_company - cc_min) / (cc_max - cc_min)
+            company_company = (company_company - cc_min) / (cc_max - cc_min)
+        else:
+            center_company = np.zeros_like(center_company)
+            company_company = np.zeros_like(company_company)
+
+    # placements supervisados por profesor
+    placements_by_t: List[List[int]] = [[] for _ in range(p.n_professors)]
+    for j in range(p.n_placements):
+        if sol.placement_filled[j]:
+            t = sol.placement_to_professor[j]
+            placements_by_t[t].append(j)
+
+    lbar = [0.0] * p.n_professors
+    for t in range(p.n_professors):
+        supervised = placements_by_t[t]
+        Nt = len(supervised)
+        if Nt == 0:
+            lbar[t] = 0.0
+            continue
+
+        center = p.prof_center[t]
+
+        # nodos: 0 será el origen, 1..Nt serán placements
+        # distancia entre nodos a,b:
+        # - si ambos placements: company_company[comp(a)][comp(b)]
+        # - si uno es origen: center_company[center][comp(placement)]
+        comps = [p.placement_company[j] for j in supervised]
+
+        def d(a: int, b: int) -> float:
+            if a == 0 and b == 0:
+                return 0.0
+            if a == 0:
+                return float(center_company[center, comps[b - 1]])
+            if b == 0:
+                return float(center_company[center, comps[a - 1]])
+            return float(company_company[comps[a - 1], comps[b - 1]])
+
+        Lt = _prim_mst_length(num_nodes=Nt + 1, dist_fn=d)
+        lbar[t] = float(Lt / Nt)
+
+    return lbar
+
+
+def _compute_sigma_by_center(sol: Solution) -> List[float]:
+    """
+    σ_e = std dev of p_t = Nt/Ct over professors belonging to center e.
+    Uses population std: sqrt((1/|Te|) * sum (p_t - pbar_e)^2).
+    """
+    p = sol.problem
+
+    # Nt: carga real (supervisados)
+    Nt = sol.professor_load[:]  # ya lo mantienes actualizado en Solution
+    Ct = p.prof_capacity
+
+    # agrupar profesores por centro
+    profs_by_center: List[List[int]] = [[] for _ in range(p.n_centers)]
+    for t in range(p.n_professors):
+        e = p.prof_center[t]
+        profs_by_center[e].append(t)
+
+    sigma = [0.0] * p.n_centers
+    for e in range(p.n_centers):
+        Ts = profs_by_center[e]
+        if not Ts:
+            sigma[e] = 0.0
+            continue
+
+        ps = []
+        for t in Ts:
+            cap = Ct[t]
+            ps.append((Nt[t] / cap) if cap > 0 else 0.0)
+
+        pbar = sum(ps) / len(ps)
+        var = sum((x - pbar) ** 2 for x in ps) / len(ps)
+        sigma[e] = float(math.sqrt(var))
+
+    return sigma
+
+
+def _minmax_normalize_rows(a: np.ndarray) -> np.ndarray:
+    """
+    Min-max por fila a [0,1]. Si una fila es constante, devuelve 0.
+    """
+    mins = a.min(axis=1, keepdims=True)
+    maxs = a.max(axis=1, keepdims=True)
+    denom = maxs - mins
+    out = np.zeros_like(a, dtype=float)
+    mask = denom[:, 0] > 1e-12
+    out[mask] = (a[mask] - mins[mask]) / denom[mask]
+    return out
+
+
+def _prim_mst_length(num_nodes: int, dist_fn) -> float:
+    """
+    Longitud del MST con Prim en un grafo completo implícito de num_nodes.
+    dist_fn(a,b) debe devolver la distancia entre nodos a y b.
+    """
+    in_mst = [False] * num_nodes
+    min_edge = [float("inf")] * num_nodes
+
+    min_edge[0] = 0.0
+    total = 0.0
+
+    for _ in range(num_nodes):
+        # elegir nodo fuera del MST con menor coste
+        u = -1
+        best = float("inf")
+        for v in range(num_nodes):
+            if not in_mst[v] and min_edge[v] < best:
+                best = min_edge[v]
+                u = v
+
+        if u == -1:
+            break  # grafo degenerado
+        in_mst[u] = True
+        total += best
+
+        # actualizar distancias
+        for v in range(num_nodes):
+            if not in_mst[v]:
+                w = dist_fn(u, v)
+                if w < min_edge[v]:
+                    min_edge[v] = w
+
+    return float(total)
