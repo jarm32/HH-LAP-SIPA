@@ -104,6 +104,24 @@ def _remove_random_block_from_company(selected_blocks: Dict[int, List[List[int]]
     blocks.pop(idx)
     return True
 
+def _add_random_block_from_company(pre, selected_blocks, k, rng):
+    """
+    Activa aleatoriamente un bloque de dependencias no seleccionado de la empresa k.
+    """
+    existing = selected_blocks.get(k, [])
+    available = []
+
+    for block in pre.dep_blocks_by_company[k]:
+        if block not in existing:
+            available.append(block)
+
+    if not available:
+        return False
+
+    block = rng.choice(available)
+    selected_blocks.setdefault(k, []).append(list(block))
+    return True
+
 
 def _remove_random_block_any(selected_blocks: Dict[int, List[List[int]]], rng: random.Random) -> bool:
     companies_with_blocks = [k for k, bl in selected_blocks.items() if bl]
@@ -145,12 +163,18 @@ def _fix_dependency_selection(problem: Problem, pre: _Preproc, rng: random.Rando
         # Caso 3: en alguna empresa no es posible alcanzar el mínimo con las no-deps restantes
         deficit = [k for k in range(problem.n_companies) if can_send[k] < must_send[k]]
         if deficit:
-            # quitar dependencias en esa empresa para liberar cuota (sube can_send y/o baja must_send)
             k = rng.choice(deficit)
-            if not _remove_random_block_from_company(selected_blocks, k, rng):
-                # si no hay bloques que quitar, esta selección no se puede arreglar
-                return None
-            continue
+
+            # 1) intentar activar dependencias no seleccionadas
+            if _add_random_block_from_company(pre, selected_blocks, k, rng):
+                continue
+
+            # 2) si no se puede activar ninguna, intentar eliminar alguna
+            if _remove_random_block_from_company(selected_blocks, k, rng):
+                continue
+
+            # 3) si tampoco se puede eliminar, no es reparable
+            return None
 
         # Caso 4: aunque todo lo anterior esté OK, globalmente no hay plazas alcanzables para n_students
         if total_selected + total_can < problem.n_students:
@@ -285,8 +309,8 @@ def _prof_candidates_sorted(problem: Problem, company_k: int) -> List[int]:
     return [t for _, t in d]
 
 
-def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.Random,
-                                  top_k: int = 8, max_repair_iters: int = 3000) -> bool:
+def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.Random, 
+                                   max_repair_iters: int = 3000, top_k = None) -> bool:
     """
     Asigna placement->professor para todos los placements ocupados en sol.
     - Constructivo: placements en orden aleatorio; elige prof aleatorio entre top_k candidatos con capacidad.
@@ -307,15 +331,24 @@ def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.
     # Constructivo
     for j in assigned_placements:
         k = problem.placement_company[j]
-        cand_sorted = _prof_candidates_sorted(problem, k)
+        
+        # Candidatos
+        if top_k is None:
+            cand_sorted = list(range(problem.n_professors))
+        else:
+            cand_sorted = _prof_candidates_sorted(problem, k)
 
-        # filtra por capacidad disponible
+        # Filtra por capacidad disponible
         feasible = [t for t in cand_sorted if sol.professor_load[t] < problem.prof_capacity[t]]
         if not feasible:
             unassigned.append(j)
             continue
-
-        chosen_pool = feasible[: min(top_k, len(feasible))]
+        
+        # Elige aleatoriamente entre los candidatos
+        if top_k is None:
+            chosen_pool = feasible
+        else:
+            chosen_pool = feasible[:min(top_k, len(feasible))]
         t = rng.choice(chosen_pool)
 
         sol.placement_to_professor[j] = t

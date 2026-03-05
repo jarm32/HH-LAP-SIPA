@@ -124,4 +124,8 @@ class Solution:
         if not self.dependencies_ok():
             return False
 
+        for j in range(self.problem.n_placements):
+            if self.placement_filled[j] and self.placement_to_professor[j] == -1:
+                return False
+
         return True
