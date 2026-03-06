@@ -1,5 +1,8 @@
-# Generador de soluciones aleatorias factibles (random + fixing) --> 1º Asignación estudiante -> plaza (con dependencias y cuotas por empresa) / 2º Asignación plaza -> profesor (con capacidades y centros)
+# Generador de soluciones aleatorias factibles (random + fixing) --> 1º Asignación estudiante-plaza (con dependencias y cuotas por empresa) / 2º Asignación plaza-profesor (con capacidades y centros)
 
+# ----------------------------
+# Imports
+# ----------------------------
 import random
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Set, Optional
@@ -8,19 +11,23 @@ from tools.solution import Solution
 
 
 # ----------------------------
-# Utilidades: preprocesado de bloques y listas por empresa
+# Preprocesado de bloques de plazas
 # ----------------------------
 
 @dataclass
 class _Preproc:
     placements_by_company: List[List[int]]
     nondep_by_company: List[List[int]]
-    dep_blocks_by_company: List[List[List[int]]]  # company -> list of blocks (each block is list of placements)
+    dep_blocks_by_company: List[List[List[int]]]
     placement_in_any_dep: List[bool]
     total_in_deps_by_company: List[int]
 
 
-def _preprocess(problem: Problem) -> _Preproc:
+def _preprocess(problem): # objeto tipo Problem
+    """
+    Preprocesa la instancia para facilitar generación de soluciones factibles
+    """
+    # Clasificación de plazas por empresa y bloques de dependencias
     placements_by_company = [[] for _ in range(problem.n_companies)]
     for j in range(problem.n_placements):
         placements_by_company[problem.placement_company[j]].append(j)
@@ -29,6 +36,7 @@ def _preprocess(problem: Problem) -> _Preproc:
     dep_blocks_by_company = [[] for _ in range(problem.n_companies)]
     total_in_deps_by_company = [0] * problem.n_companies
 
+    # Clasificar bloques de dependencias por empresa, y marcar qué plazas están en dependencias
     for dep in problem.dependencies:
         if not dep:
             continue
@@ -38,7 +46,8 @@ def _preprocess(problem: Problem) -> _Preproc:
         for j in block:
             placement_in_any_dep[j] = True
         total_in_deps_by_company[k] += len(block)
-
+    
+    # Clasificar plazas no dependientes por empresa
     nondep_by_company = [[] for _ in range(problem.n_companies)]
     for k in range(problem.n_companies):
         for j in placements_by_company[k]:
@@ -51,8 +60,10 @@ def _preprocess(problem: Problem) -> _Preproc:
         dep_blocks_by_company=dep_blocks_by_company,
         placement_in_any_dep=placement_in_any_dep,
         total_in_deps_by_company=total_in_deps_by_company,
-    )
+    ) # Objeto _Preproc con toda la información preprocesada de la instancia para usar en generación de soluciones
 
+
+#######################################
 
 # ----------------------------
 # Fase A: random + fixing de dependencias, y completar con no-deps
@@ -75,7 +86,7 @@ def _random_initial_dep_selection(pre: _Preproc, rng: random.Random) -> Dict[int
     return selected
 
 
-def _recompute_counters(problem: Problem, pre: _Preproc, selected_blocks: Dict[int, List[List[int]]]):
+def _recompute_counters(problem, pre: _Preproc, selected_blocks: Dict[int, List[List[int]]]):
     selected_from_company = [0] * problem.n_companies
     total_selected = 0
 
@@ -131,7 +142,7 @@ def _remove_random_block_any(selected_blocks: Dict[int, List[List[int]]], rng: r
     return _remove_random_block_from_company(selected_blocks, k, rng)
 
 
-def _fix_dependency_selection(problem: Problem, pre: _Preproc, rng: random.Random,
+def _fix_dependency_selection(problem, pre: _Preproc, rng: random.Random,
                             selected_blocks: Dict[int, List[List[int]]],
                             max_iters: int = 5000) -> Optional[Tuple[Dict[int, List[List[int]]], List[int], List[int]]]:
     """
@@ -243,7 +254,7 @@ def _random_partition_to_fill(need: int, must_send: List[int], can_send: List[in
     return x
 
 
-def _choose_final_placements(problem: Problem, pre: _Preproc, rng: random.Random) -> List[int]:
+def _choose_final_placements(problem, pre: _Preproc, rng: random.Random) -> List[int]:
     """
     Devuelve una lista de exactamente n_students placements:
       - incluye todos los placements de los bloques de dependencias seleccionados (tras fixing)
@@ -295,61 +306,34 @@ def _choose_final_placements(problem: Problem, pre: _Preproc, rng: random.Random
 # Fase B: asignación de profesores (constructivo aleatorizado + repair ligero)
 # ----------------------------
 
-def _prof_candidates_sorted(problem: Problem, company_k: int) -> List[int]:
+def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,
+                                   max_repair_iters: int = 3000) -> bool:
     """
-    Devuelve profesores ordenados por distancia centro->empresa (menor es mejor).
-    """
-    # distancia del centro del profesor t a la empresa k
-    # center_company_dist[center][k]
-    d = []
-    for t in range(problem.n_professors):
-        c = problem.prof_center[t]
-        d.append((problem.center_company_dist[c][company_k], t))
-    d.sort(key=lambda x: x[0])
-    return [t for _, t in d]
-
-
-def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.Random, 
-                                   max_repair_iters: int = 3000, top_k = None) -> bool:
-    """
-    Asigna placement->professor para todos los placements ocupados en sol.
-    - Constructivo: placements en orden aleatorio; elige prof aleatorio entre top_k candidatos con capacidad.
-    - Repair: si quedan sin asignar, intenta liberar capacidad mediante moves simples.
+    Asigna placement -> professor para todas las plazas ocupadas.
     """
 
     # quick infeasibility check
     if sum(problem.prof_capacity) < problem.n_students:
         return False
 
-    # placements asignados (ocupados por estudiantes)
     assigned_placements = [j for j in range(problem.n_placements) if sol.placement_filled[j]]
     rng.shuffle(assigned_placements)
 
     prof_to_pl: List[List[int]] = [[] for _ in range(problem.n_professors)]
     unassigned: List[int] = []
 
-    # Constructivo
+    # -------- Constructivo --------
     for j in assigned_placements:
-        k = problem.placement_company[j]
-        
-        # Candidatos
-        if top_k is None:
-            cand_sorted = list(range(problem.n_professors))
-        else:
-            cand_sorted = _prof_candidates_sorted(problem, k)
+        cand = list(range(problem.n_professors))
+        rng.shuffle(cand)
 
-        # Filtra por capacidad disponible
-        feasible = [t for t in cand_sorted if sol.professor_load[t] < problem.prof_capacity[t]]
+        feasible = [t for t in cand if sol.professor_load[t] < problem.prof_capacity[t]]
+
         if not feasible:
             unassigned.append(j)
             continue
-        
-        # Elige aleatoriamente entre los candidatos
-        if top_k is None:
-            chosen_pool = feasible
-        else:
-            chosen_pool = feasible[:min(top_k, len(feasible))]
-        t = rng.choice(chosen_pool)
+
+        t = rng.choice(feasible)
 
         sol.placement_to_professor[j] = t
         sol.professor_load[t] += 1
@@ -358,50 +342,59 @@ def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.
     if not unassigned:
         return True
 
-    # Repair ligero
-    # Idea: para cada placement sin profesor, intentar:
-    #  - asignarlo a un prof "preferido" que está lleno
-    #  - mover 1 placement "movible" de ese prof a otro prof con hueco, y así liberar
+    # -------- Repair --------
     for _ in range(max_repair_iters):
+
         if not unassigned:
             return True
 
         j = unassigned[-1]
-        k = problem.placement_company[j]
-        cand_sorted = _prof_candidates_sorted(problem, k)
 
-        # 1) si aparece alguno con hueco (por cambios previos), asignar directo
-        feasible = [t for t in cand_sorted if sol.professor_load[t] < problem.prof_capacity[t]]
+        cand = list(range(problem.n_professors))
+        rng.shuffle(cand)
+
+        feasible = [t for t in cand if sol.professor_load[t] < problem.prof_capacity[t]]
+
         if feasible:
-            t = rng.choice(feasible[: min(top_k, len(feasible))])
+            t = rng.choice(feasible)
+
             sol.placement_to_professor[j] = t
             sol.professor_load[t] += 1
             prof_to_pl[t].append(j)
+
             unassigned.pop()
             continue
 
-        # 2) intentar liberar espacio en un candidato bueno "lleno"
-        # elegimos un candidato dentro de top_k (o el primero) y tratamos de eyectar una plaza suya
-        target_pool = cand_sorted[: min(top_k, len(cand_sorted))]
+        target_pool = cand[:]
         rng.shuffle(target_pool)
 
         moved = False
+
         for t_full in target_pool:
+
             if not prof_to_pl[t_full]:
                 continue
 
-            # intenta mover una de sus plazas a otro profesor con capacidad
             rng.shuffle(prof_to_pl[t_full])
+
             for j2 in list(prof_to_pl[t_full]):
+
                 k2 = problem.placement_company[j2]
-                cand2 = _prof_candidates_sorted(problem, k2)
-                dests = [t2 for t2 in cand2 if t2 != t_full and sol.professor_load[t2] < problem.prof_capacity[t2]]
+
+                cand2 = list(range(problem.n_professors))
+                rng.shuffle(cand2)
+
+                dests = [
+                    t2 for t2 in cand2
+                    if t2 != t_full and sol.professor_load[t2] < problem.prof_capacity[t2]
+                ]
+
                 if not dests:
                     continue
 
-                # mover j2 a t2
-                t2 = rng.choice(dests[: min(top_k, len(dests))])
+                t2 = rng.choice(dests)
 
+                # mover j2
                 sol.placement_to_professor[j2] = t2
                 sol.professor_load[t_full] -= 1
                 sol.professor_load[t2] += 1
@@ -409,7 +402,7 @@ def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.
                 prof_to_pl[t_full].remove(j2)
                 prof_to_pl[t2].append(j2)
 
-                # ahora t_full tiene hueco, asignamos j a t_full
+                # asignar j
                 sol.placement_to_professor[j] = t_full
                 sol.professor_load[t_full] += 1
                 prof_to_pl[t_full].append(j)
@@ -421,20 +414,16 @@ def _assign_professors_with_repair(problem: Problem, sol: Solution, rng: random.
             if moved:
                 break
 
-        if moved:
-            continue
-
-        # si no hemos podido mover nada en esta iteración, barajamos y seguimos
-        rng.shuffle(unassigned)
+        if not moved:
+            rng.shuffle(unassigned)
 
     return False
-
 
 # ----------------------------
 # Construcción final de Solution
 # ----------------------------
 
-def generate_random_feasible_fixing(problem: Problem, seed: Optional[int] = None, max_attempts: int = 50) -> Solution:
+def generate_random_feasible_fixing(problem, seed: Optional[int] = None, max_attempts: int = 50) -> Solution:
     """
     Genera una Solution aleatoria y factible usando:
       A) random + fixing para dependencias y cuotas empresa, luego completar con no-deps
@@ -457,7 +446,7 @@ def generate_random_feasible_fixing(problem: Problem, seed: Optional[int] = None
             sol = Solution(problem)
 
             # Asignamos student->placement sin profesor todavía, actualizando estructuras coherentes
-            # (usamos las estructuras internas de Solution) :contentReference[oaicite:2]{index=2}
+            # (usamos las estructuras internas de Solution)
             for i, j in zip(students, chosen_placements):
                 sol.student_to_placement[i] = j
                 sol.placement_filled[j] = True
