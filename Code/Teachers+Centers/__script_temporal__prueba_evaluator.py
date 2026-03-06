@@ -1,13 +1,13 @@
 from tools.problem import load_instance
-from tools.random_feasible import generate_random_feasible
+from tools.random_feasible_fixing import generate_random_feasible_fixing
 from tools.evaluator import evaluate_solution, ObjectiveWeights
 
 
 def main():
-    instance_path = "inst_creator/output/problem_instance_ext_400_1.txt"
+    instance_path = "Code/Teachers+Centers/inst_creator/output/problem_instance_ext_400_0.txt"
     problem = load_instance(instance_path)
 
-    sol = generate_random_feasible(problem, seed=42)
+    sol = generate_random_feasible_fixing(problem, seed=42)
 
     print("Students:", problem.n_students)
     print("Companies:", problem.n_companies)
