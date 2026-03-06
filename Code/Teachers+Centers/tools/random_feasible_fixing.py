@@ -134,7 +134,7 @@ def _add_random_block_from_company(pre, selected_blocks, k, rng):
     return True
 
 
-def _remove_random_block_any(selected_blocks: Dict[int, List[List[int]]], rng: random.Random) -> bool:
+def _remove_random_block_any(selected_blocks, rng):
     companies_with_blocks = [k for k, bl in selected_blocks.items() if bl]
     if not companies_with_blocks:
         return False
@@ -142,9 +142,7 @@ def _remove_random_block_any(selected_blocks: Dict[int, List[List[int]]], rng: r
     return _remove_random_block_from_company(selected_blocks, k, rng)
 
 
-def _fix_dependency_selection(problem, pre: _Preproc, rng: random.Random,
-                            selected_blocks: Dict[int, List[List[int]]],
-                            max_iters: int = 5000) -> Optional[Tuple[Dict[int, List[List[int]]], List[int], List[int]]]:
+def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 5000):
     """
     Arregla selección de dependencias para que:
       - total_selected <= n_students
@@ -202,7 +200,9 @@ def _fix_dependency_selection(problem, pre: _Preproc, rng: random.Random,
                     return None
             else:
                 candidates.sort(key=lambda x: x[0])
-                k = candidates[0][1]
+                best_slack = candidates[0][0]
+                best_ks = [k for slack, k in candidates if slack == best_slack]
+                k = rng.choice(best_ks)
                 if not _remove_random_block_from_company(selected_blocks, k, rng):
                     return None
             continue
@@ -423,7 +423,7 @@ def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,
 # Construcción final de Solution
 # ----------------------------
 
-def generate_random_feasible_fixing(problem, seed: Optional[int] = None, max_attempts: int = 50) -> Solution:
+def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50):
     """
     Genera una Solution aleatoria y factible usando:
       A) random + fixing para dependencias y cuotas empresa, luego completar con no-deps
