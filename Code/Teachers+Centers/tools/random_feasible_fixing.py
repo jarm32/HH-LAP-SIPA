@@ -63,14 +63,14 @@ def _preprocess(problem): # objeto tipo Problem
     ) # Objeto _Preproc con toda la información preprocesada de la instancia para usar en generación de soluciones
 
 
-#######################################
-
 # ----------------------------
-# Fase A: random + fixing de dependencias, y completar con no-deps
+# Selección aleatoria + arreglos de bloques de dependencias (individuales y múltiples)
 # ----------------------------
 
-def _random_initial_dep_selection(pre: _Preproc, rng: random.Random) -> Dict[int, List[List[int]]]:
+def _random_initial_dep_selection(pre, rng):
+                                  # Problema preprocesado, generador de números aleatorios
     """
+    #####################################
     Selección completamente aleatoria de bloques de dependencia por empresa.
     Devuelve un dict: company -> lista de blocks seleccionados (cada block: lista de placements).
     """
@@ -83,7 +83,7 @@ def _random_initial_dep_selection(pre: _Preproc, rng: random.Random) -> Dict[int
         if n > 0:
             chosen = rng.sample(blocks, n)
             selected[k] = [list(b) for b in chosen]
-    return selected
+    return selected # {empresa: [bloque1, bloque2, ...]} --> diccionario que almacena los bloques de plazas por empresa (bloque1 = [plaza1, plaza2, ...])
 
 
 def _recompute_counters(problem, pre: _Preproc, selected_blocks: Dict[int, List[List[int]]]):
@@ -303,7 +303,7 @@ def _choose_final_placements(problem, pre: _Preproc, rng: random.Random) -> List
 
 
 # ----------------------------
-# Fase B: asignación de profesores (constructivo aleatorizado + repair ligero)
+# Asignación de profesores (constructivo aleatorizado + repair ligero)
 # ----------------------------
 
 def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,

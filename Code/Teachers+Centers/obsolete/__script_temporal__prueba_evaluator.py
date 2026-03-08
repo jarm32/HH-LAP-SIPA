@@ -4,10 +4,10 @@ from tools.evaluator import evaluate_solution, ObjectiveWeights
 
 
 def main():
-    instance_path = "Code/Teachers+Centers/inst_creator/output/problem_instance_ext_400_0.txt"
+    instance_path = "Code/Teachers+Centers/inst_creator/output/problem_instance_ext_600_0.txt"
     problem = load_instance(instance_path)
 
-    sol = generate_random_feasible_fixing(problem, seed=42)
+    sol = generate_random_feasible_fixing(problem)
 
     print("Students:", problem.n_students)
     print("Companies:", problem.n_companies)
