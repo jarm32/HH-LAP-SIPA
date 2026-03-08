@@ -71,6 +71,7 @@ def _random_initial_dep_selection(pre, rng):
                                   # Problema preprocesado, generador de números aleatorios
     """
     #####################################
+    
     Selección completamente aleatoria de bloques de dependencia por empresa.
     Devuelve un dict: company -> lista de blocks seleccionados (cada block: lista de placements).
     """
