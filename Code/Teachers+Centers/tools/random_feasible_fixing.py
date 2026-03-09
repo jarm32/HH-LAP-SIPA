@@ -25,7 +25,11 @@ class _Preproc:
 
 def _preprocess(problem): # objeto tipo Problem
     """
-    Preprocesa la instancia para facilitar generación de soluciones factibles
+    Estructura auxiliar con información preprocesada de la instancia para acelerar la generación de soluciones.
+
+    Contiene solo organización de plazas (bloques de dependencias, plazas no dependientes, etc.), 
+    pero no incluye las restricciones del modelo (min/max por empresa, capacidades, etc.); por lo que,
+    si se necesitan estas restricciones, se consultan directamente en el objeto problem
     """
     # Clasificación de plazas por empresa y bloques de dependencias
     placements_by_company = [[] for _ in range(problem.n_companies)]
@@ -70,24 +74,27 @@ def _preprocess(problem): # objeto tipo Problem
 def _random_initial_dep_selection(pre, rng):
                                   # Problema preprocesado, generador de números aleatorios
     """
-    #####################################
-    
-    Selección completamente aleatoria de bloques de dependencia por empresa.
-    Devuelve un dict: company -> lista de blocks seleccionados (cada block: lista de placements).
+    Selección inicial aleatoria de bloques de dependencia
+    (individuales o múltiples) a activar por empresa
     """
-    selected: Dict[int, List[List[int]]] = {k: [] for k in range(len(pre.dep_blocks_by_company))}
+    selected = {k: [] for k in range(len(pre.dep_blocks_by_company))}
+
+    # Para cada empresa, elige aleatoriamente un subconjunto de sus bloques de dependencias (puede ser vacío)
     for k, blocks in enumerate(pre.dep_blocks_by_company):
         if not blocks:
             continue
-        # elige n bloques aleatorios (n puede ser 0..len(blocks))
         n = rng.randint(0, len(blocks))
         if n > 0:
             chosen = rng.sample(blocks, n)
             selected[k] = [list(b) for b in chosen]
-    return selected # {empresa: [bloque1, bloque2, ...]} --> diccionario que almacena los bloques de plazas por empresa (bloque1 = [plaza1, plaza2, ...])
+    return selected # {empresa1: [bloque1, bloque2, ...], ...} --> diccionario que almacena los bloques de plazas por empresa (bloque1 = [plaza1, plaza2, ...])
 
 
-def _recompute_counters(problem, pre: _Preproc, selected_blocks: Dict[int, List[List[int]]]):
+def _recompute_counters(problem, pre, selected_blocks):
+                        # Problema original, Problema preprocesado, diccionario de la selección actual de bloques de dependencias por empresa
+    """
+    ##########################################
+    """
     selected_from_company = [0] * problem.n_companies
     total_selected = 0
 
