@@ -93,8 +93,9 @@ def _random_initial_dep_selection(pre, rng):
 def _recompute_counters(problem, pre, selected_blocks):
                         # Problema original, Problema preprocesado, diccionario de la selección actual de bloques de dependencias por empresa
     """
-    ##########################################
+    Recalcula todas las cantidades necesarias para saber si la selección actual de dependencias es viable o hay que arreglarla
     """
+    # Contar plazas ya seleccionadas por empresa
     selected_from_company = [0] * problem.n_companies
     total_selected = 0
 
@@ -103,51 +104,80 @@ def _recompute_counters(problem, pre, selected_blocks):
         selected_from_company[k] = s
         total_selected += s
 
+    # Contar no-deps disponibles por empresa
     unassigned_nondep = [len(pre.nondep_by_company[k]) for k in range(problem.n_companies)]
-
+    
+    # Calcular lo que falta por cubrir (must_send) y lo que se podría cubrir (can_send) por empresa, para cumplir mínimos/máximos
     must_send = [0] * problem.n_companies
     can_send = [0] * problem.n_companies
     for k in range(problem.n_companies):
         must_send[k] = max(problem.company_min[k] - selected_from_company[k], 0)
         can_send[k] = min(max(problem.company_max[k] - selected_from_company[k], 0), unassigned_nondep[k])
 
+    # Suma total de plazas que se podrían cubrir con no-deps (holgura total)
     total_can = sum(can_send)
     return selected_from_company, total_selected, must_send, can_send, unassigned_nondep, total_can
+           # lista que indica cuántas plazas dependientes están seleccionadas por empresa, total de plazas seleccionadas,
+           # lista de plazas mínimas que aún faltan por cubrir por empresa, lista de holgura por empresa (plazas individuales), 
+           # lista con la cantidad de plazas por asignar por empresa, suma total de holgura (sum(can_send))
 
 
-def _remove_random_block_from_company(selected_blocks: Dict[int, List[List[int]]], k: int, rng: random.Random) -> bool:
+def _remove_random_block_from_company(selected_blocks, k, rng):
+                                     # Diccionario de la selección actual de bloques de dependencias por empresa, empresa k, generador de números aleatorios
+    """
+    Desactiva aleatoriamente un bloque de dependencias seleccionado de la empresa k,
+    permitiendo probar variaciones en la selección
+    """
+    # Obtener bloques seleccionados de la empresa
     blocks = selected_blocks.get(k, [])
     if not blocks:
-        return False
+        return False # si no había bloques para eliminar
+    
+    # Elegir un bloque al azar y quitarlo
     idx = rng.randrange(len(blocks))
     blocks.pop(idx)
-    return True
+    return True # se ha eliminado un bloque
+
 
 def _add_random_block_from_company(pre, selected_blocks, k, rng):
+                                  # Problema preprocesado, diccionario de la selección actual de bloques de dependencias por empresa, empresa k, generador de números aleatorios
     """
-    Activa aleatoriamente un bloque de dependencias no seleccionado de la empresa k.
+    Activa aleatoriamente un bloque de dependencias no seleccionado de la empresa k
     """
+    # Ver cuáles están ya activos
     existing = selected_blocks.get(k, [])
-    available = []
 
+    # Construir lista de bloques disponibles
+    available = []
     for block in pre.dep_blocks_by_company[k]:
         if block not in existing:
             available.append(block)
 
     if not available:
-        return False
+        return False # No hay bloques disponibles para añadir
 
+    # Elegir uno al azar y activarlo
     block = rng.choice(available)
     selected_blocks.setdefault(k, []).append(list(block))
-    return True
+    return True # Añade el bloque nuevo
 
 
 def _remove_random_block_any(selected_blocks, rng):
+                            # Diccionario de la selección actual de bloques de dependencias por empresa, generador de números aleatorios
+    """
+    Quita aleatoriamente un bloque (a partir de la función anterior) de una empresa aleatoria
+    """
+    # Busca empresas con bloques activos
     companies_with_blocks = [k for k, bl in selected_blocks.items() if bl]
+   
     if not companies_with_blocks:
-        return False
+        return False # No hay empresas con bloques activos
+    
+    # Elegir empresa al azar y quitar un bloque suyo (si es posible)
     k = rng.choice(companies_with_blocks)
-    return _remove_random_block_from_company(selected_blocks, k, rng)
+    return _remove_random_block_from_company(selected_blocks, k, rng) # True/False, dependiendo de la empresa
+
+##############################
 
 
 def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 5000):
