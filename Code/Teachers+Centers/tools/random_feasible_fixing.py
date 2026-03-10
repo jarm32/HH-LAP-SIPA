@@ -177,63 +177,63 @@ def _remove_random_block_any(selected_blocks, rng):
     k = rng.choice(companies_with_blocks)
     return _remove_random_block_from_company(selected_blocks, k, rng) # True/False, dependiendo de la empresa
 
-##############################
-
 
 def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 5000):
+                             # Problema original, Problema preprocesado, generador de números aleatorios, diccionario de la selección actual de bloques de dependencias por empresa, límite de iteraciones del fixing
     """
-    Arregla selección de dependencias para que:
+    Arreglo de las siguientes dependencias:
       - total_selected <= n_students
       - selected_from_company[k] <= company_max[k]
-      - para cada empresa: can_send[k] >= must_send[k]
-      - global: total_selected + sum(can_send) >= n_students (posible completar con no-deps)
-    Devuelve (selected_blocks_fixed, must_send, can_send) o None si no converge.
+      - can_send[k] >= must_send[k]
+      - total_selected + sum(can_send) >= n_students
     """
     for _ in range(max_iters):
+        # Recalcular contadores
         selected_from_company, total_selected, must_send, can_send, _, total_can = _recompute_counters(problem, pre, selected_blocks)
 
-        # Caso 1: demasiadas plazas en dependencias
+        # Demasiadas plazas en dependencias
         if total_selected > problem.n_students:
-            # quitar un bloque cualquiera para bajar total_selected
+            # Quitar un bloque cualquiera para bajar total_selected
             if not _remove_random_block_any(selected_blocks, rng):
                 return None
             continue
 
-        # Caso 2: alguna empresa excede su máximo por dependencias
+        # Alguna empresa excede su máximo por dependencias
         over_max = [k for k in range(problem.n_companies) if selected_from_company[k] > problem.company_max[k]]
         if over_max:
             k = rng.choice(over_max)
+            # Quitar un bloque cualquiera de alguna empresa con excedencia de cupo 
             if not _remove_random_block_from_company(selected_blocks, k, rng):
                 return None
             continue
 
-        # Caso 3: en alguna empresa no es posible alcanzar el mínimo con las no-deps restantes
+        # En alguna empresa no es posible alcanzar el mínimo con las no-deps restantes
         deficit = [k for k in range(problem.n_companies) if can_send[k] < must_send[k]]
         if deficit:
             k = rng.choice(deficit)
 
-            # 1) intentar activar dependencias no seleccionadas
+            # Intentar activar dependencias no seleccionadas
             if _add_random_block_from_company(pre, selected_blocks, k, rng):
                 continue
 
-            # 2) si no se puede activar ninguna, intentar eliminar alguna
+            # Si no se puede activar ninguna, intentar eliminar alguna
             if _remove_random_block_from_company(selected_blocks, k, rng):
                 continue
 
-            # 3) si tampoco se puede eliminar, no es reparable
+            # Si tampoco se puede eliminar, no es reparable
             return None
 
-        # Caso 4: aunque todo lo anterior esté OK, globalmente no hay plazas alcanzables para n_students
+        # Revisar si, con lo que queda, no se llega a n_students
         if total_selected + total_can < problem.n_students:
-            # quitar un bloque en una empresa donde eso aumente "achievable" lo más probable:
-            # preferimos empresas donde max-selected es pequeño (están "apretadas") y hay no-deps.
+            # Quitar un bloque en una empresa donde company_max - selected_from_company es pequeño (están "apretadas") y hay bloques individuales
             candidates = []
             for k in range(problem.n_companies):
                 if selected_blocks.get(k, []) and len(pre.nondep_by_company[k]) > 0:
                     slack = problem.company_max[k] - selected_from_company[k]  # si slack es bajo, quitar ayuda más
                     candidates.append((slack, k))
+            
+            # Si no hay candidatos razonables, quitamos cualquiera
             if not candidates:
-                # si no hay candidatos razonables, quitamos cualquiera
                 if not _remove_random_block_any(selected_blocks, rng):
                     return None
             else:
@@ -245,36 +245,41 @@ def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 50
                     return None
             continue
 
-        # Si llegamos aquí, ya es completables
-        return selected_blocks, must_send, can_send
+        return selected_blocks, must_send, can_send # diccionario de bloques seleccionados, lo que se debe enviar y la holgura (en bloques individuales); todo ACTUALIZADO
 
     return None
 
 
-def _random_partition_to_fill(need: int, must_send: List[int], can_send: List[int], rng: random.Random) -> List[int]:
-    """
+def _random_partition_to_fill(need, must_send, can_send, rng):
+                             # Plazas que faltan para llegar a n_students, lista de mínimo obligatorio por empresa, 
+                             # lista de máxima holgura por empresa, generador de números aleatorios
+    """   
     Decide cuántas plazas no-dep se eligen por empresa, respetando:
-      must_send[k] <= x[k] <= can_send[k]
-      sum_k x[k] = need
+      - must_send[k] <= x[k] <= can_send[k]
+      - sum_k x[k] = need
     """
+    # Primero se cumplen todos los mínimos
     x = must_send[:]
     base = sum(x)
     if base > need:
         raise ValueError("Inconsistent: sum(must_send) > needed")
-
-    surplus = need - base
-    caps = [can_send[k] - must_send[k] for k in range(len(must_send))]
+    
+    surplus = need - base # Cuánto queda por repartir
+    caps = [can_send[k] - must_send[k] for k in range(len(must_send))] # Margen por empresa
+    
+    # Orden aleatorio de empresas
     order = list(range(len(must_send)))
     rng.shuffle(order)
-
     for k in order:
         if surplus <= 0:
             break
+        
+        # Reparto aleatorio inicial
         take = rng.randint(0, min(caps[k], surplus))
         x[k] += take
         surplus -= take
 
-    # Si todavía queda, repartir de manera determinista (sin romper límites)
+    # Si todavía queda, repartir sin romper límites
     if surplus > 0:
         for k in order:
             if surplus <= 0:
@@ -289,22 +294,26 @@ def _random_partition_to_fill(need: int, must_send: List[int], can_send: List[in
     if surplus != 0:
         raise ValueError("Could not partition to fill all needed placements within can_send limits")
 
-    return x
+    return x # [3, 6, 1, ...]; donde cada elemento corresponde a cuántas plazas no dependientes se deben asignar a cada empresa
 
 
-def _choose_final_placements(problem, pre: _Preproc, rng: random.Random) -> List[int]:
+def _choose_final_placements(problem, pre, rng):
+                            # Problema original, Problema preprocesado, generador de números aleatorios
     """
-    Devuelve una lista de exactamente n_students placements:
-      - incluye todos los placements de los bloques de dependencias seleccionados (tras fixing)
-      - completa con placements no-dep para cumplir mínimos/máximos
+    Devuelve una lista de n_students placements (con todas las plazas de bloques
+    de dependencias activados y completado con plazas individuales)
     """
+    # Selección inicial de dependencias
     selected_blocks = _random_initial_dep_selection(pre, rng)
+
+    # Arreglar las dependencias
     fixed = _fix_dependency_selection(problem, pre, rng, selected_blocks)
     if fixed is None:
         raise ValueError("Failed to fix dependency selection")
     selected_blocks, must_send, can_send = fixed
-
-    chosen_set: Set[int] = set()
+    
+    # Construir conjunto inicial de plazas
+    chosen_set = set()
     selected_from_company = [0] * problem.n_companies
     total_selected = 0
     for k in range(problem.n_companies):
@@ -314,6 +323,7 @@ def _choose_final_placements(problem, pre: _Preproc, rng: random.Random) -> List
             selected_from_company[k] += len(block)
             total_selected += len(block)
 
+    # Calcular cuántas plazas faltan
     need = problem.n_students - total_selected
     if need < 0:
         raise ValueError("Internal error: selected more than students after fixing")
@@ -321,7 +331,7 @@ def _choose_final_placements(problem, pre: _Preproc, rng: random.Random) -> List
     # Elegir cuántas no-deps por empresa
     to_pick = _random_partition_to_fill(need, must_send, can_send, rng)
 
-    # Seleccionar placements no-dep concretos
+    # Seleccionar plazas individuales concretas
     for k in range(problem.n_companies):
         if to_pick[k] <= 0:
             continue
@@ -330,69 +340,78 @@ def _choose_final_placements(problem, pre: _Preproc, rng: random.Random) -> List
             raise ValueError("Internal error: not enough non-dep placements to pick")
         chosen = rng.sample(pool, to_pick[k])
         chosen_set.update(chosen)
-
     chosen_list = list(chosen_set)
+
+    # Por seguridad, aunque el diseño debe garantizar exactitud
     if len(chosen_list) != problem.n_students:
-        # Por seguridad, aunque el diseño debe garantizar exactitud
         raise ValueError(f"Expected {problem.n_students} placements, got {len(chosen_list)}")
 
     rng.shuffle(chosen_list)
-    return chosen_list
+    return chosen_list # Lista de plazas seleccionadas por empresa (cuya suma debe resultar en n_students)
 
 
 # ----------------------------
 # Asignación de profesores (constructivo aleatorizado + repair ligero)
 # ----------------------------
 
-def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,
-                                   max_repair_iters: int = 3000) -> bool:
+def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
+                                  # Problema original, objeto Solution que ya tiene las plazas de estudiantes asignadas, 
+                                  # generador aleatorio, nº máximo de iteraciones del proceso de reparación
     """
-    Asigna placement -> professor para todas las plazas ocupadas.
+    Asigna un profesor a cada plaza ocupada (1º por construccion + 2º reparación)
+
+    True si se ha logrado asignar un profesor a todas las plazas ocupadas, False si no
     """
 
-    # quick infeasibility check
+    # Comprobación de factibilidad
     if sum(problem.prof_capacity) < problem.n_students:
         return False
 
+    # Obtener plazas ocupadas
     assigned_placements = [j for j in range(problem.n_placements) if sol.placement_filled[j]]
     rng.shuffle(assigned_placements)
 
-    prof_to_pl: List[List[int]] = [[] for _ in range(problem.n_professors)]
-    unassigned: List[int] = []
+    prof_to_pl = [[] for _ in range(problem.n_professors)] # Lista que guarda qué plazas tiene asignadas cada profesor
+    unassigned = [] # Lista de plazas sin profesor
 
     # -------- Constructivo --------
     for j in assigned_placements:
+        # Genera lista aleatoria de profesores
         cand = list(range(problem.n_professors))
         rng.shuffle(cand)
 
+        # Filtrar profesores con algo de capacidad
         feasible = [t for t in cand if sol.professor_load[t] < problem.prof_capacity[t]]
 
         if not feasible:
             unassigned.append(j)
             continue
 
+        # Se elige un profesor aleatorio y se asigna
         t = rng.choice(feasible)
-
         sol.placement_to_professor[j] = t
         sol.professor_load[t] += 1
         prof_to_pl[t].append(j)
 
+    # Si todas las plazas tienen profesor
     if not unassigned:
         return True
 
-    # -------- Repair --------
+    # -------- Reparación --------
     for _ in range(max_repair_iters):
 
         if not unassigned:
             return True
 
+        # Tomar una plaza j sin profesor e intenta asignación directa
         j = unassigned[-1]
-
         cand = list(range(problem.n_professors))
         rng.shuffle(cand)
 
+        # Filtrar profesores con algo de capacidad
         feasible = [t for t in cand if sol.professor_load[t] < problem.prof_capacity[t]]
 
+        # Si hay alguno, la plaza queda asignada y se elimina de unassigned
         if feasible:
             t = rng.choice(feasible)
 
@@ -402,37 +421,30 @@ def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,
 
             unassigned.pop()
             continue
-
+        
+        # Si a ninguno le cabe j, se intenta liberar capacidad moviendo una plaza existente
+        
+        # Elige profesores a intentar liberar para que quepa j
         target_pool = cand[:]
         rng.shuffle(target_pool)
-
         moved = False
-
         for t_full in target_pool:
-
-            if not prof_to_pl[t_full]:
+            if not prof_to_pl[t_full]: # Ignorar profesores sin plazas
                 continue
-
+            
+            # Elegir una plaza j2 del profesor lleno para que a este le queja j
             rng.shuffle(prof_to_pl[t_full])
-
             for j2 in list(prof_to_pl[t_full]):
-
-                k2 = problem.placement_company[j2]
-
                 cand2 = list(range(problem.n_professors))
                 rng.shuffle(cand2)
 
-                dests = [
-                    t2 for t2 in cand2
-                    if t2 != t_full and sol.professor_load[t2] < problem.prof_capacity[t2]
-                ]
-
+                # Buscar un profesor alternativo para asignar la plaza nueva j2
+                dests = [t2 for t2 in cand2 if t2 != t_full and sol.professor_load[t2] < problem.prof_capacity[t2]]
                 if not dests:
                     continue
-
+                
+                # Swap parcial --> se mueve j2 y t_full ahora tiene hueco para j
                 t2 = rng.choice(dests)
-
-                # mover j2
                 sol.placement_to_professor[j2] = t2
                 sol.professor_load[t_full] -= 1
                 sol.professor_load[t2] += 1
@@ -440,7 +452,6 @@ def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,
                 prof_to_pl[t_full].remove(j2)
                 prof_to_pl[t2].append(j2)
 
-                # asignar j
                 sol.placement_to_professor[j] = t_full
                 sol.professor_load[t_full] += 1
                 prof_to_pl[t_full].append(j)
@@ -450,12 +461,15 @@ def _assign_professors_with_repair(problem, sol: Solution, rng: random.Random,
                 break
 
             if moved:
-                break
+                break # Ya ha habido movimiento
 
+        # Si no se pudo mover nada, se cambia el orden de las plazas pendientes para probar otra
         if not moved:
             rng.shuffle(unassigned)
 
     return False
+
+##############################################
 
 # ----------------------------
 # Construcción final de Solution
