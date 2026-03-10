@@ -23,6 +23,7 @@ class Problem:
         # Plazas
         self.placement_company = [] # empresa a la que pertenece cada plaza
         self.dependencies = [] # grupo de plazas que deben asignarse juntas
+        self.placement_comp_needs = []  # vector competencias por plaza
 
         # Estudiantes
         self.student_w_distance = [] # peso de i a la distancia
@@ -116,6 +117,12 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
 
         # Empresa a la que pertenece cada plaza
         problem.placement_company.append(int(tokens[1]))
+
+        needs = list(map(float, tokens[2:]))
+        if len(needs) != problem.n_competences:
+            raise ValueError(f"PLACEMENT_INFO row has {len(needs)} needs, expected {problem.n_competences}")
+        problem.placement_comp_needs.append(needs)
+
         idx += 1
 
     # Dependencias entre plazas (lista de listas)
