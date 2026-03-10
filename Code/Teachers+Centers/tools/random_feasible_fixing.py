@@ -469,43 +469,41 @@ def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
 
     return False
 
-##############################################
 
 # ----------------------------
 # Construcción final de Solution
 # ----------------------------
 
 def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50):
+                                   # Problema original, semilla para reproducibilidad, nº máximo de iteraciones del proceso de reparación
     """
-    Genera una Solution aleatoria y factible usando:
-      A) random + fixing para dependencias y cuotas empresa, luego completar con no-deps
-      B) asignación de profesores dependiente de A: constructivo aleatorizado + repair
-
-    Nota: max_attempts se mantiene como "paracaídas" por robustez.
+    Genera una Solution aleatoria y factible 
     """
+    # Inicializar generador aleatorio y preprocesado de la instancia
     rng = random.Random(seed)
     pre = _preprocess(problem)
 
+    # Bucle de intentos
     for _ in range(max_attempts):
         try:
+            # Elegir plazas finales
             chosen_placements = _choose_final_placements(problem, pre, rng)
 
-            # Construir asignación estudiante->placement (aleatoria)
+            # --- Estudiante-plaza ---
             students = list(range(problem.n_students))
             rng.shuffle(students)
             rng.shuffle(chosen_placements)
 
-            sol = Solution(problem)
+            sol = Solution(problem) # Creación del objeto solution
 
-            # Asignamos student->placement sin profesor todavía, actualizando estructuras coherentes
-            # (usamos las estructuras internas de Solution)
+            # Asignar estudiantes a placements
             for i, j in zip(students, chosen_placements):
                 sol.student_to_placement[i] = j
                 sol.placement_filled[j] = True
                 k = problem.placement_company[j]
                 sol.company_load[k] += 1
 
-            # Verificación rápida de mínimos/máximos empresa antes de profes
+            # Verificación rápida de mínimos/máximos de empresas antes de profes
             ok = True
             for k in range(problem.n_companies):
                 if sol.company_load[k] < problem.company_min[k] or sol.company_load[k] > problem.company_max[k]:
@@ -514,19 +512,15 @@ def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50):
             if not ok or not sol.dependencies_ok():
                 continue
 
-            # Asignar profesores + repair
+            # --- Profesores-Plazas ---
             if not _assign_professors_with_repair(problem, sol, rng):
                 continue
 
             # Validación final
             if sol.validate():
-                return sol
+                return sol # Objeto Solution ya factible (asignaciones y cargas correctas)
 
         except ValueError:
-            continue
+            continue # Se prueba otra vez
 
-    raise ValueError(f"No feasible random solution found after {max_attempts} attempts")
-
-
-# Alias si quieres mantener naming similar a tu módulo anterior
-generate_random_feasible = generate_random_feasible_fixing
+    raise ValueError(f"No feasible random solution found after {max_attempts} attempts") # No se ha podido obtener una solución óptima tras todas las iteraciones
