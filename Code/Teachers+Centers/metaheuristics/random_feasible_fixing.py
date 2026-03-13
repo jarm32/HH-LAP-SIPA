@@ -4,8 +4,9 @@
 # Imports
 # ----------------------------
 import random
+
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Set, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 from tools.solution import Solution
 

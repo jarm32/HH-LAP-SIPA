@@ -3,9 +3,11 @@
 
 # Librerías
 from dataclasses import dataclass
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
+
 import math
 import numpy as np
+
 from tools.solution import Solution
 
 
