@@ -1,0 +1,9 @@
+Propuestas recibidas en el Research Day del 24/03/26. Comentarlas antes con Juanmi y Víctor.
+
+Todas estas propuestas deberán ser tomadas en cuenta una vez se hayan programado las heurísticas (al menos una), ya que son mejoras que pueden funcionar tras estas para mejorar la obtención de resultados.
+
+- Hacer pruebas con los 4 elementos aislados, tratando de ver si hay algo común entre los resultados para poder partir de ello (si hay cosas comunes entre intentos donde no se valoran el resto de variables, es que pueden ser asignaciones interesantes per sé).
+
+- Valorar la posibilidad de resolver el problema original mediante un Solver ILP para, después, emplear una reparación y añadir la supervisión académica.
+
+- Emplear un modelo subrogado (que recibirá los resultados buenos de las metaheurísticas) para rellenar el conjunto Pareto de forma más eficiente.
