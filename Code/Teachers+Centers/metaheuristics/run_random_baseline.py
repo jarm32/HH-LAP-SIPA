@@ -22,7 +22,7 @@ def main():
     result = random_search_pareto(
         problem=problem,
         generator_fn=generate_random_feasible_fixing,
-        weights=weights,
+        weights=weights, # Pesos usados solo para el objective_value escalar auxiliar (desempate en poda), no para la dominancia Pareto
         time_limit_seconds=60,
         max_pareto_size=50,
         base_seed=1234,
