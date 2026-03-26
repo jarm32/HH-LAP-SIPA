@@ -1,3 +1,5 @@
+# Gestiona el conjunto de soluciones no dominadas: recibe soluciones ya evaluadas y decide cuáles se quedan en el frente de Pareto y cuáles se descartan.
+
 from dataclasses import dataclass
 from typing import Dict, Any, List, Tuple
 
