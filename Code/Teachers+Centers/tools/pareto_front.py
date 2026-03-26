@@ -10,6 +10,7 @@ from typing import Dict, Any, List, Tuple
 #   - lbar_sum  : minimizar
 #   - sigma_sum : minimizar
 
+
 OBJECTIVE_SENSE = {
     "tau_sum": "max",
     "eta_sum": "max",
