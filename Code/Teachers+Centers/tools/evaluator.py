@@ -1,9 +1,9 @@
-# Evalúa un objeto Solution que contenga el resultado de una asignación, calculando su función objetivo
+# Evalúa un objeto Solution que contenga el resultado de una asignación, calculando su función objetivo.
+# Se define una evaluación multiobjetiva pura (4 elementos por separado) y una monobjetivo escalar (combinación de los objetivos)
 
 
 # Librerías
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
 
 import math
 import numpy as np
@@ -28,20 +28,23 @@ class ObjectiveWeights:
             raise ValueError(f"alpha+beta+gamma+delta must be 1. Got {s}")
 
 
-def evaluate_solution(sol, weights, normalize_student_dist = True, normalize_supervision_dist = True):
-                     # Objeto Solution a evaluar, pesos de la función objetivo, booleano que indica si las distancias estudiante-empresa se normalizan a [0,1], booleano que indica si las distancias supervisión se normalizan a [0,1]
+def evaluate_solution_multi(sol, normalize_student_dist=True, normalize_supervision_dist=True):
+    # Objeto Solution a evaluar, booleano que indica si las distancias estudiante-empresa se normalizan a [0,1],
+    # booleano que indica si las distancias de supervisión se normalizan a [0,1]
     """
-    Calcula α * sum τ_ij + β * sum η_ij - γ * sum Lbar_t - δ * sum σ_e
+    Calcula y devuelve por separado los 4 componentes de la función objetivo:
+    - tau_sum   (maximizar)
+    - eta_sum   (maximizar)
+    - lbar_sum  (minimizar)
+    - sigma_sum (minimizar)
+
+    No agrega los objetivos con pesos
     """
-    weights.validate()
     p = sol.problem
 
+    # Validación de la solución
     if not sol.validate():
-        return {
-            "valid": False,
-            "objective_value": float("-inf"),
-            "reason": "Solution is not valid according to sol.validate()",
-        }
+        return {"valid": False, "reason": "Solution is not valid according to sol.validate()"}
 
     # tau_ij y eta_ij
     tau_sum, eta_sum = _compute_student_and_company_utilities(sol, normalize_student_dist=normalize_student_dist)
@@ -54,12 +57,9 @@ def evaluate_solution(sol, weights, normalize_student_dist = True, normalize_sup
     sigma_by_e = _compute_sigma_by_center(sol)
     sigma_sum = float(sum(sigma_by_e))
 
-    # f. objetivo
-    obj = (weights.alpha * tau_sum + weights.beta * eta_sum - weights.gamma * lbar_sum - weights.delta * sigma_sum)
-
+    # Resultado multiobjetivo puro
     return {
         "valid": True,
-        "objective_value": float(obj),
         "components": {
             "tau_sum": float(tau_sum),
             "eta_sum": float(eta_sum),
@@ -70,7 +70,49 @@ def evaluate_solution(sol, weights, normalize_student_dist = True, normalize_sup
             "lbar_by_professor": lbar_by_t,
             "sigma_by_center": sigma_by_e,
         }
-    } # dict con componentes y fitness final
+    }  # dict con los 4 objetivos por separado
+
+
+def evaluate_solution_scalar(sol, weights, normalize_student_dist=True, normalize_supervision_dist=True):
+    # Objeto Solution a evaluar, pesos de la función objetivo, booleano que indica si las distancias estudiante-empresa
+    # se normalizan a [0,1], booleano que indica si las distancias de supervisión se normalizan a [0,1]
+    """
+    Calcula la versión escalar monobjetivo de la evaluación:
+    α * tau_sum + β * eta_sum - γ * lbar_sum - δ * sigma_sum
+
+    Se apoya en evaluate_solution_multi(...) para obtener primero
+    los 4 componentes por separado
+    """
+    weights.validate()
+
+    # Evaluación multiobjetivo previa
+    multi_eval = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+
+    # Si la solución no es válida, devuelve fitness inválido
+    if not multi_eval["valid"]:
+        return {"valid": False, "objective_value": float("-inf"), "reason": multi_eval["reason"]}
+
+    # Extraer componentes
+    tau_sum = multi_eval["components"]["tau_sum"]
+    eta_sum = multi_eval["components"]["eta_sum"]
+    lbar_sum = multi_eval["components"]["lbar_sum"]
+    sigma_sum = multi_eval["components"]["sigma_sum"]
+
+    # Función objetivo escalarizada
+    obj = (
+        weights.alpha * tau_sum
+        + weights.beta * eta_sum
+        - weights.gamma * lbar_sum
+        - weights.delta * sigma_sum
+    )
+
+    # Resultado escalar, manteniendo también componentes y detalles
+    return {
+        "valid": True,
+        "objective_value": float(obj),
+        "components": multi_eval["components"],
+        "details": multi_eval["details"],
+    }  # dict con componentes y fitness final
 
 
 def _compute_student_and_company_utilities(sol, normalize_student_dist):

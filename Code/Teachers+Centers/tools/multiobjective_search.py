@@ -2,7 +2,7 @@ import time
 from typing import Any, Callable, Dict, List, Optional
 
 from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
-from tools.evaluator import evaluate_solution
+from tools.evaluator import evaluate_solution_multi, evaluate_solution_scalar
 
 
 def random_search_pareto(
@@ -62,12 +62,26 @@ def random_search_pareto(
             failures += 1
             continue
 
-        eval_result = evaluate_solution(
+        # Evaluación multiobjetivo pura para Pareto
+        eval_result = evaluate_solution_multi(
+            sol,
+            normalize_student_dist=normalize_student_dist,
+            normalize_supervision_dist=normalize_supervision_dist,
+        )
+
+        if not eval_result.get("valid", False):
+            failures += 1
+            continue
+
+        # Evaluación escalar auxiliar poda
+        scalar_eval = evaluate_solution_scalar(
             sol,
             weights,
             normalize_student_dist=normalize_student_dist,
             normalize_supervision_dist=normalize_supervision_dist,
         )
+
+        eval_result["objective_value"] = scalar_eval["objective_value"]
 
         if not eval_result.get("valid", False):
             failures += 1
