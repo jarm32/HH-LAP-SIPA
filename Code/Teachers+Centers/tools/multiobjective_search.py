@@ -3,7 +3,6 @@
 
 # Librerías
 import time
-from typing import Any, Callable, Dict, List, Optional
 
 from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
 from tools.evaluator import evaluate_solution_multi, evaluate_solution_scalar
