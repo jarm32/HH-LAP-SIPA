@@ -3,7 +3,7 @@
 
 # Librerías
 from dataclasses import dataclass
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any
 
 
 # Definición de objetivos
