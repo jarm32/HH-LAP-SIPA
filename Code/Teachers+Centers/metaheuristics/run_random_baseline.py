@@ -1,4 +1,7 @@
-from scripts.random_feasible_fixing import generate_random_feasible_fixing
+# cd C:\Code\VRAIN-practicas\Code\Teachers+Centers
+# python -m metaheuristics.run_random_baseline
+
+from metaheuristics.scripts.random_feasible_fixing import generate_random_feasible_fixing
 from tools.multiobjective_search import random_search_pareto, print_pareto_set, save_results_to_txt
 from tools.evaluator import ObjectiveWeights
 from tools.problem import load_instance
@@ -7,7 +10,7 @@ from tools.problem import load_instance
 def main():
     modelo = "random"
 
-    instance_path = "inst_creator/output/problem_instance_ext_400_1.txt"
+    instance_path = "inst_creator/output/problem_instance_ext_200_0.txt"
     instance_name = instance_path.split("/")[-1]
 
     problem = load_instance(instance_path)

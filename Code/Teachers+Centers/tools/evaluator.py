@@ -29,8 +29,8 @@ class ObjectiveWeights:
 
 
 def evaluate_solution_multi(sol, normalize_student_dist=True, normalize_supervision_dist=True):
-    # Objeto Solution a evaluar, booleano que indica si las distancias estudiante-empresa se normalizan a [0,1],
-    # booleano que indica si las distancias de supervisión se normalizan a [0,1]
+                            # Objeto Solution a evaluar, booleano que indica si las distancias estudiante-empresa se normalizan a [0,1],
+                            # booleano que indica si las distancias de supervisión se normalizan a [0,1]
     """
     Calcula y devuelve por separado los 4 componentes de la función objetivo:
     - tau_sum   (maximizar)
@@ -74,8 +74,8 @@ def evaluate_solution_multi(sol, normalize_student_dist=True, normalize_supervis
 
 
 def evaluate_solution_scalar(sol, weights, normalize_student_dist=True, normalize_supervision_dist=True):
-    # Objeto Solution a evaluar, pesos de la función objetivo, booleano que indica si las distancias estudiante-empresa
-    # se normalizan a [0,1], booleano que indica si las distancias de supervisión se normalizan a [0,1]
+                            # Objeto Solution a evaluar, pesos de la función objetivo, booleano que indica si las distancias estudiante-empresa
+                            # se normalizan a [0,1], booleano que indica si las distancias de supervisión se normalizan a [0,1]
     """
     Calcula la versión escalar monobjetivo de la evaluación:
     α * tau_sum + β * eta_sum - γ * lbar_sum - δ * sigma_sum
