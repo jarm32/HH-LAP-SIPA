@@ -1,40 +1,36 @@
 # Gestiona el conjunto de soluciones no dominadas: recibe soluciones ya evaluadas y decide cuáles se quedan en el frente de Pareto y cuáles se descartan.
 
+
+# Librerías
 from dataclasses import dataclass
 from typing import Dict, Any, List, Tuple
 
 
-# Orden de objetivos del problema:
-#   - tau_sum   : maximizar
-#   - eta_sum   : maximizar
-#   - lbar_sum  : minimizar
-#   - sigma_sum : minimizar
-
-
+# Definición de objetivos
 OBJECTIVE_SENSE = {
     "tau_sum": "max",
     "eta_sum": "max",
     "lbar_sum": "min",
-    "sigma_sum": "min",
+    "sigma_sum": "min"
 }
 
 
 @dataclass
 class EvaluatedSolution:
-    sol: Any
-    evaluation: Dict[str, Any]
-    iteration: int
+    sol: Any # Objeto Solution
+    evaluation: Dict[str, Any] # Resultado de evaluate_solution_multi + valor escalar
+    iteration: int # En qué iteración se generó
     seed: int | None = None
 
-    @property
+    @property # Acceso rápido a los 4 componentes de la f.o.
     def components(self) -> Dict[str, float]:
         return self.evaluation["components"]
 
 
-def get_objective_vector(evaluation: Dict[str, Any]) -> Tuple[float, float, float, float]:
+def get_objective_vector(evaluation):
+                        # Diccionario resultante de la evaluación
     """
-    Devuelve el vector objetivo en orden fijo:
-    (tau_sum, eta_sum, lbar_sum, sigma_sum)
+    Convierte la evaluación en un vector ordenado de objetivos
     """
     c = evaluation["components"]
     return (
@@ -42,33 +38,33 @@ def get_objective_vector(evaluation: Dict[str, Any]) -> Tuple[float, float, floa
         float(c["eta_sum"]),
         float(c["lbar_sum"]),
         float(c["sigma_sum"]),
-    )
+    ) # Tupla con las 4 componentes
 
 
-def dominance_relation(eval_a: Dict[str, Any], eval_b: Dict[str, Any]) -> str:
+def dominance_relation(eval_a, eval_b):
+                       # Evaluación de dos soluciones
     """
-    Compara dos evaluaciones multiobjetivo.
-
-    Devuelve:
-      - "a_dominates_b"
-      - "b_dominates_a"
-      - "equal"
-      - "non_comparable"
+    Compara dos evaluaciones multiobjetivo para saber si:
+    a domina b, b domina a, son iguales o no son comparables
     """
     a = eval_a["components"]
     b = eval_b["components"]
 
-    a_better_or_equal_all = True
+    # Para que a domine b
+    a_better_or_equal_all = True 
     a_strictly_better_one = False
 
+    # Para que b domine a
     b_better_or_equal_all = True
     b_strictly_better_one = False
 
+    # Itera por los 4 objetivos usando su sentido (max o min)
     for obj, sense in OBJECTIVE_SENSE.items():
+        # Valor de a y b para la componente iterada
         va = float(a[obj])
         vb = float(b[obj])
 
-        if sense == "max":
+        if sense == "max": # Caso max
             if va < vb:
                 a_better_or_equal_all = False
             elif va > vb:
@@ -79,7 +75,7 @@ def dominance_relation(eval_a: Dict[str, Any], eval_b: Dict[str, Any]) -> str:
             elif vb > va:
                 b_strictly_better_one = True
 
-        elif sense == "min":
+        elif sense == "min": # Caso min
             if va > vb:
                 a_better_or_equal_all = False
             elif va < vb:
@@ -93,13 +89,16 @@ def dominance_relation(eval_a: Dict[str, Any], eval_b: Dict[str, Any]) -> str:
         else:
             raise ValueError(f"Unknown sense for objective {obj}: {sense}")
 
-    if a_better_or_equal_all and a_strictly_better_one:
+    if a_better_or_equal_all and a_strictly_better_one: # a domina b
         return "a_dominates_b"
-    if b_better_or_equal_all and b_strictly_better_one:
+    if b_better_or_equal_all and b_strictly_better_one: # b domina a
         return "b_dominates_a"
-    if not a_strictly_better_one and not b_strictly_better_one:
+    if not a_strictly_better_one and not b_strictly_better_one: # Son iguales
         return "equal"
-    return "non_comparable"
+    return "non_comparable" # Si no pasa nada de lo anterior, no son comparables
+
+
+########################################################
 
 
 def update_pareto_set(
