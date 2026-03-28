@@ -7,3 +7,7 @@ Todas estas propuestas deberán ser tomadas en cuenta una vez se hayan programad
 - Valorar la posibilidad de resolver el problema original mediante un Solver ILP para, después, emplear una reparación y añadir la supervisión académica.
 
 - Emplear un modelo subrogado (que recibirá los resultados buenos de las metaheurísticas) para rellenar el conjunto Pareto de forma más eficiente.
+
+
+
+Libro para Fronteras Pareto: https://neuroevolutionbook.com/
