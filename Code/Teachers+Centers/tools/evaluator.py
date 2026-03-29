@@ -119,11 +119,10 @@ def _compute_student_and_company_utilities(sol, normalize_student_dist):
     """
     Calcula sum τ_ij y sum η_ij por alumno asignado
     """
-    
     p = sol.problem
 
     # Matrices/vectores necesarios
-    dist = np.array(p.student_company_dist, dtype=float)  # [n_students, n_companies]
+    dist = np.asarray(p.student_company_dist, dtype=np.float64)   # [n_students, n_companies]
     if normalize_student_dist:
         dist_norm = _minmax_normalize_rows(dist)
     else:
@@ -133,33 +132,50 @@ def _compute_student_and_company_utilities(sol, normalize_student_dist):
     if not hasattr(p, "placement_comp_needs") or len(p.placement_comp_needs) != p.n_placements:
         raise ValueError("Problem is missing placement_comp_needs (Φ_j) for each placement. Update problem.py loader.")
 
-    Phi = np.array(p.placement_comp_needs, dtype=float)   # [n_placements, n_competences]
-    Theta = np.array(p.student_pref, dtype=float)         # [n_students, n_competences]
-    Psi = np.array(p.student_dev, dtype=float)            # [n_students, n_competences]
+    Phi = np.asarray(p.placement_comp_needs, dtype=np.float64)    # [n_placements, n_competences]
+    Theta = np.asarray(p.student_pref, dtype=np.float64)          # [n_students, n_competences]
+    Psi = np.asarray(p.student_dev, dtype=np.float64)             # [n_students, n_competences]
 
-    tau_sum, eta_sum  = 0.0, 0.0
+    # Asignaciones estudiante -> plaza
+    student_to_placement = np.asarray(sol.student_to_placement, dtype=np.int64)  # [n_students]
 
-    # Para cada estudiante asignado, calcula τ_ij y η_ij y acumula
-    for i in range(p.n_students):
-        j = sol.student_to_placement[i]
-        if j == -1:
-            continue
-        k = p.placement_company[j]
+    # Filtrar solo estudiantes realmente asignados
+    assigned_mask = student_to_placement != -1
+    if not np.any(assigned_mask):
+        return 0.0, 0.0
 
-        w_dist = p.student_w_distance[i]
-        w_comp = p.student_w_dev[i]
+    assigned_students = np.nonzero(assigned_mask)[0]              # índices i asignados
+    assigned_placements = student_to_placement[assigned_mask]     # plaza j de cada i
+    assigned_companies = np.asarray(p.placement_company, dtype=np.int64)[assigned_placements]  # empresa k de cada j
 
-        dij = dist_norm[i, k]
-        # τ_ij = w_dist*(1-dij) + w_comp*(Φ_j · Θ_i)
-        tau_ij = w_dist * (1.0 - dij) + w_comp * float(np.dot(Phi[j], Theta[i]))
+    # Pesos por estudiante asignado
+    w_dist = np.asarray(p.student_w_distance, dtype=np.float64)[assigned_mask]
+    w_comp = np.asarray(p.student_w_dev, dtype=np.float64)[assigned_mask]
 
-        # η_ij = Φ_j · Ψ_i
-        eta_ij = float(np.dot(Phi[j], Psi[i]))
+    # Distancia normalizada d_ij usando empresa de la plaza asignada
+    dij = dist_norm[assigned_students, assigned_companies]
 
-        tau_sum += tau_ij
-        eta_sum += eta_ij
+    # Submatrices relevantes
+    Phi_assigned = Phi[assigned_placements]       # [n_assigned, n_competences]
+    Theta_assigned = Theta[assigned_students]     # [n_assigned, n_competences]
+    Psi_assigned = Psi[assigned_students]         # [n_assigned, n_competences]
 
-    return float(tau_sum), float(eta_sum)
+    # Productos fila a fila:
+    # pref_match[r] = Phi[j_r] · Theta[i_r]
+    # comp_match[r] = Phi[j_r] · Psi[i_r]
+    pref_match = np.einsum("ij,ij->i", Phi_assigned, Theta_assigned)
+    comp_match = np.einsum("ij,ij->i", Phi_assigned, Psi_assigned)
+
+    # τ_ij = w_dist*(1-dij) + w_comp*(Φ_j · Θ_i)
+    tau_values = w_dist * (1.0 - dij) + w_comp * pref_match
+
+    # η_ij = Φ_j · Ψ_i
+    eta_values = comp_match
+
+    tau_sum = float(np.sum(tau_values))
+    eta_sum = float(np.sum(eta_values))
+
+    return tau_sum, eta_sum
 
 
 def _compute_lbar_by_professor(sol, normalize_supervision_dist):
@@ -170,8 +186,8 @@ def _compute_lbar_by_professor(sol, normalize_supervision_dist):
     p = sol.problem
 
     # Distancias base (centro-empresa y empresa-empresa)
-    center_company = np.array(p.center_company_dist, dtype=float)   # [n_centers, n_companies]
-    company_company = np.array(p.company_company_dist, dtype=float) # [n_companies, n_companies]
+    center_company = np.asarray(p.center_company_dist, dtype=np.float64)   # [n_centers, n_companies]
+    company_company = np.asarray(p.company_company_dist, dtype=np.float64) # [n_companies, n_companies]
 
     if normalize_supervision_dist:
         # Normaliza globalmente ambas matrices juntas a [0,1]
