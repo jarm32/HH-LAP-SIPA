@@ -44,10 +44,10 @@ class Problem:
     # Métodos auxiliares útiles más adelante
 
     def total_company_capacity(self): # -
-        return sum(self.company_max) # suma de las cuotas máximas de todas las empresas
+        return int(np.sum(self.company_max)) # suma de las cuotas máximas de todas las empresas
 
     def total_professor_capacity(self): # -
-        return sum(self.prof_capacity) # suma de las capacidades totales de supervisión de todos los profesores
+        return int(np.sum(self.prof_capacity)) # suma de las capacidades totales de supervisión de todos los profesores
 
 
 def load_instance(filename): # ruta del archivo .txt que contiene la instancia
@@ -200,5 +200,20 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
         idx += 1
 
     problem.company_company_dist = np.array(company_company_matrix)
+
+    # Una vez cargados todos los datos, se convierten a arrays NumPy para mejorar el rendimiento en operaciones vectorizadas
+    problem.company_min = np.asarray(problem.company_min, dtype=np.int32)
+    problem.company_max = np.asarray(problem.company_max, dtype=np.int32)
+
+    problem.placement_company = np.asarray(problem.placement_company, dtype=np.int32)
+    problem.placement_comp_needs = np.asarray(problem.placement_comp_needs, dtype=np.float64)
+
+    problem.student_w_distance = np.asarray(problem.student_w_distance, dtype=np.float64)
+    problem.student_w_dev = np.asarray(problem.student_w_dev, dtype=np.float64)
+    problem.student_dev = np.asarray(problem.student_dev, dtype=np.float64)
+    problem.student_pref = np.asarray(problem.student_pref, dtype=np.float64)
+
+    problem.prof_center = np.asarray(problem.prof_center, dtype=np.int32)
+    problem.prof_capacity = np.asarray(problem.prof_capacity, dtype=np.int32)
 
     return problem # Un objeto Problem con la información de la instancia (dimensiones, datos de estudiantes, empresas, plazas, dependencias, distancias, centros y profesores)
