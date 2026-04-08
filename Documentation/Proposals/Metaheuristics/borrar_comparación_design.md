@@ -1,35 +1,9 @@
-# Diseño conceptual del GA multiobjetivo (NSGA-III)
-
-## 1. Objetivo
-
-Desarrollar un algoritmo genético multiobjetivo que genere soluciones factibles de alta calidad para el problema SIPA modificado, optimizando simultáneamente:
-
-- ↑ `tau_sum` (satisfacción estudiantes)
-- ↑ `eta_sum` (satisfacción empresas)
-- ↓ `lbar_sum` (coste de supervisión)
-- ↓ `sigma_sum` (desequilibrio entre profesores)
-
-El GA actúa como alternativa a métodos exactos para instancias grandes, algo alineado con la motivación del modelo original y su extensión con profesores. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
-
----
-
-## 2. Representación del individuo
-
-- Cromosoma principal:  
-  `student_to_placement[i] = j`
-
-- La asignación de profesores **no se codifica directamente**, sino que se reconstruye después.
-
-**Motivo:** esta representación reduce complejidad y encaja con la estructura actual de `Solution`, donde la asignación estudiante→plaza y plaza→profesor están separadas. :contentReference[oaicite:2]{index=2}
-
----
-
 ## 3. Población inicial
 
 - Los individuos iniciales se generan con:
   `generate_random_feasible_fixing`
 
-- Por tanto, la población inicial parte de soluciones **factibles**. :contentReference[oaicite:3]{index=3}
+- Por tanto, la población inicial parte de soluciones **factibles**.
 
 ---
 
@@ -43,7 +17,7 @@ El GA actúa como alternativa a métodos exactos para instancias grandes, algo a
   - minimizar `sigma_sum`
 
 - Evaluación escalar (`evaluate_solution_scalar`):
-  - solo como apoyo para desempates, análisis o poda auxiliar, no como criterio principal. :contentReference[oaicite:4]{index=4}
+  - solo como apoyo para desempates, análisis o poda auxiliar, no como criterio principal.
 
 ---
 
@@ -66,7 +40,7 @@ La selección se basará en:
 - El cruce combinará asignaciones de dos padres sobre subconjuntos de estudiantes.
 - El descendiente puede quedar inválido, por lo que después se aplicará reparación.
 
-No se usa una codificación directa sobre `xijt`, ya que sería mucho más grande y difícil de manejar genéticamente que una codificación basada en `student_to_placement`. :contentReference[oaicite:5]{index=5}
+No se usa una codificación directa sobre `xijt`, ya que sería mucho más grande y difícil de manejar genéticamente que una codificación basada en `student_to_placement`.
 
 ---
 
@@ -100,7 +74,7 @@ Debe garantizar:
 - que toda plaza ocupada tenga profesor,
 - que ningún profesor exceda su capacidad.
 
-Se reutilizará, en lo posible, la lógica ya presente en `random_feasible_fixing`. :contentReference[oaicite:6]{index=6}
+Se reutilizará, en lo posible, la lógica ya presente en `random_feasible_fixing`.
 
 ---
 
@@ -121,7 +95,7 @@ A diferencia de NSGA-II, aquí la diversidad no se gestiona con crowding distanc
 Además de la población interna, se mantendrá un conjunto externo de soluciones no dominadas usando:
 
 - `update_pareto_set`
-- `prune_pareto_set_by_size` :contentReference[oaicite:7]{index=7}
+- `prune_pareto_set_by_size`
 
 Esto permitirá conservar las mejores soluciones de toda la ejecución, independientemente de la población de cada generación.
 
@@ -138,7 +112,7 @@ Opcionalmente, más adelante:
 - número máximo de generaciones,
 - estancamiento del Pareto global.
 
-Esto mantiene comparabilidad con la baseline actual. :contentReference[oaicite:8]{index=8}
+Esto mantiene comparabilidad con la baseline actual.
 
 ---
 
@@ -167,7 +141,7 @@ Comparar con la búsqueda aleatoria actual en:
 - calidad de soluciones,
 - diversidad del frente,
 - mejor valor escalar auxiliar,
-- tiempo de ejecución. :contentReference[oaicite:9]{index=9} :contentReference[oaicite:10]{index=10}
+- tiempo de ejecución.
 
 ---
 

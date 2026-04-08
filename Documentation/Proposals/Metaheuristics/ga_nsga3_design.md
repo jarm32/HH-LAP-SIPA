@@ -1,4 +1,4 @@
-# Diseño conceptual del GA multiobjetivo (ga_nsga2)
+# Diseño conceptual del GA multiobjetivo (NSGA-III)
 
 ## 1. Objetivo del algoritmo
 
