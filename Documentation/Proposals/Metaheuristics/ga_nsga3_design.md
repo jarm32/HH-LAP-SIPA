@@ -23,9 +23,7 @@ Desarrollar un algoritmo genético multiobjetivo que genere soluciones factibles
 ## 3. Población inicial
 
 - Se generan individuos con:
-  `generate_random_feasible_fixing`
-
-- Todos los individuos iniciales son **factibles**.
+  `generate_random_feasible_fixing` --> Aseguran factibilidad inicial.
 
 ---
 
@@ -37,9 +35,11 @@ Desarrollar un algoritmo genético multiobjetivo que genere soluciones factibles
   - min: `lbar_sum`, `sigma_sum`
 
 - Evaluación escalar (`evaluate_solution_scalar`):
-  - solo para desempates / apoyo
+  - solo como apoyo para desempates, análisis o poda auxiliar, no como criterio principal.
 
 ---
+
+#################################################
 
 ## 5. Selección
 

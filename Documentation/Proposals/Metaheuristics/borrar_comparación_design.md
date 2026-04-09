@@ -1,26 +1,3 @@
-## 3. Población inicial
-
-- Los individuos iniciales se generan con:
-  `generate_random_feasible_fixing`
-
-- Por tanto, la población inicial parte de soluciones **factibles**.
-
----
-
-## 4. Evaluación
-
-- Evaluación principal: `evaluate_solution_multi`
-- Objetivos:
-  - maximizar `tau_sum`
-  - maximizar `eta_sum`
-  - minimizar `lbar_sum`
-  - minimizar `sigma_sum`
-
-- Evaluación escalar (`evaluate_solution_scalar`):
-  - solo como apoyo para desempates, análisis o poda auxiliar, no como criterio principal.
-
----
-
 ## 5. Selección
 
 - Método: **NSGA-III**
