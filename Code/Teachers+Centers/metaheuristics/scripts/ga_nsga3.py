@@ -22,29 +22,30 @@ from tools.solution import Solution
 
 def _ensure_deap_types():
     """
-    Comprueba si los tipos necesarios de DEAP ya existen y, si no, los crea
+    DEAP necesita que se le especifique cómo es una solución (individuo) 
+    y cómo se mide su calidad (fitness). Esta función comprueba si estos 
+    tipos ya existen y los crea en caso contrario
     """
+    # Creación del tipo de fitness multiobjetivo
     if not hasattr(creator, "FitnessSIPAMulti"):
         creator.create(
-            "FitnessSIPAMulti",
-            base.Fitness,
-            weights=(1.0, 1.0, -1.0, -1.0),  # max tau, max eta, min lbar, min sigma
+            "FitnessSIPAMulti",               # nombre del tipo de fitness
+            base.Fitness,                     # clase base de DEAP que gestiona la evaluación
+            weights=(1.0, 1.0, -1.0, -1.0)    # max tau, max eta, min lbar, min sigma
         )
 
+    # Creación del tipo de individuo --> lista con el fitness definido arriba
     if not hasattr(creator, "IndividualSIPA"):
         creator.create(
-            "IndividualSIPA",
-            list,
-            fitness=creator.FitnessSIPAMulti,
+            "IndividualSIPA",                 # nombre del nuevo tipo de individuo       
+            list,                             # estructura del individuo (lista de genes)
+            fitness=creator.FitnessSIPAMulti  # tipo de fitness asociado a cada individuo
         )
 
 
-
-#########################################
-
-# ============================================================
+# --------------------------------------------------------
 # Utilidades básicas Solution <-> Individual
-# ============================================================
+# --------------------------------------------------------
 
 def solution_to_individual(sol: Solution):
     """
@@ -126,6 +127,10 @@ def _build_solution_from_assignment_vector(problem, assignments: List[int], rng:
         return None
 
     return sol
+
+
+
+#############################################################
 
 
 # ============================================================
