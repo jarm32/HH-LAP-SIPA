@@ -43,9 +43,9 @@ def _ensure_deap_types():
         )
 
 
-# ---------------------------------------------------------
-# Utilidades básicas Solution ↔ Individuo
-# ---------------------------------------------------------
+# -----------------------------------------------------------------
+# Utilidades de conversión y reconstrucción Solution ↔ Individuo
+# -----------------------------------------------------------------
 
 def solution_to_individual(sol): # objeto Solution
     """
@@ -57,6 +57,8 @@ def solution_to_individual(sol): # objeto Solution
 
     # Guarda una copia de la solución
     ind.cached_solution = _copy_solution(sol)
+
+    # Caché de evaluación multiobjetivo (se rellenará tras evaluar el individuo)
     ind.cached_multi_eval = None
 
     return ind # individuo DEAP del tipo IndividualSIPA
@@ -88,12 +90,12 @@ def _reset_professor_assignment(sol): # objeto Solution
     sol.professor_load = [0] * sol.problem.n_professors
 
 
-def _build_solution_from_assignment_vector(problem, assignments, rng):
+def _build_solution_from_assignment_vector(problem, assignments, rng): # individual_to_solution
                                           # instancia del problema, lista de longitud n_students con la plaza asignada a cada estudiante, generador de nºs aleatorios 
     """
-    Reconstruye una solución completa a partir de un vector student_to_placement, comprobando primero sea viable. 
+    Reconstruye una Solution completa a partir de un vector student_to_placement, comprobando primero sea viable. 
     
-    En caso positivo, reconstruye la capa [plaza -> profesor] y devuelve la solución final solo si pasa todas las validaciones.
+    En caso positivo, reconstruye la capa [plaza -> profesor] y devuelve la solución final si pasa todas las validaciones.
     En caso negativo, devuelve None
     """
     # Validaciones básicas del vector
@@ -141,7 +143,7 @@ def _build_solution_from_assignment_vector(problem, assignments, rng):
     if not sol.validate():
         return None
 
-    return sol # Solutiona válida si puede construirla
+    return sol # Solution válida si puede construirla
 
 
 

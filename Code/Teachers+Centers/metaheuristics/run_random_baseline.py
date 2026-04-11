@@ -18,7 +18,7 @@ def main():
     modelo = "random"
 
     # Instancia escogida + carga
-    instance_path = "inst_creator/output/problem_instance_ext_600_2.txt"
+    instance_path = "inst_creator/output/problem_instance_ext_200_0.txt"
     instance_name = instance_path.split("/")[-1]
     problem = load_instance(instance_path)
 
