@@ -43,90 +43,105 @@ def _ensure_deap_types():
         )
 
 
-# --------------------------------------------------------
-# Utilidades básicas Solution <-> Individual
-# --------------------------------------------------------
+# ---------------------------------------------------------
+# Utilidades básicas Solution ↔ Individuo
+# ---------------------------------------------------------
 
-def solution_to_individual(sol: Solution):
+def solution_to_individual(sol): # objeto Solution
     """
-    Convierte una Solution a individuo DEAP.
+    Convierte una Solution a individuo DEAP (individuo genético) usando como cromosoma student_to_placement.
+    Además, guarda una copia de la solución para evitar reconstruirla en evaluaciones posteriores
     """
+    # Crea el individuo DEAP usando como genes la lista de plazas asignadas a cada estudiante
     ind = creator.IndividualSIPA(list(sol.student_to_placement))
+
+    # Guarda una copia de la solución
     ind.cached_solution = _copy_solution(sol)
     ind.cached_multi_eval = None
-    return ind
+
+    return ind # individuo DEAP del tipo IndividualSIPA
 
 
-def _copy_solution(sol: Solution) -> Solution:
+def _copy_solution(sol): # objeto Solution
     """
-    Copia ligera y segura de un objeto Solution.
+    Crea una copia manual de la solución para poder modificarla sin alterar la original
     """
+    # Nueva solución vacía
     new_sol = Solution(sol.problem)
+
+    # Copia una a una las estructuras internas relevantes de la solución
     new_sol.student_to_placement = list(sol.student_to_placement)
     new_sol.placement_to_professor = list(sol.placement_to_professor)
     new_sol.company_load = list(sol.company_load)
     new_sol.professor_load = list(sol.professor_load)
     new_sol.placement_filled = list(sol.placement_filled)
-    return new_sol
+
+    return new_sol # otra solución con el mismo contenido, pero independiente
 
 
-def _reset_professor_assignment(sol: Solution):
+def _reset_professor_assignment(sol): # objeto Solution
     """
-    Borra la capa plaza -> profesor para reconstruirla.
+    Borra la parte de la solución que asigna plazas a profesores
     """
+    # Marca todas las plazas como no asignadas a ningún profesor y reinicia las cargas
     sol.placement_to_professor = [-1] * sol.problem.n_placements
     sol.professor_load = [0] * sol.problem.n_professors
 
 
-def _build_solution_from_assignment_vector(problem, assignments: List[int], rng: random.Random) -> Optional[Solution]:
+def _build_solution_from_assignment_vector(problem, assignments, rng):
+                                          # instancia del problema, lista de longitud n_students con la plaza asignada a cada estudiante, generador de nºs aleatorios 
     """
-    Construye una Solution a partir de un vector student_to_placement ya completo.
-
-    Esta función asume que:
-    - hay una plaza por estudiante,
-    - no hay plazas repetidas,
-    - las plazas son válidas.
-
-    Después reconstruye la capa plaza -> profesor.
+    Reconstruye una solución completa a partir de un vector student_to_placement, comprobando primero sea viable. 
+    
+    En caso positivo, reconstruye la capa [plaza -> profesor] y devuelve la solución final solo si pasa todas las validaciones.
+    En caso negativo, devuelve None
     """
-    if len(assignments) != problem.n_students:
+    # Validaciones básicas del vector
+    if len(assignments) != problem.n_students: # 1 plaza por estudiante
         return None
 
-    if any(j < 0 or j >= problem.n_placements for j in assignments):
+    if any(j < 0 or j >= problem.n_placements for j in assignments): # Todas las plazas son índices válidos
         return None
 
-    if len(set(assignments)) != len(assignments):
+    if len(set(assignments)) != len(assignments): # No hay plazas repetidas
         return None
 
+    # Crea una solución vacía
     sol = Solution(problem)
 
+    # Carga en la solución la asignación [estudiante -> plaza] y actualiza estructuras auxiliares
     for i, j in enumerate(assignments):
         sol.student_to_placement[i] = j
         sol.placement_filled[j] = True
         k = problem.placement_company[j]
         sol.company_load[k] += 1
 
-    # Validación básica de la capa estudiante -> plaza
+    # Comprueba que cada empresa respete sus mínimos y máximos
     for k in range(problem.n_companies):
         if sol.company_load[k] < problem.company_min[k]:
             return None
         if sol.company_load[k] > problem.company_max[k]:
             return None
 
+    # Comprueba que no haya bloques de dependencias parcialmente ocupados
     if not sol.dependencies_ok():
         return None
 
-    # Reconstrucción de profesores
+    # Reconstrucción de la capa [plaza -> profesor]
+
+    # Limpia cualquier asignación previa de profesores
     _reset_professor_assignment(sol)
 
+    # Intenta asignar un profesor a cada plaza ocupada respetando capacidades
     ok = _assign_professors_with_repair(problem, sol, rng)
     if not ok:
         return None
 
+    # Validación global final de toda la solución
     if not sol.validate():
         return None
 
-    return sol
+    return sol # Solutiona válida si puede construirla
 
 
 
