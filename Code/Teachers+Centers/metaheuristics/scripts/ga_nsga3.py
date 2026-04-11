@@ -1,28 +1,28 @@
-# Algoritmo genético multiobjetivo basado en NSGA-III para el SIPA modificado
+# Algoritmo genético multiobjetivo (NSGA-III) que genera y evoluciona soluciones factibles del problema, aplicando
+# cruce, mutación y repair, y evaluándolas según los objetivos del modelo
 
+# ----------------------------
+# Imports
+# ----------------------------
 import copy
 import random
 import time
 from typing import List, Optional
-
 from deap import base, creator, tools
 
-from metaheuristics.scripts.random_feasible_fixing import (
-    generate_random_feasible_fixing,
-    _assign_professors_with_repair,
-)
+from metaheuristics.scripts.random_feasible_fixing import generate_random_feasible_fixing, _assign_professors_with_repair
 from tools.evaluator import ObjectiveWeights, evaluate_solution_multi
 from tools.multiobjective_search import register_solution_in_pareto
 from tools.solution import Solution
 
 
-# ============================================================
+# ----------------------------
 # Configuración DEAP
-# ============================================================
+# ----------------------------
 
 def _ensure_deap_types():
     """
-    Crea los tipos de DEAP una sola vez.
+    Comprueba si los tipos necesarios de DEAP ya existen y, si no, los crea
     """
     if not hasattr(creator, "FitnessSIPAMulti"):
         creator.create(
@@ -38,6 +38,9 @@ def _ensure_deap_types():
             fitness=creator.FitnessSIPAMulti,
         )
 
+
+
+#########################################
 
 # ============================================================
 # Utilidades básicas Solution <-> Individual
