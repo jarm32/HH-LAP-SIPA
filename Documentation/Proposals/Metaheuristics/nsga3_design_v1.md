@@ -36,9 +36,26 @@ Desarrollar un algoritmo genético multiobjetivo que genere soluciones factibles
 - Evaluación escalar (`evaluate_solution_scalar`):
   - solo como apoyo para desempates, análisis o poda auxiliar, no como criterio principal.
 
+## 4.1 Tratamiento de objetivos en NSGA-III
+
+La gestión del sentido de optimización y del mecanismo interno de selección de NSGA-III se delegará en la implementación proporcionada por DEAP. En particular, el sentido de cada objetivo se definirá mediante los pesos del fitness, sin necesidad de transformar manualmente los valores de la función objetivo en esta fase del diseño.
+
 ---
 
 ## 5. Selección
+
+Se distinguirán dos mecanismos dentro del algoritmo:
+
+### 5.1 Selección de padres (qué individuos se reproducen)
+
+La selección de padres decidirá qué individuos de la población actual se usan para generar descendencia mediante cruce y mutación. Se basará en la calidad multiobjetivo de los individuos, priorizando:
+
+1. El frente no dominado al que pertenece cada individuo.
+2. Como apoyo, un criterio auxiliar de diversidad.
+
+Su objetivo no es construir la nueva población, sino elegir qué individuos se reproducen.
+
+### 5.2 Selección de supervivientes (qué individuos sobreviven en la siguiente generación)
 
 Seguirá el esquema de NSGA-III:
 
@@ -91,7 +108,7 @@ Toda mutación irá seguida de un proceso de repair para garantizar la factibili
 
 El proceso de repair se aplicará tras las operaciones de cruce y mutación para transformar el descendiente en una solución factible. Tendrá dos fases:
 
-### 1. Repair estudiante → plaza
+### 8.1. Repair estudiante → plaza
 Debe garantizar:
 
 - Cada estudiante tiene exactamente una plaza asignada.
@@ -99,7 +116,15 @@ Debe garantizar:
 - Respeto de mínimos y máximos por empresa.
 - Cumplimiento de dependencias.
 
-### 2. Repair plaza → profesor
+El procedimiento será:
+
+1. Detectar inconsistencias: estudiantes sin plaza, plazas duplicadas, excesos de empresa o bloques dependientes parcialmente activados.
+2. Eliminar primero conflictos directos, liberando asignaciones problemáticas.
+3. Reparar después las dependencias, completando o desactivando bloques según la factibilidad global.
+4. Reasignar los estudiantes sin plaza a plazas libres válidas, respetando unicidad, cuotas y dependencias.
+5. Verificar que la asignación final estudiante → plaza sea completamente factible.
+
+### 8.2. Repair plaza → profesor
 Debe garantizar:
 
 - Toda plaza ocupada tenga un profesor asignado.
@@ -107,17 +132,20 @@ Debe garantizar:
 
 Su implementación se basará en la lógica utilizada en `generate_random_feasible_fixing`, adaptándola al contexto de reparación de soluciones parciales.
 
+El procedimiento será:
+
+1. Intentar conservar asignaciones válidas heredadas.
+2. Asignar profesor a las plazas ocupadas que aún no lo tengan.
+3. Si no hay capacidad directa, realizar recolocaciones entre profesores para liberar hueco.
+4. Verificar que todas las plazas ocupadas queden supervisadas sin violar capacidades.
+
+Si tras estas dos fases no se obtiene una solución factible, el descendiente será descartado.
+
 ---
 
 ## 9. Reemplazo
 
-- Esquema elitista tipo `NSGA-III`:
-  1. Unir padres e hijos.
-  2. Construir frentes no dominados.
-  3. Rellenar la nueva población añadiendo frentes completos por orden.
-  4. Si el último frente no cabe completo, seleccionar usando reference points para mantener diversidad.
-
-A diferencia de NSGA-II, aquí la diversidad no se gestiona con crowding distance, sino con direcciones de referencia.
+El reemplazo seguirá el esquema elitista de NSGA-III descrito en la selección de supervivientes. Su función será construir la nueva población a partir del conjunto combinado de padres e hijos, manteniendo tanto calidad multiobjetivo como diversidad en el frente.
 
 ---
 
