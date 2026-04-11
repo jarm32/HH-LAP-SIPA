@@ -7,6 +7,87 @@ import time
 from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
 from tools.evaluator import evaluate_solution_multi, evaluate_solution_scalar
 
+# Función de registro en Pareto --> evalúa una solución, la envuelve como EvaluatedSolution y la intenta registrar en el Pareto global externo
+def register_solution_in_pareto(
+    sol,
+    pareto_set,
+    iteration,
+    seed,
+    weights,
+    max_pareto_size=None,
+    normalize_student_dist=True,
+    normalize_supervision_dist=True,
+    precomputed_multi_eval=None,
+    precomputed_scalar_eval=None,
+):
+    """
+    Evalúa una Solution, la envuelve como EvaluatedSolution y la intenta registrar
+    en el Pareto global externo.
+
+    Puede reutilizar evaluaciones ya calculadas para no repetir trabajo.
+
+    Devuelve un diccionario con:
+    - pareto_set: Pareto actualizado
+    - valid: si la solución era válida
+    - was_inserted: si entró en el Pareto
+    - removed_count: cuántas soluciones dominadas eliminó
+    - pruned: si hubo poda por tamaño
+    - evaluation: evaluación final almacenada (incluye objective_value)
+    """
+    multi_eval = precomputed_multi_eval
+    if multi_eval is None:
+        multi_eval = evaluate_solution_multi(
+            sol,
+            normalize_student_dist=normalize_student_dist,
+            normalize_supervision_dist=normalize_supervision_dist,
+        )
+
+    if not multi_eval.get("valid", False):
+        return {
+            "pareto_set": pareto_set,
+            "valid": False,
+            "was_inserted": False,
+            "removed_count": 0,
+            "pruned": False,
+            "evaluation": None,
+        }
+
+    scalar_eval = precomputed_scalar_eval
+    if scalar_eval is None:
+        scalar_eval = evaluate_solution_scalar(
+            sol,
+            weights,
+            normalize_student_dist=normalize_student_dist,
+            normalize_supervision_dist=normalize_supervision_dist,
+        )
+
+    eval_result = dict(multi_eval)
+    eval_result["objective_value"] = scalar_eval["objective_value"]
+
+    candidate = EvaluatedSolution(
+        sol=sol,
+        evaluation=eval_result,
+        iteration=iteration,
+        seed=seed,
+    )
+
+    new_pareto_set, was_inserted, removed_count = update_pareto_set(pareto_set, candidate)
+
+    pruned = False
+    if max_pareto_size is not None and len(new_pareto_set) > max_pareto_size:
+        new_pareto_set = prune_pareto_set_by_size(new_pareto_set, max_pareto_size)
+        pruned = True
+
+    return {
+        "pareto_set": new_pareto_set,
+        "valid": True,
+        "was_inserted": was_inserted,
+        "removed_count": removed_count,
+        "pruned": pruned,
+        "evaluation": eval_result,
+    }
+
+
 # Baseline --> Búsqueda aleatoria
 def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60,
                          # Objeto Problem (instancia), función que genera soluciones, pesos para evaluación escalar, límite de tiempo
@@ -55,31 +136,26 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
             failures += 1
             continue
 
-        # Evaluación multiobjetivo pura para Pareto
-        eval_result = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+        reg = register_solution_in_pareto(
+            sol=sol,
+            pareto_set=pareto_set,
+            iteration=iteration,
+            seed=seed,
+            weights=weights,
+            max_pareto_size=max_pareto_size,
+            normalize_student_dist=normalize_student_dist,
+            normalize_supervision_dist=normalize_supervision_dist,
+        )
 
-        if not eval_result.get("valid", False): # Descarta soluciones no válidas (no ha encontrado nada, pasa a la siguiente iteración)
+        if not reg["valid"]:
             failures += 1
             continue
 
-        # Evaluación escalar auxiliar para poda
-        scalar_eval = evaluate_solution_scalar(sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
-
-        eval_result["objective_value"] = scalar_eval["objective_value"] # Añade ese valor a la evaluación
-
-        # La solución es factible
         feasible += 1
+        pareto_set = reg["pareto_set"]
 
-        # Crea objeto empaquetador y actualiza el cjto Pareto
-        cand = EvaluatedSolution(sol=sol, evaluation=eval_result, iteration=iteration, seed=seed)
-        pareto_set, was_inserted, _ = update_pareto_set(pareto_set, cand)
-
-        if was_inserted: # Contea el nº de inserciones (para estadísticas)
+        if reg["was_inserted"]:
             inserted += 1
-
-        # Poda por tamaño
-        if max_pareto_size is not None and len(pareto_set) > max_pareto_size:
-            pareto_set = prune_pareto_set_by_size(pareto_set, max_pareto_size)
 
         # Imprime estado cada 50 iteraciones
         if verbose and iteration % 50 == 0:
