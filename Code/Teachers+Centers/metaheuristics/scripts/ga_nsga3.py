@@ -1,651 +1,678 @@
-"""
-Algoritmo genético multiobjetivo NSGA-III para el SIPA modificado.
-
-Incluye:
-- población inicial factible a partir de generate_random_feasible_fixing
-- conversión individuo <-> Solution
-- evaluación multiobjetivo compatible con DEAP
-- selección de padres sencilla basada en frentes no dominados
-- reemplazo ambiental con NSGA-III (DEAP)
-- cruce simple
-- mutación simple
-- repair robusto con respaldo en una solución factible aleatoria
-- Pareto global externo y estadísticas de ejecución
-"""
-
-from __future__ import annotations
+# Algoritmo genético multiobjetivo basado en NSGA-III para el SIPA modificado
 
 import copy
 import random
 import time
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import List, Optional
 
-try:
-    from deap import base, creator, tools
-except ImportError as exc:  # pragma: no cover - depende del entorno del usuario
-    raise ImportError(
-        "DEAP no está instalado. Instálalo para usar ga_nsga3.py, por ejemplo con: pip install deap"
-    ) from exc
+from deap import base, creator, tools
 
 from metaheuristics.scripts.random_feasible_fixing import (
-    _assign_professors_with_repair,
     generate_random_feasible_fixing,
+    _assign_professors_with_repair,
 )
-from tools.evaluator import ObjectiveWeights, evaluate_solution_multi, evaluate_solution_scalar
-from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
+from tools.evaluator import ObjectiveWeights, evaluate_solution_multi
+from tools.multiobjective_search import register_solution_in_pareto
 from tools.solution import Solution
 
 
-# ---------------------------------------------------------------------------
+# ============================================================
 # Configuración DEAP
-# ---------------------------------------------------------------------------
+# ============================================================
 
-if not hasattr(creator, "FitnessSIPANSGA3"):
-    # max, max, min, min
-    creator.create("FitnessSIPANSGA3", base.Fitness, weights=(1.0, 1.0, -1.0, -1.0))
+def _ensure_deap_types():
+    """
+    Crea los tipos de DEAP una sola vez.
+    """
+    if not hasattr(creator, "FitnessSIPAMulti"):
+        creator.create(
+            "FitnessSIPAMulti",
+            base.Fitness,
+            weights=(1.0, 1.0, -1.0, -1.0),  # max tau, max eta, min lbar, min sigma
+        )
 
-if not hasattr(creator, "IndividualSIPANSGA3"):
-    creator.create("IndividualSIPANSGA3", list, fitness=creator.FitnessSIPANSGA3)
-
-
-# ---------------------------------------------------------------------------
-# Estructuras auxiliares
-# ---------------------------------------------------------------------------
-
-@dataclass
-class NSGA3Stats:
-    generations: int = 0
-    generated: int = 0
-    feasible: int = 0
-    failures: int = 0
-    inserted_into_pareto: int = 0
-    pareto_size: int = 0
-    elapsed_seconds: float = 0.0
-
-    def to_dict(self) -> Dict[str, float | int]:
-        return {
-            "generations": self.generations,
-            "generated": self.generated,
-            "feasible": self.feasible,
-            "failures": self.failures,
-            "inserted_into_pareto": self.inserted_into_pareto,
-            "pareto_size": self.pareto_size,
-            "elapsed_seconds": self.elapsed_seconds,
-        }
+    if not hasattr(creator, "IndividualSIPA"):
+        creator.create(
+            "IndividualSIPA",
+            list,
+            fitness=creator.FitnessSIPAMulti,
+        )
 
 
-# ---------------------------------------------------------------------------
-# Conversión individuo <-> solución
-# ---------------------------------------------------------------------------
+# ============================================================
+# Utilidades básicas Solution <-> Individual
+# ============================================================
 
 def solution_to_individual(sol: Solution):
-    """Convierte una Solution factible en un individuo DEAP."""
-    ind = creator.IndividualSIPANSGA3(list(sol.student_to_placement))
-    ind._solution_cache = sol
-    ind._multi_eval_cache = None
+    """
+    Convierte una Solution a individuo DEAP.
+    """
+    ind = creator.IndividualSIPA(list(sol.student_to_placement))
+    ind.cached_solution = _copy_solution(sol)
+    ind.cached_multi_eval = None
     return ind
 
 
-def individual_to_solution(
-    problem,
-    individual: Sequence[int],
-    rng: random.Random,
-    normalize_student_dist: bool = True,
-    normalize_supervision_dist: bool = True,
-    repair_seed: Optional[int] = None,
-) -> Tuple[Solution, Dict[str, object]]:
+def _copy_solution(sol: Solution) -> Solution:
     """
-    Convierte un individuo en una Solution factible.
+    Copia ligera y segura de un objeto Solution.
+    """
+    new_sol = Solution(sol.problem)
+    new_sol.student_to_placement = list(sol.student_to_placement)
+    new_sol.placement_to_professor = list(sol.placement_to_professor)
+    new_sol.company_load = list(sol.company_load)
+    new_sol.professor_load = list(sol.professor_load)
+    new_sol.placement_filled = list(sol.placement_filled)
+    return new_sol
 
-    Estrategia de repair empleada:
-    1. sanea el cromosoma (índices válidos y sin duplicados evidentes),
-    2. genera una solución factible de respaldo,
-    3. intenta preservar asignaciones heredadas que encajen con las plazas ocupadas
-       en la solución de respaldo mediante intercambios entre estudiantes,
-    4. valida y, si fuera necesario, reconstruye la capa plaza->profesor.
+
+def _reset_professor_assignment(sol: Solution):
     """
-    desired = _sanitize_individual(problem, individual, rng)
-    sol = _repair_from_template(problem, desired, rng, repair_seed=repair_seed)
+    Borra la capa plaza -> profesor para reconstruirla.
+    """
+    sol.placement_to_professor = [-1] * sol.problem.n_placements
+    sol.professor_load = [0] * sol.problem.n_professors
+
+
+def _build_solution_from_assignment_vector(problem, assignments: List[int], rng: random.Random) -> Optional[Solution]:
+    """
+    Construye una Solution a partir de un vector student_to_placement ya completo.
+
+    Esta función asume que:
+    - hay una plaza por estudiante,
+    - no hay plazas repetidas,
+    - las plazas son válidas.
+
+    Después reconstruye la capa plaza -> profesor.
+    """
+    if len(assignments) != problem.n_students:
+        return None
+
+    if any(j < 0 or j >= problem.n_placements for j in assignments):
+        return None
+
+    if len(set(assignments)) != len(assignments):
+        return None
+
+    sol = Solution(problem)
+
+    for i, j in enumerate(assignments):
+        sol.student_to_placement[i] = j
+        sol.placement_filled[j] = True
+        k = problem.placement_company[j]
+        sol.company_load[k] += 1
+
+    # Validación básica de la capa estudiante -> plaza
+    for k in range(problem.n_companies):
+        if sol.company_load[k] < problem.company_min[k]:
+            return None
+        if sol.company_load[k] > problem.company_max[k]:
+            return None
+
+    if not sol.dependencies_ok():
+        return None
+
+    # Reconstrucción de profesores
+    _reset_professor_assignment(sol)
+
+    ok = _assign_professors_with_repair(problem, sol, rng)
+    if not ok:
+        return None
+
+    if not sol.validate():
+        return None
+
+    return sol
+
+
+# ============================================================
+# Utilidades para repair
+# ============================================================
+
+def _dependency_placement_set(problem):
+    dep_set = set()
+    for block in problem.dependencies:
+        for j in block:
+            dep_set.add(j)
+    return dep_set
+
+
+def _placement_owner(assignments: List[int]):
+    """
+    Devuelve un diccionario placement -> student.
+    """
+    return {j: i for i, j in enumerate(assignments)}
+
+
+def _try_align_assignments_with_template(problem, desired: List[int], template_sol: Solution, rng: random.Random) -> List[int]:
+    """
+    Parte de una solución factible base y trata de incorporar información del individuo
+    sin romper factibilidad estructural.
+
+    Estrategia simple y robusta:
+    - si la plaza deseada ya está en la solución base, intercambia estudiantes;
+    - si no está en la solución base, solo permite sustituciones seguras:
+      plaza actual y plaza deseada deben pertenecer a la misma empresa y no estar
+      en dependencias.
+    """
+    assignments = list(template_sol.student_to_placement)
+    owner = _placement_owner(assignments)
+    dep_set = _dependency_placement_set(problem)
+
+    order = list(range(problem.n_students))
+    rng.shuffle(order)
+
+    for i in order:
+        j_des = desired[i]
+
+        if not isinstance(j_des, int):
+            continue
+        if j_des < 0 or j_des >= problem.n_placements:
+            continue
+
+        j_cur = assignments[i]
+        if j_des == j_cur:
+            continue
+
+        # Caso 1: la plaza deseada ya forma parte del conjunto actual -> swap
+        if j_des in owner:
+            other = owner[j_des]
+            if other == i:
+                continue
+
+            assignments[i], assignments[other] = assignments[other], assignments[i]
+            owner[assignments[i]] = i
+            owner[assignments[other]] = other
+            continue
+
+        # Caso 2: sustitución segura dentro de misma empresa y fuera de dependencias
+        same_company = problem.placement_company[j_cur] == problem.placement_company[j_des]
+        both_nondep = (j_cur not in dep_set) and (j_des not in dep_set)
+
+        if same_company and both_nondep:
+            del owner[j_cur]
+            assignments[i] = j_des
+            owner[j_des] = i
+
+    return assignments
+
+
+def repair_individual(problem, individual, rng: random.Random, template_sol: Optional[Solution] = None, seed: Optional[int] = None) -> Solution:
+    """
+    Repair robusto y simple.
+
+    Idea:
+    1. parte de una solución factible base;
+    2. intenta incorporar la información del individuo;
+    3. reconstruye profesores;
+    4. si falla, cae a una solución factible generada de nuevo.
+    """
+    desired = []
+    for x in individual:
+        try:
+            desired.append(int(x))
+        except Exception:
+            desired.append(-1)
+
+    candidate_templates = []
+
+    if template_sol is not None:
+        candidate_templates.append(_copy_solution(template_sol))
+
+    # Añadimos algunas soluciones factibles auxiliares
+    for extra in range(3):
+        local_seed = None if seed is None else seed + 1000 + extra
+        base_sol = generate_random_feasible_fixing(problem, seed=local_seed)
+        candidate_templates.append(base_sol)
+
+    for base_sol in candidate_templates:
+        assignments = _try_align_assignments_with_template(problem, desired, base_sol, rng)
+        repaired = _build_solution_from_assignment_vector(problem, assignments, rng)
+        if repaired is not None and repaired.validate():
+            return repaired
+
+    # Último recurso: devolver una solución factible nueva
+    fallback_seed = None if seed is None else seed + 999999
+    return generate_random_feasible_fixing(problem, seed=fallback_seed)
+
+
+# ============================================================
+# Inicialización
+# ============================================================
+
+def _init_individual(problem, seed=None):
+    """
+    Genera un individuo factible inicial a partir del generador existente.
+    """
+    sol = generate_random_feasible_fixing(problem, seed=seed)
+    return solution_to_individual(sol)
+
+
+def _init_population(problem, population_size: int, base_seed: Optional[int] = None):
+    """
+    Genera la población inicial factible.
+    """
+    population = []
+    for i in range(population_size):
+        seed = None if base_seed is None else base_seed + i
+        population.append(_init_individual(problem, seed=seed))
+    return population
+
+
+# ============================================================
+# Operadores genéticos
+# ============================================================
+
+def crossover_simple(ind1, ind2, problem, rng: random.Random, seed: Optional[int] = None):
+    """
+    Cruce simple por máscara aleatoria de estudiantes.
+    Después repara ambos descendientes.
+    """
+    parent1_sol = getattr(ind1, "cached_solution", None)
+    parent2_sol = getattr(ind2, "cached_solution", None)
+
+    child1_genes = list(ind1)
+    child2_genes = list(ind2)
+
+    for i in range(len(child1_genes)):
+        if rng.random() < 0.5:
+            child1_genes[i], child2_genes[i] = child2_genes[i], child1_genes[i]
+
+    child1_sol = repair_individual(
+        problem=problem,
+        individual=child1_genes,
+        rng=rng,
+        template_sol=parent1_sol,
+        seed=seed,
+    )
+    child2_sol = repair_individual(
+        problem=problem,
+        individual=child2_genes,
+        rng=rng,
+        template_sol=parent2_sol,
+        seed=None if seed is None else seed + 1,
+    )
+
+    ind1[:] = list(child1_sol.student_to_placement)
+    ind2[:] = list(child2_sol.student_to_placement)
+
+    ind1.cached_solution = child1_sol
+    ind2.cached_solution = child2_sol
+    ind1.cached_multi_eval = None
+    ind2.cached_multi_eval = None
+
+    if ind1.fitness.valid:
+        del ind1.fitness.values
+    if ind2.fitness.valid:
+        del ind2.fitness.values
+
+    return ind1, ind2
+
+
+def mutate_simple(individual, problem, rng: random.Random, seed: Optional[int] = None):
+    """
+    Mutación simple:
+    - o bien intercambia dos estudiantes,
+    - o bien cambia la plaza deseada de un estudiante por una plaza aleatoria.
+
+    Después aplica repair.
+    """
+    mutated = list(individual)
+
+    if len(mutated) >= 2 and rng.random() < 0.5:
+        i, j = rng.sample(range(len(mutated)), 2)
+        mutated[i], mutated[j] = mutated[j], mutated[i]
+    else:
+        i = rng.randrange(len(mutated))
+        mutated[i] = rng.randrange(problem.n_placements)
+
+    template_sol = getattr(individual, "cached_solution", None)
+
+    repaired_sol = repair_individual(
+        problem=problem,
+        individual=mutated,
+        rng=rng,
+        template_sol=template_sol,
+        seed=seed,
+    )
+
+    individual[:] = list(repaired_sol.student_to_placement)
+    individual.cached_solution = repaired_sol
+    individual.cached_multi_eval = None
+
+    if individual.fitness.valid:
+        del individual.fitness.values
+
+    return (individual,)
+
+
+# ============================================================
+# Evaluación y Pareto externo
+# ============================================================
+
+def _evaluate_individual(individual, normalize_student_dist=True, normalize_supervision_dist=True):
+    """
+    Evalúa el individuo a partir de su Solution cacheada.
+    """
+    sol = getattr(individual, "cached_solution", None)
+    if sol is None:
+        raise ValueError("Individual has no cached_solution. Repair/init should build it first.")
 
     multi_eval = evaluate_solution_multi(
         sol,
         normalize_student_dist=normalize_student_dist,
         normalize_supervision_dist=normalize_supervision_dist,
     )
+
     if not multi_eval.get("valid", False):
-        raise ValueError("La solución reparada no es válida")
+        # Penalización extrema; en principio no debería ocurrir si repair funciona
+        individual.cached_multi_eval = multi_eval
+        return (-1e18, -1e18, 1e18, 1e18)
 
-    return sol, multi_eval
-
-
-# ---------------------------------------------------------------------------
-# Repair
-# ---------------------------------------------------------------------------
-
-def _sanitize_individual(problem, individual: Sequence[int], rng: random.Random) -> List[int]:
-    """
-    Limpieza básica del cromosoma:
-    - longitud correcta
-    - genes enteros
-    - índices de plaza válidos
-    - elimina duplicados evidentes dejando solo una ocurrencia
-    """
-    n = problem.n_students
-    genes = list(individual[:n]) + [-1] * max(0, n - len(individual))
-
-    cleaned = [-1] * n
-    used = set()
-
-    order = list(range(n))
-    rng.shuffle(order)
-    for i in order:
-        g = genes[i]
-        try:
-            j = int(g)
-        except Exception:
-            continue
-        if 0 <= j < problem.n_placements and j not in used:
-            cleaned[i] = j
-            used.add(j)
-
-    return cleaned
-
-
-def _repair_from_template(problem, desired: Sequence[int], rng: random.Random, repair_seed: Optional[int] = None) -> Solution:
-    """
-    Repair robusto y simple:
-    - crea una solución factible completa con el generador actual,
-    - intenta preservar el máximo posible de asignaciones heredadas siempre que la
-      plaza deseada ya esté presente en el conjunto de plazas ocupadas del template,
-      usando intercambios entre estudiantes,
-    - reconstruye profesores si fuera necesario.
-
-    Nota: este repair prioriza factibilidad y robustez sobre agresividad genética.
-    """
-    template = generate_random_feasible_fixing(problem, seed=repair_seed)
-
-    # Mapa plaza -> estudiante en la solución factible de respaldo
-    placement_owner = {
-        int(j): i
-        for i, j in enumerate(template.student_to_placement)
-        if j is not None and j != -1
-    }
-
-    # Intentar imponer asignaciones heredadas mediante swaps entre estudiantes.
-    for i, desired_j in enumerate(desired):
-        if desired_j == -1:
-            continue
-        if desired_j not in placement_owner:
-            # Esa plaza no está en el conjunto ocupado del template: se ignora.
-            continue
-
-        current_j = template.student_to_placement[i]
-        if current_j == desired_j:
-            continue
-
-        other = placement_owner[desired_j]
-        other_j = template.student_to_placement[other]
-
-        # Swap estudiante i <-> estudiante other
-        template.student_to_placement[i] = desired_j
-        template.student_to_placement[other] = current_j
-
-        placement_owner[desired_j] = i
-        if current_j != -1:
-            placement_owner[current_j] = other
-
-    # Por seguridad, comprobar coherencia de la capa estudiante->plaza.
-    if not _student_placement_layer_seems_valid(problem, template):
-        template = generate_random_feasible_fixing(problem, seed=None if repair_seed is None else repair_seed + 1)
-
-    # Si por alguna razón la capa de profesores se ha roto, reconstruirla.
-    if not _professor_layer_valid(problem, template):
-        template.placement_to_professor = [-1] * problem.n_placements
-        template.professor_load = [0] * problem.n_professors
-        ok = _assign_professors_with_repair(problem, template, rng)
-        if not ok:
-            template = generate_random_feasible_fixing(problem, seed=None if repair_seed is None else repair_seed + 2)
-
-    if not template.validate():
-        # Último respaldo totalmente factible
-        template = generate_random_feasible_fixing(problem, seed=None if repair_seed is None else repair_seed + 3)
-
-    return template
-
-
-def _student_placement_layer_seems_valid(problem, sol: Solution) -> bool:
-    """Chequeo rápido de la capa estudiante->plaza antes de validar todo."""
-    assigned = sol.student_to_placement
-    if len(assigned) != problem.n_students:
-        return False
-    if any(j == -1 for j in assigned):
-        return False
-    if len(set(assigned)) != len(assigned):
-        return False
-
-    # company_load debe ser consistente con las asignaciones
-    loads = [0] * problem.n_companies
-    for j in assigned:
-        if not (0 <= j < problem.n_placements):
-            return False
-        k = problem.placement_company[j]
-        loads[k] += 1
-
-    for k in range(problem.n_companies):
-        if loads[k] < problem.company_min[k] or loads[k] > problem.company_max[k]:
-            return False
-
-    # Dependencias
-    for dep in problem.dependencies:
-        if not dep:
-            continue
-        count = sum(1 for j in dep if j in set(assigned))
-        if 0 < count < len(dep):
-            return False
-
-    return True
-
-
-def _professor_layer_valid(problem, sol: Solution) -> bool:
-    for j in range(problem.n_placements):
-        if sol.placement_filled[j]:
-            t = sol.placement_to_professor[j]
-            if t == -1 or not (0 <= t < problem.n_professors):
-                return False
-    for t in range(problem.n_professors):
-        if sol.professor_load[t] > problem.prof_capacity[t]:
-            return False
-    return True
-
-
-# ---------------------------------------------------------------------------
-# Evaluación y toolbox
-# ---------------------------------------------------------------------------
-
-def evaluate_individual_factory(problem, normalize_student_dist: bool, normalize_supervision_dist: bool):
-    """Devuelve la función evaluate compatible con DEAP."""
-
-    def _evaluate(individual):
-        rng = random.Random()
-        sol, multi_eval = individual_to_solution(
-            problem,
-            individual,
-            rng=rng,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-        )
-        individual._solution_cache = sol
-        individual._multi_eval_cache = multi_eval
-        c = multi_eval["components"]
-        return (
-            float(c["tau_sum"]),
-            float(c["eta_sum"]),
-            float(c["lbar_sum"]),
-            float(c["sigma_sum"]),
-        )
-
-    return _evaluate
-
-
-def build_deap_toolbox(
-    problem,
-    ref_points,
-    normalize_student_dist: bool = True,
-    normalize_supervision_dist: bool = True,
-):
-    toolbox = base.Toolbox()
-    toolbox.register(
-        "evaluate",
-        evaluate_individual_factory(
-            problem,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-        ),
+    c = multi_eval["components"]
+    values = (
+        float(c["tau_sum"]),
+        float(c["eta_sum"]),
+        float(c["lbar_sum"]),
+        float(c["sigma_sum"]),
     )
-    toolbox.register("mate", crossover_simple)
-    toolbox.register("mutate", mutate_simple)
-    toolbox.register("select_survivors", tools.selNSGA3, ref_points=ref_points)
-    return toolbox
+    individual.cached_multi_eval = multi_eval
+    return values
 
 
-# ---------------------------------------------------------------------------
-# Operadores genéticos
-# ---------------------------------------------------------------------------
-
-def crossover_simple(ind1, ind2, rng: Optional[random.Random] = None):
+def _register_individual_in_global_pareto(
+    individual,
+    pareto_set,
+    iteration,
+    seed,
+    weights,
+    max_pareto_size,
+    normalize_student_dist,
+    normalize_supervision_dist,
+):
     """
-    Cruce simple por máscara de estudiantes.
-    Cada estudiante hereda del padre A o B según una máscara aleatoria.
+    Registra el individuo ya evaluado en el Pareto global externo.
     """
-    rng = rng or random
-    size = min(len(ind1), len(ind2))
-    if size == 0:
-        return ind1, ind2
+    sol = individual.cached_solution
+    multi_eval = getattr(individual, "cached_multi_eval", None)
 
-    mask = [rng.random() < 0.5 for _ in range(size)]
-    for i, take_from_1 in enumerate(mask):
-        if not take_from_1:
-            ind1[i], ind2[i] = ind2[i], ind1[i]
+    reg = register_solution_in_pareto(
+        sol=sol,
+        pareto_set=pareto_set,
+        iteration=iteration,
+        seed=seed,
+        weights=weights,
+        max_pareto_size=max_pareto_size,
+        normalize_student_dist=normalize_student_dist,
+        normalize_supervision_dist=normalize_supervision_dist,
+        precomputed_multi_eval=multi_eval,
+        precomputed_scalar_eval=None,
+    )
 
-    _invalidate_individual(ind1)
-    _invalidate_individual(ind2)
-    return ind1, ind2
-
-
-def mutate_simple(individual, problem, rng: Optional[random.Random] = None):
-    """
-    Mutación simple con dos variantes:
-    - move: cambia la plaza deseada de un estudiante
-    - swap: intercambia las plazas deseadas entre dos estudiantes
-    """
-    rng = rng or random
-    n = len(individual)
-    if n == 0:
-        return (individual,)
-
-    if n >= 2 and rng.random() < 0.5:
-        i, j = rng.sample(range(n), 2)
-        individual[i], individual[j] = individual[j], individual[i]
-    else:
-        i = rng.randrange(n)
-        individual[i] = rng.randrange(problem.n_placements)
-
-    _invalidate_individual(individual)
-    return (individual,)
+    return reg
 
 
-def _invalidate_individual(individual) -> None:
-    if hasattr(individual, "fitness") and individual.fitness.valid:
-        del individual.fitness.values
-    if hasattr(individual, "_solution_cache"):
-        individual._solution_cache = None
-    if hasattr(individual, "_multi_eval_cache"):
-        individual._multi_eval_cache = None
-
-
-# ---------------------------------------------------------------------------
+# ============================================================
 # Selección de padres
-# ---------------------------------------------------------------------------
+# ============================================================
 
-def select_parents_by_rank(population, k: int, rng: random.Random):
+def _select_parents(population, k, rng: random.Random):
     """
-    Selección sencilla de padres basada en frentes no dominados.
-    Prioriza mejor rango y desempata aleatoriamente.
+    Selección de padres mediante torneo binario basado en frentes no dominados.
+
+    Criterio:
+    - mejor frente -> gana
+    - empate en frente -> desempate aleatorio
+
+    Devuelve k copias de individuos seleccionados para reproducirse.
     """
-    if k <= 0:
-        return []
     if not population:
-        raise ValueError("Population is empty")
+        return []
 
+    # Construir ranking por frentes
     fronts = tools.sortNondominated(population, len(population), first_front_only=False)
-    rank_by_id = {}
-    for rank, front in enumerate(fronts):
+
+    rank = {}
+    for r, front in enumerate(fronts):
         for ind in front:
-            rank_by_id[id(ind)] = rank
+            rank[id(ind)] = r
 
     selected = []
-    tournsize = 2
+
     for _ in range(k):
-        aspirants = rng.sample(population, min(tournsize, len(population)))
-        best = aspirants[0]
-        best_rank = rank_by_id[id(best)]
-        for cand in aspirants[1:]:
-            cand_rank = rank_by_id[id(cand)]
-            if cand_rank < best_rank:
-                best = cand
-                best_rank = cand_rank
-            elif cand_rank == best_rank and rng.random() < 0.5:
-                best = cand
-                best_rank = cand_rank
-        selected.append(best)
+        if len(population) == 1:
+            winner = population[0]
+        else:
+            a, b = rng.sample(population, 2)
+
+            ra = rank[id(a)]
+            rb = rank[id(b)]
+
+            if ra < rb:
+                winner = a
+            elif rb < ra:
+                winner = b
+            else:
+                winner = a if rng.random() < 0.5 else b
+
+        selected.append(copy.deepcopy(winner))
+
     return selected
 
 
-# ---------------------------------------------------------------------------
-# Inicialización y evaluación de población
-# ---------------------------------------------------------------------------
+# ============================================================
+# Toolbox DEAP
+# ============================================================
 
-def init_population(problem, population_size: int, base_seed: Optional[int] = None):
-    population = []
-    for idx in range(population_size):
-        seed = None if base_seed is None else base_seed + idx
-        sol = generate_random_feasible_fixing(problem, seed=seed)
-        population.append(solution_to_individual(sol))
-    return population
-
-
-def evaluate_population(toolbox, population, stats: NSGA3Stats) -> None:
-    for ind in population:
-        if ind.fitness.valid:
-            continue
-        try:
-            fit = toolbox.evaluate(ind)
-            ind.fitness.values = fit
-            stats.generated += 1
-            stats.feasible += 1
-        except Exception:
-            stats.generated += 1
-            stats.failures += 1
-            raise
-
-
-# ---------------------------------------------------------------------------
-# Pareto externo
-# ---------------------------------------------------------------------------
-
-def _register_individual_in_external_pareto(
-    individual,
-    pareto_set,
-    weights: ObjectiveWeights,
-    iteration: int,
-    seed: Optional[int],
-    normalize_student_dist: bool,
-    normalize_supervision_dist: bool,
+def build_deap_toolbox(
+    problem,
+    rng: random.Random,
+    normalize_student_dist=True,
+    normalize_supervision_dist=True,
+    ref_points_p=5,
 ):
-    sol = getattr(individual, "_solution_cache", None)
-    multi_eval = getattr(individual, "_multi_eval_cache", None)
+    """
+    Construye y devuelve el toolbox de DEAP.
+    """
+    _ensure_deap_types()
 
-    if sol is None or multi_eval is None:
-        rng = random.Random(seed)
-        sol, multi_eval = individual_to_solution(
-            sol.problem if sol is not None else None,
-            individual,
-            rng=rng,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-            repair_seed=seed,
-        )
+    toolbox = base.Toolbox()
 
-    scalar_eval = evaluate_solution_scalar(
-        sol,
-        weights,
+    ref_points = tools.uniform_reference_points(nobj=4, p=ref_points_p)
+
+    toolbox.register(
+        "evaluate",
+        _evaluate_individual,
         normalize_student_dist=normalize_student_dist,
         normalize_supervision_dist=normalize_supervision_dist,
     )
 
-    eval_result = copy.deepcopy(multi_eval)
-    eval_result["objective_value"] = scalar_eval["objective_value"]
+    toolbox.register(
+        "mate",
+        crossover_simple,
+        problem=problem,
+        rng=rng,
+    )
 
-    cand = EvaluatedSolution(sol=sol, evaluation=eval_result, iteration=iteration, seed=seed)
-    pareto_set, was_inserted, _ = update_pareto_set(pareto_set, cand)
-    return pareto_set, was_inserted
+    toolbox.register(
+        "mutate",
+        mutate_simple,
+        problem=problem,
+        rng=rng,
+    )
+
+    toolbox.register(
+        "select_survivors",
+        tools.selNSGA3,
+        ref_points=ref_points,
+    )
+
+    return toolbox, ref_points
 
 
-# ---------------------------------------------------------------------------
-# Algoritmo principal
-# ---------------------------------------------------------------------------
+# ============================================================
+# Bucle principal NSGA-III
+# ============================================================
 
 def run_nsga3(
     problem,
     weights: ObjectiveWeights,
-    population_size: int = 50,
-    offspring_size: int = 50,
-    crossover_prob: float = 0.8,
-    mutation_prob: float = 0.2,
-    time_limit_seconds: float = 60.0,
-    max_generations: Optional[int] = None,
-    divisions: int = 12,
-    max_pareto_size: Optional[int] = None,
-    base_seed: Optional[int] = None,
-    normalize_student_dist: bool = True,
-    normalize_supervision_dist: bool = True,
-    verbose: bool = True,
+    population_size=50,
+    offspring_size=50,
+    cx_prob=0.8,
+    mut_prob=0.2,
+    time_limit_seconds=60,
+    max_generations=None,
+    max_pareto_size=None,
+    base_seed=None,
+    normalize_student_dist=True,
+    normalize_supervision_dist=True,
+    ref_points_p=5,
+    verbose=True,
 ):
     """
-    Ejecuta NSGA-III sobre el problema SIPA modificado.
+    Ejecuta el algoritmo NSGA-III sobre el problema dado.
 
     Devuelve:
-    - población final
-    - Pareto global externo
-    - estadísticas
-    - reference points usados
+    - pareto_set externo
+    - stats
+    - population final
     """
+    if time_limit_seconds <= 0:
+        raise ValueError("time_limit_seconds must be > 0")
     if population_size <= 0:
         raise ValueError("population_size must be > 0")
     if offspring_size <= 0:
         raise ValueError("offspring_size must be > 0")
-    if not (0.0 <= crossover_prob <= 1.0):
-        raise ValueError("crossover_prob must be in [0,1]")
-    if not (0.0 <= mutation_prob <= 1.0):
-        raise ValueError("mutation_prob must be in [0,1]")
-    if time_limit_seconds <= 0:
-        raise ValueError("time_limit_seconds must be > 0")
 
     weights.validate()
+
     rng = random.Random(base_seed)
-    ref_points = tools.uniform_reference_points(nobj=4, p=divisions)
-    toolbox = build_deap_toolbox(
-        problem,
-        ref_points,
+
+    toolbox, ref_points = build_deap_toolbox(
+        problem=problem,
+        rng=rng,
         normalize_student_dist=normalize_student_dist,
         normalize_supervision_dist=normalize_supervision_dist,
+        ref_points_p=ref_points_p,
     )
 
     start = time.time()
-    stats = NSGA3Stats()
+
     pareto_set = []
+    population = _init_population(problem, population_size, base_seed=base_seed)
 
-    # Población inicial factible
-    population = init_population(problem, population_size, base_seed=base_seed)
-    evaluate_population(toolbox, population, stats)
+    generations = 0
+    generated = 0
+    feasible = 0
+    failures = 0
+    inserted = 0
 
-    # Registrar población inicial en el Pareto externo
+    # Evaluación inicial + Pareto externo
     for idx, ind in enumerate(population):
-        seed = None if base_seed is None else base_seed + idx
-        pareto_set, was_inserted = _register_individual_in_external_pareto(
-            ind,
-            pareto_set,
-            weights,
+        values = toolbox.evaluate(ind)
+        if values[0] <= -1e17:
+            failures += 1
+            continue
+
+        ind.fitness.values = values
+        generated += 1
+        feasible += 1
+
+        reg = _register_individual_in_global_pareto(
+            individual=ind,
+            pareto_set=pareto_set,
             iteration=0,
-            seed=seed,
+            seed=None if base_seed is None else base_seed + idx,
+            weights=weights,
+            max_pareto_size=max_pareto_size,
             normalize_student_dist=normalize_student_dist,
             normalize_supervision_dist=normalize_supervision_dist,
         )
-        if was_inserted:
-            stats.inserted_into_pareto += 1
 
-    # Asignar orden inicial coherente con NSGA-III
-    population = toolbox.select_survivors(population, population_size)
+        pareto_set = reg["pareto_set"]
+        if reg["was_inserted"]:
+            inserted += 1
 
-    generation = 0
     while True:
         elapsed = time.time() - start
         if elapsed >= time_limit_seconds:
             break
-        if max_generations is not None and generation >= max_generations:
+        if max_generations is not None and generations >= max_generations:
             break
 
-        generation += 1
-        stats.generations = generation
+        generations += 1
 
         # Selección de padres
-        parents = select_parents_by_rank(population, offspring_size, rng)
+        parents = _select_parents(population, offspring_size, rng)
 
         # Variación
-        offspring = []
-        i = 0
-        while len(offspring) < offspring_size:
-            p1 = creator.IndividualSIPANSGA3(list(parents[i % len(parents)]))
-            p2 = creator.IndividualSIPANSGA3(list(parents[(i + 1) % len(parents)]))
-            i += 2
+        offspring = parents
 
-            if rng.random() < crossover_prob:
-                p1, p2 = crossover_simple(p1, p2, rng=rng)
+        for i in range(0, len(offspring) - 1, 2):
+            if rng.random() < cx_prob:
+                seed = None if base_seed is None else base_seed + generations * 100000 + i
+                toolbox.mate(offspring[i], offspring[i + 1], seed=seed)
 
-            if rng.random() < mutation_prob:
-                mutate_simple(p1, problem, rng=rng)
-            if rng.random() < mutation_prob and len(offspring) + 1 < offspring_size:
-                mutate_simple(p2, problem, rng=rng)
+        for i in range(len(offspring)):
+            if rng.random() < mut_prob:
+                seed = None if base_seed is None else base_seed + generations * 200000 + i
+                toolbox.mutate(offspring[i], seed=seed)
 
-            offspring.append(p1)
-            if len(offspring) < offspring_size:
-                offspring.append(p2)
+        # Evaluación de descendencia + Pareto externo
+        for i, ind in enumerate(offspring):
+            if not ind.fitness.valid:
+                values = toolbox.evaluate(ind)
 
-        # Evaluar descendencia
-        try:
-            evaluate_population(toolbox, offspring, stats)
-        except Exception:
-            # si un descendiente falla en evaluación, se regenera población de respaldo mínima
-            repaired_offspring = []
-            for idx in range(len(offspring)):
-                sol = generate_random_feasible_fixing(problem, seed=None if base_seed is None else base_seed + generation * 10000 + idx)
-                ind = solution_to_individual(sol)
-                fit = toolbox.evaluate(ind)
-                ind.fitness.values = fit
-                repaired_offspring.append(ind)
-                stats.generated += 1
-                stats.feasible += 1
-            offspring = repaired_offspring
+                if values[0] <= -1e17:
+                    failures += 1
+                    continue
 
-        # Registrar descendencia en el Pareto externo
-        for idx, ind in enumerate(offspring):
-            seed = None if base_seed is None else base_seed + generation * 10000 + idx
-            pareto_set, was_inserted = _register_individual_in_external_pareto(
-                ind,
-                pareto_set,
-                weights,
-                iteration=generation,
-                seed=seed,
-                normalize_student_dist=normalize_student_dist,
-                normalize_supervision_dist=normalize_supervision_dist,
-            )
-            if was_inserted:
-                stats.inserted_into_pareto += 1
+                ind.fitness.values = values
+                generated += 1
+                feasible += 1
 
-        if max_pareto_size is not None and len(pareto_set) > max_pareto_size:
-            pareto_set = prune_pareto_set_by_size(pareto_set, max_pareto_size)
+                reg = _register_individual_in_global_pareto(
+                    individual=ind,
+                    pareto_set=pareto_set,
+                    iteration=generations,
+                    seed=None if base_seed is None else base_seed + generations * 1000 + i,
+                    weights=weights,
+                    max_pareto_size=max_pareto_size,
+                    normalize_student_dist=normalize_student_dist,
+                    normalize_supervision_dist=normalize_supervision_dist,
+                )
+
+                pareto_set = reg["pareto_set"]
+                if reg["was_inserted"]:
+                    inserted += 1
 
         # Reemplazo ambiental NSGA-III
         combined = population + offspring
         population = toolbox.select_survivors(combined, population_size)
 
-        if verbose and generation % 10 == 0:
+        if verbose and generations % 5 == 0:
             print(
-                f"[gen={generation}] "
-                f"generated={stats.generated} feasible={stats.feasible} failures={stats.failures} "
+                f"[gen={generations}] "
+                f"generated={generated} feasible={feasible} failures={failures} "
                 f"pareto_size={len(pareto_set)}"
             )
 
-    stats.pareto_size = len(pareto_set)
-    stats.elapsed_seconds = time.time() - start
+    total_time = time.time() - start
 
     return {
-        "population": population,
         "pareto_set": pareto_set,
-        "stats": stats.to_dict(),
-        "reference_points": ref_points,
+        "population": population,
+        "stats": {
+            "generations": generations,
+            "generated": generated,
+            "feasible": feasible,
+            "failures": failures,
+            "inserted_into_pareto": inserted,
+            "pareto_size": len(pareto_set),
+            "elapsed_seconds": total_time,
+            "population_size": population_size,
+            "offspring_size": offspring_size,
+            "reference_points": len(ref_points),
+        },
     }
-
-
-__all__ = [
-    "build_deap_toolbox",
-    "crossover_simple",
-    "evaluate_individual_factory",
-    "individual_to_solution",
-    "init_population",
-    "mutate_simple",
-    "run_nsga3",
-    "select_parents_by_rank",
-    "solution_to_individual",
-]
