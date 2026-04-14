@@ -330,14 +330,17 @@ def crossover_simple(ind1, ind2, problem, rng, seed = None):
     child1_sol = repair_individual(problem=problem, individual=child1_genes, rng=rng, template_sol=parent1_sol, seed=seed)
     child2_sol = repair_individual(problem=problem, individual=child2_genes, rng=rng, template_sol=parent2_sol, seed=None if seed is None else seed + 1)
 
+    # Sustituye el contenido de los individuos por los genes reparados
     ind1[:] = list(child1_sol.student_to_placement)
     ind2[:] = list(child2_sol.student_to_placement)
 
+    # Actualiza la caché de solución y borra la de evaluación
     ind1.cached_solution = child1_sol
     ind2.cached_solution = child2_sol
     ind1.cached_multi_eval = None
     ind2.cached_multi_eval = None
 
+    # Invalida el fitness anterior, ya que los individuos han cambiado
     if ind1.fitness.valid:
         del ind1.fitness.values
     if ind2.fitness.valid:
@@ -346,16 +349,15 @@ def crossover_simple(ind1, ind2, problem, rng, seed = None):
     return ind1, ind2 # los dos individuos descendientes modificados
 
 
-def mutate_simple(individual, problem, rng: random.Random, seed: Optional[int] = None):
+def mutate_simple(individual, problem, rng, seed = None):
+                 # cromosoma/individuo a mutar, instancia del problema, generador aleatorio, semilla
     """
-    Mutación simple:
-    - o bien intercambia dos estudiantes,
-    - o bien cambia la plaza deseada de un estudiante por una plaza aleatoria.
-
-    Después aplica repair.
+    Aplica una mutación sencilla al cromosoma. Después aplica repair y actualiza la caché y el fitness
     """
+    # Copia temporal del cromosoma
     mutated = list(individual)
 
+    # Mutación --> o bien intercambia dos estudiantes, o bien cambia la plaza deseada de uno de ellos por otra aleatoria
     if len(mutated) >= 2 and rng.random() < 0.5:
         i, j = rng.sample(range(len(mutated)), 2)
         mutated[i], mutated[j] = mutated[j], mutated[i]
@@ -363,33 +365,38 @@ def mutate_simple(individual, problem, rng: random.Random, seed: Optional[int] =
         i = rng.randrange(len(mutated))
         mutated[i] = rng.randrange(problem.n_placements)
 
+    # Usa la solución actual como plantilla para el repair
     template_sol = getattr(individual, "cached_solution", None)
+    
+    # Repara el cromosoma mutado para obtener una solución válida
+    repaired_sol = repair_individual(problem=problem, individual=mutated, rng=rng, template_sol=template_sol, seed=seed)
 
-    repaired_sol = repair_individual(
-        problem=problem,
-        individual=mutated,
-        rng=rng,
-        template_sol=template_sol,
-        seed=seed,
-    )
-
+    # Sustituye el individuo por el resultado reparado
     individual[:] = list(repaired_sol.student_to_placement)
     individual.cached_solution = repaired_sol
     individual.cached_multi_eval = None
 
+    # Invalida el fitness anterior
     if individual.fitness.valid:
         del individual.fitness.values
 
-    return (individual,)
+    return (individual,) #individuo mutado
 
 
 # -----------------------------------------------------------------
 # Evaluación y registro en Pareto externo
 # -----------------------------------------------------------------
 
+
+###############################################################
+
 def _evaluate_individual(individual, normalize_student_dist=True, normalize_supervision_dist=True):
+                        # individuo a evaluar, booleanos para normalización de objetivos (distancias de estudiantes y supervisores)
     """
     Evalúa el individuo a partir de su Solution cacheada.
+
+    Evalúa el individuo a partir de su cached_solution, usando evaluate_solution_multi.
+    Si la solución no es válida, devuelve una penalización extrema; si lo es, devuelve los cuatro objetivos en el orden esperado por DEAP.
     """
     sol = getattr(individual, "cached_solution", None)
     if sol is None:
@@ -414,7 +421,7 @@ def _evaluate_individual(individual, normalize_student_dist=True, normalize_supe
         float(c["sigma_sum"]),
     )
     individual.cached_multi_eval = multi_eval
-    return values
+    return values # tupla con los 4 objetivos del fitness
 
 
 def _register_individual_in_global_pareto(
