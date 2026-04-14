@@ -308,39 +308,27 @@ def _init_population(problem, population_size, base_seed = None):
 # Operadores genéticos
 # -----------------------------------------------------------------
 
-
-
-############################################################
-
-def crossover_simple(ind1, ind2, problem, rng: random.Random, seed: Optional[int] = None):
+def crossover_simple(ind1, ind2, problem, rng, seed = None):
+                    # dos individuos padres a cruzar, instancia del problema, generador aleatorio, semilla
     """
-    Cruce simple por máscara aleatoria de estudiantes.
-    Después repara ambos descendientes.
+    Cruza dos individuos mezclando los genes de los padres con una máscara aleatoria y repara los descendientes resultantes
     """
+    # Recupera las soluciones de los padres cacheadas para usarlas como plantilla en el repair
     parent1_sol = getattr(ind1, "cached_solution", None)
     parent2_sol = getattr(ind2, "cached_solution", None)
 
+    # Copia temporal de los genes de ambos padres para el cruce
     child1_genes = list(ind1)
     child2_genes = list(ind2)
 
+    # Cruce (por máscara aleatoria) --> para cada estudiante, decide de qué padre hereda
     for i in range(len(child1_genes)):
         if rng.random() < 0.5:
             child1_genes[i], child2_genes[i] = child2_genes[i], child1_genes[i]
 
-    child1_sol = repair_individual(
-        problem=problem,
-        individual=child1_genes,
-        rng=rng,
-        template_sol=parent1_sol,
-        seed=seed,
-    )
-    child2_sol = repair_individual(
-        problem=problem,
-        individual=child2_genes,
-        rng=rng,
-        template_sol=parent2_sol,
-        seed=None if seed is None else seed + 1,
-    )
+    # Repara ambos descendientes para obtener soluciones válidas
+    child1_sol = repair_individual(problem=problem, individual=child1_genes, rng=rng, template_sol=parent1_sol, seed=seed)
+    child2_sol = repair_individual(problem=problem, individual=child2_genes, rng=rng, template_sol=parent2_sol, seed=None if seed is None else seed + 1)
 
     ind1[:] = list(child1_sol.student_to_placement)
     ind2[:] = list(child2_sol.student_to_placement)
@@ -355,7 +343,7 @@ def crossover_simple(ind1, ind2, problem, rng: random.Random, seed: Optional[int
     if ind2.fitness.valid:
         del ind2.fitness.values
 
-    return ind1, ind2
+    return ind1, ind2 # los dos individuos descendientes modificados
 
 
 def mutate_simple(individual, problem, rng: random.Random, seed: Optional[int] = None):
