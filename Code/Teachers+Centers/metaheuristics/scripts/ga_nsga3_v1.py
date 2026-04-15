@@ -263,7 +263,7 @@ def repair_individual(problem, individual, rng, template_sol = None, seed = None
         assignments = _try_align_assignments_with_template(problem, desired, base_sol, rng) # Intenta acercar la plantilla al individuo sin romper factibilidad
         repaired = _build_solution_from_assignment_vector(problem, assignments, rng) # Reconstruye y valida una Solution a partir del intento de acercamiento anterior
         if repaired is not None and repaired.validate():
-            return repaired # Si la solution es válida, la devuelve como resultado del repair
+            return repaired # Si la solución es válida, la devuelve como resultado del repair
 
     # Último recurso --> Si ninguna plantilla funciona, se devuelve una solución factible nueva
     fallback_seed = None if seed is None else seed + 999999
@@ -513,7 +513,7 @@ def build_deap_toolbox(problem, rng, normalize_student_dist=True, normalize_supe
                       # instancia del problema, generador aleatorio, booleanos para normalización de objetivos (distancias de estudiantes y supervisores), parámetro generar los puntos de referencia de NSGA-III
     """
     Construye y configura el toolbox de DEAP registrando los operadores del algoritmo (evaluación, cruce, mutación y selección de supervivientes con NSGA-III)
-    y generando los puntos de referencia necesarios para selNSGA3 (reemplazo elegido)
+    y generando los puntos de referencia necesarios para la selección de supervivientes NSGA-III
     """
     # Asegura que los tipos de individuo y fitness de DEAP estén definidos
     _ensure_deap_types()
@@ -540,36 +540,31 @@ def build_deap_toolbox(problem, rng, normalize_student_dist=True, normalize_supe
            # objeto Toolbox configurado de DEAP, lista de puntos de referencia generados para NSGA-III
 
 
-#######################################################################
-
-# ============================================================
-# Bucle principal NSGA-III
-# ============================================================
+# -----------------------------------------------------------------
+# Ejecución principal del algoritmo NSGA-III
+# -----------------------------------------------------------------
 
 def run_nsga3(
-    problem,
-    weights: ObjectiveWeights,
-    population_size=50,
-    offspring_size=50,
-    cx_prob=0.8,
-    mut_prob=0.2,
-    time_limit_seconds=60,
-    max_generations=None,
-    max_pareto_size=None,
-    base_seed=None,
-    normalize_student_dist=True,
-    normalize_supervision_dist=True,
-    ref_points_p=5,
-    verbose=True,
+    problem,                         # instancia del problema
+    weights,                         # pesos de los objetivos para evaluación escalar (desempate)
+    population_size=50,              # tamaño de la población inicial
+    offspring_size=50,               # número de descendientes por generación
+    cx_prob=0.8,                     # probabilidad de cruce
+    mut_prob=0.2,                    # probabilidad de mutación
+    time_limit_seconds=60,           # límite de tiempo de ejecución
+    max_generations=None,            # límite opcional de generaciones
+    max_pareto_size=None,            # tamaño máximo del Pareto externo
+    base_seed=None,                  # semilla 
+    normalize_student_dist=True,     # normalización de distancias de estudiantes
+    normalize_supervision_dist=True, # normalización de distancias de supervisión
+    ref_points_p=5,                  # parámetro para generar reference points de NSGA-III
+    verbose=True                     # muestra o no información de progreso
 ):
     """
-    Ejecuta el algoritmo NSGA-III sobre el problema dado.
-
-    Devuelve:
-    - pareto_set externo
-    - stats
-    - population final
+    Ejecuta el NSGA-III completo sobre una instancia del problema. 
+    Inicializa, evalúa, evoluciona la población por generaciones y mantiene en paralelo un Pareto global externo con las soluciones no dominadas encontradas
     """
+    # Validaciones básicas de parámetros
     if time_limit_seconds <= 0:
         raise ValueError("time_limit_seconds must be > 0")
     if population_size <= 0:
@@ -577,40 +572,39 @@ def run_nsga3(
     if offspring_size <= 0:
         raise ValueError("offspring_size must be > 0")
 
+    # Valida los pesos de la función objetivo escalar auxiliar para desempate
     weights.validate()
 
+    # Inicializa el generador aleatorio global del algoritmo
     rng = random.Random(base_seed)
 
-    toolbox, ref_points = build_deap_toolbox(
-        problem=problem,
-        rng=rng,
-        normalize_student_dist=normalize_student_dist,
-        normalize_supervision_dist=normalize_supervision_dist,
-        ref_points_p=ref_points_p,
-    )
-
+    # Construye el toolbox DEAP y genera los puntos de referencia de NSGA-III
+    toolbox, ref_points = build_deap_toolbox(problem=problem, rng=rng, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist, ref_points_p=ref_points_p)
+    
+    # Instante de inicio
     start = time.time()
 
+    # Inicializa el Pareto global externo, la población inicial factible y los contadores de estadísticas
     pareto_set = []
     population = _init_population(problem, population_size, base_seed=base_seed)
+    generations, generated, feasible, failures, inserted = 0, 0, 0, 0, 0
 
-    generations = 0
-    generated = 0
-    feasible = 0
-    failures = 0
-    inserted = 0
-
-    # Evaluación inicial + Pareto externo
+    # ------------------------------------------------------
+    # Evaluación inicial de la población + actualización del Pareto externo
+    # ------------------------------------------------------
     for idx, ind in enumerate(population):
+        # Evalúa los individuos de la población inicial
         values = toolbox.evaluate(ind)
         if values[0] <= -1e17:
             failures += 1
             continue
-
+        
+        # Guarda el fitness del individuo y actualiza contadores de evaluaciones factibles
         ind.fitness.values = values
         generated += 1
         feasible += 1
 
+        # Intenta registrar el individuo en el Pareto global externo
         reg = _register_individual_in_global_pareto(
             individual=ind,
             pareto_set=pareto_set,
@@ -626,44 +620,52 @@ def run_nsga3(
         if reg["was_inserted"]:
             inserted += 1
 
+    # ---------------------------------------------------------
+    # Bucle generacional principal (selección, cruce, mutación, evaluación y reemplazo hasta cumplir con el criterio de parada)
+    # ---------------------------------------------------------
     while True:
+        # Comprueba criterios de parada (tiempo o nº máximo de generaciones)
         elapsed = time.time() - start
         if elapsed >= time_limit_seconds:
             break
         if max_generations is not None and generations >= max_generations:
             break
-
         generations += 1
 
-        # Selección de padres
+        # Selección de padres desde la población actual
         parents = _select_parents(population, offspring_size, rng)
-
-        # Variación
         offspring = parents
 
+        # Aplica cruce por parejas con probabilidad cx_prob
         for i in range(0, len(offspring) - 1, 2):
             if rng.random() < cx_prob:
                 seed = None if base_seed is None else base_seed + generations * 100000 + i
                 toolbox.mate(offspring[i], offspring[i + 1], seed=seed)
-
+        
+        # Aplica mutación individual con probabilidad mut_prob
         for i in range(len(offspring)):
             if rng.random() < mut_prob:
                 seed = None if base_seed is None else base_seed + generations * 200000 + i
                 toolbox.mutate(offspring[i], seed=seed)
 
-        # Evaluación de descendencia + Pareto externo
+        # ---------------------------------------------------------
+        # Evaluación de la descendencia + actualización del Pareto externo
+        # ---------------------------------------------------------
         for i, ind in enumerate(offspring):
+            # Solo evalúa si el fitness ha quedado invalidado tras la variación 
             if not ind.fitness.valid:
                 values = toolbox.evaluate(ind)
 
                 if values[0] <= -1e17:
                     failures += 1
                     continue
-
+                
+                # Guarda el fitness del descendiente
                 ind.fitness.values = values
                 generated += 1
                 feasible += 1
 
+                # Intenta registrar el descendiente en el Pareto global externo
                 reg = _register_individual_in_global_pareto(
                     individual=ind,
                     pareto_set=pareto_set,
@@ -679,10 +681,14 @@ def run_nsga3(
                 if reg["was_inserted"]:
                     inserted += 1
 
+        # ---------------------------------------------------------
         # Reemplazo ambiental NSGA-III
+        # ---------------------------------------------------------
+        # Une población actual y descendencia y selecciona los mejores individuos según NSGA-III para formar la nueva población
         combined = population + offspring
         population = toolbox.select_survivors(combined, population_size)
 
+        # Muestra información de progreso cada 5 generaciones
         if verbose and generations % 5 == 0:
             print(
                 f"[gen={generations}] "
@@ -690,6 +696,7 @@ def run_nsga3(
                 f"pareto_size={len(pareto_set)}"
             )
 
+    # Calcula el tiempo total de ejecución
     total_time = time.time() - start
 
     return {
@@ -707,4 +714,4 @@ def run_nsga3(
             "offspring_size": offspring_size,
             "reference_points": len(ref_points),
         },
-    }
+    } # diccionario con el Pareto externo final, la población final y estadísticas de la ejecución
