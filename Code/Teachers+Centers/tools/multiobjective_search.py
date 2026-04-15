@@ -1,47 +1,43 @@
-# Motor de búsqueda multiobjetivo --> genera soluciones, las evalúa y mantiene el conjunto de Pareto
-# Marco común para ejecutar y comparar distintas metaheurísticas.
+# Motor común de búsqueda multiobjetivo --> evalúa soluciones, mantiene el conjunto de Pareto
+# y proporciona utilidades compartidas para ejecutar y comparar distintas metaheurísticas.
 
+# ----------------------------
 # Librerías
+# ----------------------------
 import time
 
 from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
 from tools.evaluator import evaluate_solution_multi, evaluate_solution_scalar
 
-# Función de registro en Pareto --> evalúa una solución, la envuelve como EvaluatedSolution y la intenta registrar en el Pareto global externo
+
+# -----------------------------------------------------------------
+# Registro y actualización del Pareto global externo
+# -----------------------------------------------------------------
+
 def register_solution_in_pareto(
-    sol,
-    pareto_set,
-    iteration,
-    seed,
-    weights,
-    max_pareto_size=None,
-    normalize_student_dist=True,
-    normalize_supervision_dist=True,
-    precomputed_multi_eval=None,
-    precomputed_scalar_eval=None,
+    sol,                                # solución a evaluar y registrar
+    pareto_set,                         # Pareto actual
+    iteration,                          # iteración en la que se genera la solución
+    seed,                               # semilla
+    weights,                            # pesos para la evaluación escalar auxiliar
+    max_pareto_size=None,               # tamaño máximo del Pareto externo (None para ilimitado)
+    normalize_student_dist=True,        # booleano para normalización de distancia de estudiantes
+    normalize_supervision_dist=True,    # booleano para normalización de distancia de supervisores
+    precomputed_multi_eval=None,        # evaluación multiobjetivo ya calculada
+    precomputed_scalar_eval=None        # evaluación escalar ya calculada
 ):
     """
-    Evalúa una Solution, la envuelve como EvaluatedSolution y la intenta registrar
+    Evalúa una Solution, la convierte en EvaluatedSolution y la intenta registrar
     en el Pareto global externo.
 
     Puede reutilizar evaluaciones ya calculadas para no repetir trabajo.
-
-    Devuelve un diccionario con:
-    - pareto_set: Pareto actualizado
-    - valid: si la solución era válida
-    - was_inserted: si entró en el Pareto
-    - removed_count: cuántas soluciones dominadas eliminó
-    - pruned: si hubo poda por tamaño
-    - evaluation: evaluación final almacenada (incluye objective_value)
     """
+    # Evaluación multiobjetivo
     multi_eval = precomputed_multi_eval
     if multi_eval is None:
-        multi_eval = evaluate_solution_multi(
-            sol,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-        )
+        multi_eval = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
+    # Si la solución no es válida, no se procesa más
     if not multi_eval.get("valid", False):
         return {
             "pareto_set": pareto_set,
@@ -52,27 +48,22 @@ def register_solution_in_pareto(
             "evaluation": None,
         }
 
+    # Evaluación escalar auxiliar
     scalar_eval = precomputed_scalar_eval
     if scalar_eval is None:
-        scalar_eval = evaluate_solution_scalar(
-            sol,
-            weights,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-        )
-
+        scalar_eval = evaluate_solution_scalar(sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+    
+    # Combina evaluación multiobjetivo + escalar en un único diccionario para almacenar en el Pareto
     eval_result = dict(multi_eval)
     eval_result["objective_value"] = scalar_eval["objective_value"]
 
-    candidate = EvaluatedSolution(
-        sol=sol,
-        evaluation=eval_result,
-        iteration=iteration,
-        seed=seed,
-    )
+    # Construcción del objeto evaluado
+    candidate = EvaluatedSolution(sol=sol, evaluation=eval_result, iteration=iteration, seed=seed)
 
+    # Actualización del Pareto
     new_pareto_set, was_inserted, removed_count = update_pareto_set(pareto_set, candidate)
 
+    # Poda opcional por tamaño máximo
     pruned = False
     if max_pareto_size is not None and len(new_pareto_set) > max_pareto_size:
         new_pareto_set = prune_pareto_set_by_size(new_pareto_set, max_pareto_size)
@@ -85,21 +76,25 @@ def register_solution_in_pareto(
         "removed_count": removed_count,
         "pruned": pruned,
         "evaluation": eval_result,
-    }
+    } # diccionario con: Pareto actualizado, si la solución era válida, si entró en el Pareto, cuántas soluciones dominadas eliminó, si hubo poda por tamaño y evaluación final almacenada (incluye objective_value)
 
 
-# Baseline --> Búsqueda aleatoria
+# -----------------------------------------------------------------
+# Baseline de búsqueda aleatoria multiobjetivo
+# -----------------------------------------------------------------
+
 def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60,
                          # Objeto Problem (instancia), función que genera soluciones, pesos para evaluación escalar, límite de tiempo
                          max_iterations = None, generator_kwargs = None, max_pareto_size = None, base_seed = None, normalize_student_dist = True, normalize_supervision_dist = True, verbose = True):
                          # tope de iteraciones, argumentos extra generador, tamaño máximo Pareto, semilla, normalizar o no distancias del estudiante y de la supervisión, mostrar progreso
     """
-    Ejecuta una búsqueda aleatoria multiobjetivo --> genera soluciones, las evalúa y mantiene el cjto Pareto
-    mientras haya tiempo. Añade estadísticas y poda el conjunto en caso de que tenga tamaño máximo 
+    Ejecuta una búsqueda aleatoria multiobjetivo: genera soluciones con el generador dado
+    y las intenta registrar en el Pareto global externo mientras haya tiempo. Añade estadísticas
+    de ejecución y aplica poda al Pareto si se fija un tamaño máximo.
 
     generator_fn es, en este caso, generate_random_feasible_fixing
     """
-    # Validación inicial + Inicialización
+    # Validación inicial e inicialización de parámetros y contadores
     if time_limit_seconds <= 0:
         raise ValueError("time_limit_seconds must be > 0")
 
@@ -135,25 +130,23 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
         except Exception:
             failures += 1
             continue
-
-        reg = register_solution_in_pareto(
-            sol=sol,
-            pareto_set=pareto_set,
-            iteration=iteration,
-            seed=seed,
-            weights=weights,
-            max_pareto_size=max_pareto_size,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-        )
-
+        
+        # Evalúa la solución y delega su registro/actualización en el Pareto externo
+        reg = register_solution_in_pareto(sol=sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
+                                          normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+        
+        # Si la solución no era válida, se cuenta como fallo y se descarta
         if not reg["valid"]:
             failures += 1
             continue
-
+        
+        # La solución era válida y ha sido procesada correctamente
         feasible += 1
+
+        # Actualiza el Pareto externo con el resultado devuelto por la función común
         pareto_set = reg["pareto_set"]
 
+        # Cuenta cuántas soluciones llegaron a entrar en el Pareto
         if reg["was_inserted"]:
             inserted += 1
 
@@ -165,7 +158,7 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
                 f"pareto_size={len(pareto_set)}"
             )
 
-    # Actualiza el tiempo para cumplir el time_limit_seconds
+    # Calcula el tiempo total de ejecución
     total_time = time.time() - start
 
     return {
@@ -178,8 +171,12 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
             "inserted_into_pareto": inserted,
             "pareto_size": len(pareto_set),
             "elapsed_seconds": total_time}
-            } # Cjto Pareto, junto con estadísticas de la ejecución
+            } # Diccionario con el Pareto externo final y las estadísticas de la ejecución
 
+
+# -----------------------------------------------------------------
+# Utilidades de visualización y exportación de resultados
+# -----------------------------------------------------------------
 
 def print_pareto_set(pareto_set):
                     # Conjunto Pareto actual --> los elementos son las soluciones empaquetadas en EvaluatedSolution
@@ -211,7 +208,7 @@ def print_pareto_set(pareto_set):
 
 
 def save_results_to_txt(filepath, instance_name, stats, pareto_set):
-                        # Ruta archivo del archivo, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
+                        # # Ruta del archivo de salida, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
     """
     Guarda los resultados de la ejecución en un archivo txt
     """
