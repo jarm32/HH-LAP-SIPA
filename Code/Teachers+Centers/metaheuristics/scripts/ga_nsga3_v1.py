@@ -423,14 +423,14 @@ def _evaluate_individual(individual, normalize_student_dist=True, normalize_supe
 
 
 def _register_individual_in_global_pareto(
-    individual,                 # individuo ya evaluado
-    pareto_set,                 # pareto actual
-    iteration,                  # número de iteración/generación actual
-    seed,                       # semilla
-    weights,                    # pesos de los objetivos para evaluación escalar (desempate)
-    max_pareto_size = None,      # tamaño máximo del Pareto externo (None para ilimitado)
+    individual,                        # individuo ya evaluado
+    pareto_set,                        # Pareto actual
+    iteration,                         # número de iteración/generación actual
+    seed,                              # semilla
+    weights,                           # pesos de los objetivos para evaluación escalar (desempate)
+    max_pareto_size = None,            # tamaño máximo del Pareto externo (None para ilimitado)
     normalize_student_dist = True,     # booleano para normalización de distancia de estudiantes
-    normalize_supervision_dist = True # booleano para normalización de distancia de supervisores
+    normalize_supervision_dist = True  # booleano para normalización de distancia de supervisores
     ):
     """
     Registra el individuo ya evaluado en el Pareto global externo
