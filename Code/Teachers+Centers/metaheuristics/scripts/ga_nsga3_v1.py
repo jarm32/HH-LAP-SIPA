@@ -326,7 +326,7 @@ def crossover_simple(ind1, ind2, problem, rng, seed = None):
         if rng.random() < 0.5:
             child1_genes[i], child2_genes[i] = child2_genes[i], child1_genes[i]
 
-    # Repara ambos descendientes para obtener soluciones válidas
+    # Repara ambos cromosomas descendientes para obtener soluciones válidas
     child1_sol = repair_individual(problem=problem, individual=child1_genes, rng=rng, template_sol=parent1_sol, seed=seed)
     child2_sol = repair_individual(problem=problem, individual=child2_genes, rng=rng, template_sol=parent2_sol, seed=None if seed is None else seed + 1)
 
@@ -387,59 +387,59 @@ def mutate_simple(individual, problem, rng, seed = None):
 # Evaluación y registro en Pareto externo
 # -----------------------------------------------------------------
 
-
-###############################################################
-
 def _evaluate_individual(individual, normalize_student_dist=True, normalize_supervision_dist=True):
                         # individuo a evaluar, booleanos para normalización de objetivos (distancias de estudiantes y supervisores)
     """
-    Evalúa el individuo a partir de su Solution cacheada.
-
-    Evalúa el individuo a partir de su cached_solution, usando evaluate_solution_multi.
-    Si la solución no es válida, devuelve una penalización extrema; si lo es, devuelve los cuatro objetivos en el orden esperado por DEAP.
+    Evalúa el individuo a partir de su Solution cacheada mediante evaluate_solution_multi.
+    Si la solución no es válida, devuelve una penalización alta; si lo es, devuelve los cuatro objetivos en el orden esperado por DEAP.
     """
+    # Recupera la solución asociada al individuo de su caché para evitar reconstruirla
     sol = getattr(individual, "cached_solution", None)
     if sol is None:
         raise ValueError("Individual has no cached_solution. Repair/init should build it first.")
 
-    multi_eval = evaluate_solution_multi(
-        sol,
-        normalize_student_dist=normalize_student_dist,
-        normalize_supervision_dist=normalize_supervision_dist,
-    )
+    # Evalúa la solución con los cuatro objetivos del modelo
+    multi_eval = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
+    # Sol no válida
     if not multi_eval.get("valid", False):
-        # Penalización extrema; en principio no debería ocurrir si repair funciona
+        # Penalización alta; en principio no debería ocurrir si repair funciona
         individual.cached_multi_eval = multi_eval
         return (-1e18, -1e18, 1e18, 1e18)
-
+    
+    # Extrae los cuatro componentes de la evaluación en el orden del fitness DEAP
     c = multi_eval["components"]
     values = (
         float(c["tau_sum"]),
         float(c["eta_sum"]),
         float(c["lbar_sum"]),
         float(c["sigma_sum"]),
-    )
+    )  
+
+    # Guarda la evaluación en caché
     individual.cached_multi_eval = multi_eval
+
     return values # tupla con los 4 objetivos del fitness
 
 
 def _register_individual_in_global_pareto(
-    individual,
-    pareto_set,
-    iteration,
-    seed,
-    weights,
-    max_pareto_size,
-    normalize_student_dist,
-    normalize_supervision_dist,
-):
+    individual,                 # individuo ya evaluado
+    pareto_set,                 # pareto actual
+    iteration,                  # número de iteración/generación actual
+    seed,                       # semilla
+    weights,                    # pesos de los objetivos para evaluación escalar (desempate)
+    max_pareto_size = None,      # tamaño máximo del Pareto externo (None para ilimitado)
+    normalize_student_dist = True,     # booleano para normalización de distancia de estudiantes
+    normalize_supervision_dist = True # booleano para normalización de distancia de supervisores
+    ):
     """
-    Registra el individuo ya evaluado en el Pareto global externo.
+    Registra el individuo ya evaluado en el Pareto global externo
     """
+    # Recupera la solución y la evaluación cacheadas en el individuo
     sol = individual.cached_solution
     multi_eval = getattr(individual, "cached_multi_eval", None)
-
+    
+    # Hace el registro en Pareto usando la función común, pasando la evaluación ya calculada para agilizar
     reg = register_solution_in_pareto(
         sol=sol,
         pareto_set=pareto_set,
@@ -453,29 +453,27 @@ def _register_individual_in_global_pareto(
         precomputed_scalar_eval=None,
     )
 
-    return reg
+    return reg # diccionario con el resultado del registro en Pareto (pareto_set actualizado, valid, was_inserted, removed_count, pruned, evaluation)
 
 
-# ============================================================
+# -----------------------------------------------------------------
 # Selección de padres
-# ============================================================
+# -----------------------------------------------------------------
 
-def _select_parents(population, k, rng: random.Random):
+def _select_parents(population, k, rng):
+                   # población actual, número de padres a seleccionar, generador aleatorio
     """
-    Selección de padres mediante torneo binario basado en frentes no dominados.
-
-    Criterio:
-    - mejor frente -> gana
-    - empate en frente -> desempate aleatorio
-
-    Devuelve k copias de individuos seleccionados para reproducirse.
+    Selecciona padres mediante torneos binarios usando como criterio el frente no dominado al que pertenece cada individuo.
+    Gana el que esté en mejor frente; si ambos están en el mismo, se desempata aleatoriamente
     """
+    # Caso población vacía
     if not population:
         return []
 
-    # Construir ranking por frentes
+    # Construye los frentes no dominados de la población
     fronts = tools.sortNondominated(population, len(population), first_front_only=False)
-
+    
+    # Asigna a cada individuo su rango de frente (0 = mejor frente)
     rank = {}
     for r, front in enumerate(fronts):
         for ind in front:
@@ -483,76 +481,66 @@ def _select_parents(population, k, rng: random.Random):
 
     selected = []
 
+    # Realiza k torneos binarios para elegir los padres
     for _ in range(k):
         if len(population) == 1:
             winner = population[0]
         else:
+            # Toma dos individuos al azar para el torneo
             a, b = rng.sample(population, 2)
-
             ra = rank[id(a)]
             rb = rank[id(b)]
 
+            # Gana el individuo del mejor frente; en empate, se desempata al azar
             if ra < rb:
                 winner = a
             elif rb < ra:
                 winner = b
             else:
                 winner = a if rng.random() < 0.5 else b
-
+        
+        # Añade una copia del ganador para evitar modificar los individuos originales durante la reproducción
         selected.append(copy.deepcopy(winner))
 
-    return selected
+    return selected # lista con k copias de individuos seleccionados
 
 
-# ============================================================
-# Toolbox DEAP
-# ============================================================
+# -----------------------------------------------------------------
+# Configuración del toolbox DEAP
+# -----------------------------------------------------------------
 
-def build_deap_toolbox(
-    problem,
-    rng: random.Random,
-    normalize_student_dist=True,
-    normalize_supervision_dist=True,
-    ref_points_p=5,
-):
+def build_deap_toolbox(problem, rng, normalize_student_dist=True, normalize_supervision_dist=True, ref_points_p=5):
+                      # instancia del problema, generador aleatorio, booleanos para normalización de objetivos (distancias de estudiantes y supervisores), parámetro generar los puntos de referencia de NSGA-III
     """
-    Construye y devuelve el toolbox de DEAP.
+    Construye y configura el toolbox de DEAP registrando los operadores del algoritmo (evaluación, cruce, mutación y selección de supervivientes con NSGA-III)
+    y generando los puntos de referencia necesarios para selNSGA3 (reemplazo elegido)
     """
+    # Asegura que los tipos de individuo y fitness de DEAP estén definidos
     _ensure_deap_types()
 
+    # Crea el contenedor de operadores de DEAP
     toolbox = base.Toolbox()
-
+    
+    # Genera los puntos de referencia uniformes para NSGA-III (4 objetivos)
     ref_points = tools.uniform_reference_points(nobj=4, p=ref_points_p)
 
-    toolbox.register(
-        "evaluate",
-        _evaluate_individual,
-        normalize_student_dist=normalize_student_dist,
-        normalize_supervision_dist=normalize_supervision_dist,
-    )
+    # Registra la función de evaluación del individuo
+    toolbox.register("evaluate", _evaluate_individual, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
-    toolbox.register(
-        "mate",
-        crossover_simple,
-        problem=problem,
-        rng=rng,
-    )
+    # Registra el operador de cruce
+    toolbox.register("mate", crossover_simple, problem=problem, rng=rng)
 
-    toolbox.register(
-        "mutate",
-        mutate_simple,
-        problem=problem,
-        rng=rng,
-    )
+    # Registra el operador de mutación
+    toolbox.register("mutate", mutate_simple, problem=problem, rng=rng)
 
-    toolbox.register(
-        "select_survivors",
-        tools.selNSGA3,
-        ref_points=ref_points,
-    )
+    # Registra la selección de supervivientes (reemplazo) mediante NSGA-III
+    toolbox.register("select_survivors", tools.selNSGA3, ref_points=ref_points)
 
     return toolbox, ref_points
+           # objeto Toolbox configurado de DEAP, lista de puntos de referencia generados para NSGA-III
 
+
+#######################################################################
 
 # ============================================================
 # Bucle principal NSGA-III
