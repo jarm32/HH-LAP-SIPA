@@ -208,7 +208,7 @@ def print_pareto_set(pareto_set):
 
 
 def save_results_to_txt(filepath, instance_name, stats, pareto_set):
-                        # # Ruta del archivo de salida, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
+                        # Ruta del archivo de salida, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
     """
     Guarda los resultados de la ejecución en un archivo txt
     """
