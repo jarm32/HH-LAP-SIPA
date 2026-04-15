@@ -91,7 +91,7 @@ def _reset_professor_assignment(sol): # objeto Solution
 
 
 def _build_solution_from_assignment_vector(problem, assignments, rng): # individual_to_solution
-                                          # instancia del problema, lista de longitud n_students con la plaza asignada a cada estudiante, generador de nºs aleatorios 
+                                          # instancia del problema, lista de longitud n_students con la plaza asignada a cada estudiante, generador aleatorio 
     """
     Reconstruye una Solution completa a partir de un vector student_to_placement, comprobando primero sea viable. 
     
@@ -146,60 +146,64 @@ def _build_solution_from_assignment_vector(problem, assignments, rng): # individ
     return sol # Solution válida si puede construirla
 
 
+# ---------------------------------------------------------------
+# Utilidades de repair del cromosoma
+# ---------------------------------------------------------------
 
-#############################################################
-
-
-# ============================================================
-# Utilidades para repair
-# ============================================================
-
-def _dependency_placement_set(problem):
+def _dependency_placement_set(problem): # instancia del problema
+    """
+    Construye el conjunto de plazas que están afectadas por alguna dependencia
+    """
     dep_set = set()
+    
+    # Recorre todos los bloques de dependencias y añade sus plazas al conjunto
     for block in problem.dependencies:
         for j in block:
             dep_set.add(j)
-    return dep_set
+    return dep_set # set con todas las plazas que participan en dependencias
 
 
-def _placement_owner(assignments: List[int]):
+def _placement_owner(assignments): # lista de longitud n_students con la plaza j asignada a cada estudiante i (assignments[i] = j)
     """
-    Devuelve un diccionario placement -> student.
+    Invierte la representación student -> placement para poder saber rápidamente qué estudiante ocupa una plaza concreta
     """
-    return {j: i for i, j in enumerate(assignments)}
+    return {j: i for i, j in enumerate(assignments)} # diccionario placement -> student
 
 
-def _try_align_assignments_with_template(problem, desired: List[int], template_sol: Solution, rng: random.Random) -> List[int]:
+def _try_align_assignments_with_template(problem, desired, template_sol, rng):
+                                        # instancia del problema, lista con las plazas que el cromosoma propone asignar a cada estudiante,
+                                        # solución factible base sobre la que se intenta trabajar, generador aleatorio
     """
     Parte de una solución factible base y trata de incorporar información del individuo
     sin romper factibilidad estructural.
 
-    Estrategia simple y robusta:
-    - si la plaza deseada ya está en la solución base, intercambia estudiantes;
-    - si no está en la solución base, solo permite sustituciones seguras:
-      plaza actual y plaza deseada deben pertenecer a la misma empresa y no estar
-      en dependencias.
+    Lo hace usando dos movimientos (leves):
+    - Si la plaza deseada ya está en la solución base, intercambia estudiantes
+    - Si no, solo permite sustituciones en las que la plaza actual y la plaza deseada pertenezcan a la misma empresa, y no estén en dependencias
     """
-    assignments = list(template_sol.student_to_placement)
-    owner = _placement_owner(assignments)
-    dep_set = _dependency_placement_set(problem)
+    assignments = list(template_sol.student_to_placement) # Solución base
+    owner = _placement_owner(assignments) # Diccionario placement -> student
+    dep_set = _dependency_placement_set(problem) # Plazas en dependencias
 
+    # Recorremos los estudiantes en orden aleatorio
     order = list(range(problem.n_students))
     rng.shuffle(order)
 
+    # Para cada estudiante, alinea su plaza asignada con la plaza deseada por el cromosoma
     for i in order:
         j_des = desired[i]
 
+        # Se ignoran genes que no representen una plaza válida
         if not isinstance(j_des, int):
             continue
         if j_des < 0 or j_des >= problem.n_placements:
             continue
 
-        j_cur = assignments[i]
+        j_cur = assignments[i] # Misma plaza que tengo asignada en la solución base
         if j_des == j_cur:
             continue
 
-        # Caso 1: la plaza deseada ya forma parte del conjunto actual -> swap
+        # Caso 1 --> la plaza deseada ya está ocupada en la solución base --> swap de estudiantes para acercar la asignación al cromosoma sin cambiar el conjunto de plazas ocupadas
         if j_des in owner:
             other = owner[j_des]
             if other == i:
@@ -210,7 +214,7 @@ def _try_align_assignments_with_template(problem, desired: List[int], template_s
             owner[assignments[other]] = other
             continue
 
-        # Caso 2: sustitución segura dentro de misma empresa y fuera de dependencias
+        # Caso 2 --> la plaza deseada no está ocupada en la solución base --> solo se permite el cambio si no rompe restricciones (misma empresa, no dependencias)
         same_company = problem.placement_company[j_cur] == problem.placement_company[j_des]
         both_nondep = (j_cur not in dep_set) and (j_des not in dep_set)
 
@@ -219,19 +223,21 @@ def _try_align_assignments_with_template(problem, desired: List[int], template_s
             assignments[i] = j_des
             owner[j_des] = i
 
-    return assignments
+    return assignments # lista de plazas asignadas a cada estudiante más cercana a la deseada
 
 
-def repair_individual(problem, individual, rng: random.Random, template_sol: Optional[Solution] = None, seed: Optional[int] = None) -> Solution:
+def repair_individual(problem, individual, rng, template_sol = None, seed = None):
+                     # instancia del problema, cromosoma a reparar, generador aleatorio, solución factible base para intentar alinear, semilla
     """
-    Repair robusto y simple.
+    Intenta reparar el individuo construyendo una solución válida a partir de una solución factible base:
+    1. Parte de una solución factible base
+    2. Intenta incorporar la información del individuo
+    3. Reconstruye profesores 
+    4. Si falla, cae a una solución factible generada de nuevo
 
-    Idea:
-    1. parte de una solución factible base;
-    2. intenta incorporar la información del individuo;
-    3. reconstruye profesores;
-    4. si falla, cae a una solución factible generada de nuevo.
+    No corrige directamente el cromosoma, sino que intenta proyectarlo sobre una solución factible
     """
+    # Conversión del individuo a lista de plazas deseadas
     desired = []
     for x in individual:
         try:
@@ -239,111 +245,119 @@ def repair_individual(problem, individual, rng: random.Random, template_sol: Opt
         except Exception:
             desired.append(-1)
 
+    # Construcción de plantillas candidatas
     candidate_templates = []
 
+    # Añade la solución plantilla heredada, si existe
     if template_sol is not None:
         candidate_templates.append(_copy_solution(template_sol))
 
-    # Añadimos algunas soluciones factibles auxiliares
+    # Genera varias soluciones factibles auxiliares como posibles bases de repair
     for extra in range(3):
         local_seed = None if seed is None else seed + 1000 + extra
         base_sol = generate_random_feasible_fixing(problem, seed=local_seed)
         candidate_templates.append(base_sol)
 
+    # Intento de alineación y reconstrucción de solución a partir de cada plantilla candidata hasta encontrar una solución válida
     for base_sol in candidate_templates:
-        assignments = _try_align_assignments_with_template(problem, desired, base_sol, rng)
-        repaired = _build_solution_from_assignment_vector(problem, assignments, rng)
+        assignments = _try_align_assignments_with_template(problem, desired, base_sol, rng) # Intenta acercar la plantilla al individuo sin romper factibilidad
+        repaired = _build_solution_from_assignment_vector(problem, assignments, rng) # Reconstruye y valida una Solution a partir del intento de acercamiento anterior
         if repaired is not None and repaired.validate():
-            return repaired
+            return repaired # Si la solution es válida, la devuelve como resultado del repair
 
-    # Último recurso: devolver una solución factible nueva
+    # Último recurso --> Si ninguna plantilla funciona, se devuelve una solución factible nueva
     fallback_seed = None if seed is None else seed + 999999
-    return generate_random_feasible_fixing(problem, seed=fallback_seed)
+    return generate_random_feasible_fixing(problem, seed=fallback_seed) # Solución factible garantizada, aunque sin relación con el individuo original (generada de nuevo)
 
 
-# ============================================================
-# Inicialización
-# ============================================================
+# -----------------------------------------------------------------
+# Inicialización de individuos y población
+# -----------------------------------------------------------------
 
 def _init_individual(problem, seed=None):
+                    # instancia del problema, semilla
     """
-    Genera un individuo factible inicial a partir del generador existente.
+    Genera una solución factible usando el generador existente y la convierte en un individuo del GA (DEAP)
     """
+    # Genera una solución factible del problema
     sol = generate_random_feasible_fixing(problem, seed=seed)
-    return solution_to_individual(sol)
+
+    # Convierte la solución en un individuo DEAP
+    return solution_to_individual(sol) # IndividualSIPA factible
 
 
-def _init_population(problem, population_size: int, base_seed: Optional[int] = None):
+def _init_population(problem, population_size, base_seed = None):
+                    # instancia del problema, nº de individuos a generar, semilla
     """
-    Genera la población inicial factible.
+    Construye la población inicial generando múltiples individuos factibles
     """
     population = []
+
+    # Generación de individuos
     for i in range(population_size):
+        # Si hay semilla base, cada individuo usa una semilla distinta (base_seed + i) para mantener reproducibilidad y evitar clones
         seed = None if base_seed is None else base_seed + i
+        
+        # Se genera cada individuo como solución factible convertida a cromosoma
         population.append(_init_individual(problem, seed=seed))
-    return population
+
+    return population # lista de individuos DEAP (población inicial factible)
 
 
-# ============================================================
+# -----------------------------------------------------------------
 # Operadores genéticos
-# ============================================================
+# -----------------------------------------------------------------
 
-def crossover_simple(ind1, ind2, problem, rng: random.Random, seed: Optional[int] = None):
+def crossover_simple(ind1, ind2, problem, rng, seed = None):
+                    # dos individuos padres a cruzar, instancia del problema, generador aleatorio, semilla
     """
-    Cruce simple por máscara aleatoria de estudiantes.
-    Después repara ambos descendientes.
+    Cruza dos individuos mezclando los genes de los padres con una máscara aleatoria y repara los descendientes resultantes
     """
+    # Recupera las soluciones de los padres cacheadas para usarlas como plantilla en el repair
     parent1_sol = getattr(ind1, "cached_solution", None)
     parent2_sol = getattr(ind2, "cached_solution", None)
 
+    # Copia temporal de los genes de ambos padres para el cruce
     child1_genes = list(ind1)
     child2_genes = list(ind2)
 
+    # Cruce (por máscara aleatoria) --> para cada estudiante, decide de qué padre hereda
     for i in range(len(child1_genes)):
         if rng.random() < 0.5:
             child1_genes[i], child2_genes[i] = child2_genes[i], child1_genes[i]
 
-    child1_sol = repair_individual(
-        problem=problem,
-        individual=child1_genes,
-        rng=rng,
-        template_sol=parent1_sol,
-        seed=seed,
-    )
-    child2_sol = repair_individual(
-        problem=problem,
-        individual=child2_genes,
-        rng=rng,
-        template_sol=parent2_sol,
-        seed=None if seed is None else seed + 1,
-    )
+    # Repara ambos cromosomas descendientes para obtener soluciones válidas
+    child1_sol = repair_individual(problem=problem, individual=child1_genes, rng=rng, template_sol=parent1_sol, seed=seed)
+    child2_sol = repair_individual(problem=problem, individual=child2_genes, rng=rng, template_sol=parent2_sol, seed=None if seed is None else seed + 1)
 
+    # Sustituye el contenido de los individuos por los genes reparados
     ind1[:] = list(child1_sol.student_to_placement)
     ind2[:] = list(child2_sol.student_to_placement)
 
+    # Actualiza la caché de solución y borra la de evaluación
     ind1.cached_solution = child1_sol
     ind2.cached_solution = child2_sol
     ind1.cached_multi_eval = None
     ind2.cached_multi_eval = None
 
+    # Invalida el fitness anterior, ya que los individuos han cambiado
     if ind1.fitness.valid:
         del ind1.fitness.values
     if ind2.fitness.valid:
         del ind2.fitness.values
 
-    return ind1, ind2
+    return ind1, ind2 # los dos individuos descendientes modificados
 
 
-def mutate_simple(individual, problem, rng: random.Random, seed: Optional[int] = None):
+def mutate_simple(individual, problem, rng, seed = None):
+                 # cromosoma/individuo a mutar, instancia del problema, generador aleatorio, semilla
     """
-    Mutación simple:
-    - o bien intercambia dos estudiantes,
-    - o bien cambia la plaza deseada de un estudiante por una plaza aleatoria.
-
-    Después aplica repair.
+    Aplica una mutación sencilla al cromosoma. Después aplica repair y actualiza la caché y el fitness
     """
+    # Copia temporal del cromosoma
     mutated = list(individual)
 
+    # Mutación --> o bien intercambia dos estudiantes, o bien cambia la plaza deseada de uno de ellos por otra aleatoria
     if len(mutated) >= 2 and rng.random() < 0.5:
         i, j = rng.sample(range(len(mutated)), 2)
         mutated[i], mutated[j] = mutated[j], mutated[i]
@@ -351,76 +365,81 @@ def mutate_simple(individual, problem, rng: random.Random, seed: Optional[int] =
         i = rng.randrange(len(mutated))
         mutated[i] = rng.randrange(problem.n_placements)
 
+    # Usa la solución actual como plantilla para el repair
     template_sol = getattr(individual, "cached_solution", None)
+    
+    # Repara el cromosoma mutado para obtener una solución válida
+    repaired_sol = repair_individual(problem=problem, individual=mutated, rng=rng, template_sol=template_sol, seed=seed)
 
-    repaired_sol = repair_individual(
-        problem=problem,
-        individual=mutated,
-        rng=rng,
-        template_sol=template_sol,
-        seed=seed,
-    )
-
+    # Sustituye el individuo por el resultado reparado
     individual[:] = list(repaired_sol.student_to_placement)
     individual.cached_solution = repaired_sol
     individual.cached_multi_eval = None
 
+    # Invalida el fitness anterior
     if individual.fitness.valid:
         del individual.fitness.values
 
-    return (individual,)
+    return (individual,) #individuo mutado
 
 
-# ============================================================
-# Evaluación y Pareto externo
-# ============================================================
+# -----------------------------------------------------------------
+# Evaluación y registro en Pareto externo
+# -----------------------------------------------------------------
 
 def _evaluate_individual(individual, normalize_student_dist=True, normalize_supervision_dist=True):
+                        # individuo a evaluar, booleanos para normalización de objetivos (distancias de estudiantes y supervisores)
     """
-    Evalúa el individuo a partir de su Solution cacheada.
+    Evalúa el individuo a partir de su Solution cacheada mediante evaluate_solution_multi.
+    Si la solución no es válida, devuelve una penalización alta; si lo es, devuelve los cuatro objetivos en el orden esperado por DEAP.
     """
+    # Recupera la solución asociada al individuo de su caché para evitar reconstruirla
     sol = getattr(individual, "cached_solution", None)
     if sol is None:
         raise ValueError("Individual has no cached_solution. Repair/init should build it first.")
 
-    multi_eval = evaluate_solution_multi(
-        sol,
-        normalize_student_dist=normalize_student_dist,
-        normalize_supervision_dist=normalize_supervision_dist,
-    )
+    # Evalúa la solución con los cuatro objetivos del modelo
+    multi_eval = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
+    # Sol no válida
     if not multi_eval.get("valid", False):
-        # Penalización extrema; en principio no debería ocurrir si repair funciona
+        # Penalización alta; en principio no debería ocurrir si repair funciona
         individual.cached_multi_eval = multi_eval
         return (-1e18, -1e18, 1e18, 1e18)
-
+    
+    # Extrae los cuatro componentes de la evaluación en el orden del fitness DEAP
     c = multi_eval["components"]
     values = (
         float(c["tau_sum"]),
         float(c["eta_sum"]),
         float(c["lbar_sum"]),
         float(c["sigma_sum"]),
-    )
+    )  
+
+    # Guarda la evaluación en caché
     individual.cached_multi_eval = multi_eval
-    return values
+
+    return values # tupla con los 4 objetivos del fitness
 
 
 def _register_individual_in_global_pareto(
-    individual,
-    pareto_set,
-    iteration,
-    seed,
-    weights,
-    max_pareto_size,
-    normalize_student_dist,
-    normalize_supervision_dist,
-):
+    individual,                 # individuo ya evaluado
+    pareto_set,                 # pareto actual
+    iteration,                  # número de iteración/generación actual
+    seed,                       # semilla
+    weights,                    # pesos de los objetivos para evaluación escalar (desempate)
+    max_pareto_size = None,      # tamaño máximo del Pareto externo (None para ilimitado)
+    normalize_student_dist = True,     # booleano para normalización de distancia de estudiantes
+    normalize_supervision_dist = True # booleano para normalización de distancia de supervisores
+    ):
     """
-    Registra el individuo ya evaluado en el Pareto global externo.
+    Registra el individuo ya evaluado en el Pareto global externo
     """
+    # Recupera la solución y la evaluación cacheadas en el individuo
     sol = individual.cached_solution
     multi_eval = getattr(individual, "cached_multi_eval", None)
-
+    
+    # Hace el registro en Pareto usando la función común, pasando la evaluación ya calculada para agilizar
     reg = register_solution_in_pareto(
         sol=sol,
         pareto_set=pareto_set,
@@ -434,29 +453,27 @@ def _register_individual_in_global_pareto(
         precomputed_scalar_eval=None,
     )
 
-    return reg
+    return reg # diccionario con el resultado del registro en Pareto (pareto_set actualizado, valid, was_inserted, removed_count, pruned, evaluation)
 
 
-# ============================================================
+# -----------------------------------------------------------------
 # Selección de padres
-# ============================================================
+# -----------------------------------------------------------------
 
-def _select_parents(population, k, rng: random.Random):
+def _select_parents(population, k, rng):
+                   # población actual, número de padres a seleccionar, generador aleatorio
     """
-    Selección de padres mediante torneo binario basado en frentes no dominados.
-
-    Criterio:
-    - mejor frente -> gana
-    - empate en frente -> desempate aleatorio
-
-    Devuelve k copias de individuos seleccionados para reproducirse.
+    Selecciona padres mediante torneos binarios usando como criterio el frente no dominado al que pertenece cada individuo.
+    Gana el que esté en mejor frente; si ambos están en el mismo, se desempata aleatoriamente
     """
+    # Caso población vacía
     if not population:
         return []
 
-    # Construir ranking por frentes
+    # Construye los frentes no dominados de la población
     fronts = tools.sortNondominated(population, len(population), first_front_only=False)
-
+    
+    # Asigna a cada individuo su rango de frente (0 = mejor frente)
     rank = {}
     for r, front in enumerate(fronts):
         for ind in front:
@@ -464,76 +481,66 @@ def _select_parents(population, k, rng: random.Random):
 
     selected = []
 
+    # Realiza k torneos binarios para elegir los padres
     for _ in range(k):
         if len(population) == 1:
             winner = population[0]
         else:
+            # Toma dos individuos al azar para el torneo
             a, b = rng.sample(population, 2)
-
             ra = rank[id(a)]
             rb = rank[id(b)]
 
+            # Gana el individuo del mejor frente; en empate, se desempata al azar
             if ra < rb:
                 winner = a
             elif rb < ra:
                 winner = b
             else:
                 winner = a if rng.random() < 0.5 else b
-
+        
+        # Añade una copia del ganador para evitar modificar los individuos originales durante la reproducción
         selected.append(copy.deepcopy(winner))
 
-    return selected
+    return selected # lista con k copias de individuos seleccionados
 
 
-# ============================================================
-# Toolbox DEAP
-# ============================================================
+# -----------------------------------------------------------------
+# Configuración del toolbox DEAP
+# -----------------------------------------------------------------
 
-def build_deap_toolbox(
-    problem,
-    rng: random.Random,
-    normalize_student_dist=True,
-    normalize_supervision_dist=True,
-    ref_points_p=5,
-):
+def build_deap_toolbox(problem, rng, normalize_student_dist=True, normalize_supervision_dist=True, ref_points_p=5):
+                      # instancia del problema, generador aleatorio, booleanos para normalización de objetivos (distancias de estudiantes y supervisores), parámetro generar los puntos de referencia de NSGA-III
     """
-    Construye y devuelve el toolbox de DEAP.
+    Construye y configura el toolbox de DEAP registrando los operadores del algoritmo (evaluación, cruce, mutación y selección de supervivientes con NSGA-III)
+    y generando los puntos de referencia necesarios para selNSGA3 (reemplazo elegido)
     """
+    # Asegura que los tipos de individuo y fitness de DEAP estén definidos
     _ensure_deap_types()
 
+    # Crea el contenedor de operadores de DEAP
     toolbox = base.Toolbox()
-
+    
+    # Genera los puntos de referencia uniformes para NSGA-III (4 objetivos)
     ref_points = tools.uniform_reference_points(nobj=4, p=ref_points_p)
 
-    toolbox.register(
-        "evaluate",
-        _evaluate_individual,
-        normalize_student_dist=normalize_student_dist,
-        normalize_supervision_dist=normalize_supervision_dist,
-    )
+    # Registra la función de evaluación del individuo
+    toolbox.register("evaluate", _evaluate_individual, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
-    toolbox.register(
-        "mate",
-        crossover_simple,
-        problem=problem,
-        rng=rng,
-    )
+    # Registra el operador de cruce
+    toolbox.register("mate", crossover_simple, problem=problem, rng=rng)
 
-    toolbox.register(
-        "mutate",
-        mutate_simple,
-        problem=problem,
-        rng=rng,
-    )
+    # Registra el operador de mutación
+    toolbox.register("mutate", mutate_simple, problem=problem, rng=rng)
 
-    toolbox.register(
-        "select_survivors",
-        tools.selNSGA3,
-        ref_points=ref_points,
-    )
+    # Registra la selección de supervivientes (reemplazo) mediante NSGA-III
+    toolbox.register("select_survivors", tools.selNSGA3, ref_points=ref_points)
 
     return toolbox, ref_points
+           # objeto Toolbox configurado de DEAP, lista de puntos de referencia generados para NSGA-III
 
+
+#######################################################################
 
 # ============================================================
 # Bucle principal NSGA-III
