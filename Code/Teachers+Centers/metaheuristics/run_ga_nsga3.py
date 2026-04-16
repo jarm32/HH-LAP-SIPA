@@ -7,7 +7,7 @@
 # Librerías
 # --------------------------------------------------
 
-from metaheuristics.scripts.ga_nsga3_v1 import run_nsga3
+from metaheuristics.scripts.ga_nsga3 import run_nsga3
 from tools.multiobjective_search import print_pareto_set, save_results_to_txt
 from tools.evaluator import ObjectiveWeights
 from tools.problem import load_instance
@@ -24,7 +24,7 @@ def main():
     modelo = "nsga3"
 
     for i in [2,4,6]:
-        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_0.txt"
+        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_2.txt"
         instance_name = instance_path.split("/")[-1]
         problem = load_instance(instance_path)
 

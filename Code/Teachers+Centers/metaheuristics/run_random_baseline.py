@@ -19,7 +19,7 @@ def main():
 
     for i in [2,4,6]:
         # Instancia escogida + carga
-        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_0.txt"
+        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_2.txt"
         instance_name = instance_path.split("/")[-1]
         problem = load_instance(instance_path)
 
