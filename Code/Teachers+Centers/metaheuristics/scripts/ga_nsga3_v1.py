@@ -7,7 +7,6 @@
 import copy
 import random
 import time
-from typing import List, Optional
 from deap import base, creator, tools
 
 from metaheuristics.scripts.random_feasible_fixing import generate_random_feasible_fixing, _assign_professors_with_repair
