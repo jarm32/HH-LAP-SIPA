@@ -1,24 +1,100 @@
-# Motor de búsqueda multiobjetivo --> genera soluciones, las evalúa y mantiene el conjunto de Pareto
-# Marco común para ejecutar y comparar distintas metaheurísticas.
+# Motor común de búsqueda multiobjetivo --> evalúa soluciones, mantiene el conjunto de Pareto
+# y proporciona utilidades compartidas para ejecutar y comparar distintas metaheurísticas.
 
+# ----------------------------
 # Librerías
+# ----------------------------
 import time
 
 from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
 from tools.evaluator import evaluate_solution_multi, evaluate_solution_scalar
 
-# Baseline --> Búsqueda aleatoria
+
+# -----------------------------------------------------------------
+# Registro y actualización del Pareto global externo
+# -----------------------------------------------------------------
+
+def register_solution_in_pareto(
+    sol,                                # solución a evaluar y registrar
+    pareto_set,                         # Pareto actual
+    iteration,                          # iteración en la que se genera la solución
+    seed,                               # semilla
+    weights,                            # pesos para la evaluación escalar auxiliar
+    max_pareto_size=None,               # tamaño máximo del Pareto externo (None para ilimitado)
+    normalize_student_dist=True,        # booleano para normalización de distancia de estudiantes
+    normalize_supervision_dist=True,    # booleano para normalización de distancia de supervisores
+    precomputed_multi_eval=None,        # evaluación multiobjetivo ya calculada
+    precomputed_scalar_eval=None        # evaluación escalar ya calculada
+):
+    """
+    Evalúa una Solution, la convierte en EvaluatedSolution y la intenta registrar
+    en el Pareto global externo.
+
+    Puede reutilizar evaluaciones ya calculadas para no repetir trabajo.
+    """
+    # Evaluación multiobjetivo
+    multi_eval = precomputed_multi_eval
+    if multi_eval is None:
+        multi_eval = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+
+    # Si la solución no es válida, no se procesa más
+    if not multi_eval.get("valid", False):
+        return {
+            "pareto_set": pareto_set,
+            "valid": False,
+            "was_inserted": False,
+            "removed_count": 0,
+            "pruned": False,
+            "evaluation": None,
+        }
+
+    # Evaluación escalar auxiliar
+    scalar_eval = precomputed_scalar_eval
+    if scalar_eval is None:
+        scalar_eval = evaluate_solution_scalar(sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+    
+    # Combina evaluación multiobjetivo + escalar en un único diccionario para almacenar en el Pareto
+    eval_result = dict(multi_eval)
+    eval_result["objective_value"] = scalar_eval["objective_value"]
+
+    # Construcción del objeto evaluado
+    candidate = EvaluatedSolution(sol=sol, evaluation=eval_result, iteration=iteration, seed=seed)
+
+    # Actualización del Pareto
+    new_pareto_set, was_inserted, removed_count = update_pareto_set(pareto_set, candidate)
+
+    # Poda opcional por tamaño máximo
+    pruned = False
+    if max_pareto_size is not None and len(new_pareto_set) > max_pareto_size:
+        new_pareto_set = prune_pareto_set_by_size(new_pareto_set, max_pareto_size)
+        pruned = True
+
+    return {
+        "pareto_set": new_pareto_set,
+        "valid": True,
+        "was_inserted": was_inserted,
+        "removed_count": removed_count,
+        "pruned": pruned,
+        "evaluation": eval_result,
+    } # diccionario con: Pareto actualizado, si la solución era válida, si entró en el Pareto, cuántas soluciones dominadas eliminó, si hubo poda por tamaño y evaluación final almacenada (incluye objective_value)
+
+
+# -----------------------------------------------------------------
+# Baseline de búsqueda aleatoria multiobjetivo
+# -----------------------------------------------------------------
+
 def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60,
                          # Objeto Problem (instancia), función que genera soluciones, pesos para evaluación escalar, límite de tiempo
                          max_iterations = None, generator_kwargs = None, max_pareto_size = None, base_seed = None, normalize_student_dist = True, normalize_supervision_dist = True, verbose = True):
                          # tope de iteraciones, argumentos extra generador, tamaño máximo Pareto, semilla, normalizar o no distancias del estudiante y de la supervisión, mostrar progreso
     """
-    Ejecuta una búsqueda aleatoria multiobjetivo --> genera soluciones, las evalúa y mantiene el cjto Pareto
-    mientras haya tiempo. Añade estadísticas y poda el conjunto en caso de que tenga tamaño máximo 
+    Ejecuta una búsqueda aleatoria multiobjetivo: genera soluciones con el generador dado
+    y las intenta registrar en el Pareto global externo mientras haya tiempo. Añade estadísticas
+    de ejecución y aplica poda al Pareto si se fija un tamaño máximo.
 
     generator_fn es, en este caso, generate_random_feasible_fixing
     """
-    # Validación inicial + Inicialización
+    # Validación inicial e inicialización de parámetros y contadores
     if time_limit_seconds <= 0:
         raise ValueError("time_limit_seconds must be > 0")
 
@@ -54,32 +130,25 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
         except Exception:
             failures += 1
             continue
-
-        # Evaluación multiobjetivo pura para Pareto
-        eval_result = evaluate_solution_multi(sol, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
-
-        if not eval_result.get("valid", False): # Descarta soluciones no válidas (no ha encontrado nada, pasa a la siguiente iteración)
+        
+        # Evalúa la solución y delega su registro/actualización en el Pareto externo
+        reg = register_solution_in_pareto(sol=sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
+                                          normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+        
+        # Si la solución no era válida, se cuenta como fallo y se descarta
+        if not reg["valid"]:
             failures += 1
             continue
-
-        # Evaluación escalar auxiliar para poda
-        scalar_eval = evaluate_solution_scalar(sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
-
-        eval_result["objective_value"] = scalar_eval["objective_value"] # Añade ese valor a la evaluación
-
-        # La solución es factible
+        
+        # La solución era válida y ha sido procesada correctamente
         feasible += 1
 
-        # Crea objeto empaquetador y actualiza el cjto Pareto
-        cand = EvaluatedSolution(sol=sol, evaluation=eval_result, iteration=iteration, seed=seed)
-        pareto_set, was_inserted, _ = update_pareto_set(pareto_set, cand)
+        # Actualiza el Pareto externo con el resultado devuelto por la función común
+        pareto_set = reg["pareto_set"]
 
-        if was_inserted: # Contea el nº de inserciones (para estadísticas)
+        # Cuenta cuántas soluciones llegaron a entrar en el Pareto
+        if reg["was_inserted"]:
             inserted += 1
-
-        # Poda por tamaño
-        if max_pareto_size is not None and len(pareto_set) > max_pareto_size:
-            pareto_set = prune_pareto_set_by_size(pareto_set, max_pareto_size)
 
         # Imprime estado cada 50 iteraciones
         if verbose and iteration % 50 == 0:
@@ -89,7 +158,7 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
                 f"pareto_size={len(pareto_set)}"
             )
 
-    # Actualiza el tiempo para cumplir el time_limit_seconds
+    # Calcula el tiempo total de ejecución
     total_time = time.time() - start
 
     return {
@@ -102,8 +171,64 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
             "inserted_into_pareto": inserted,
             "pareto_size": len(pareto_set),
             "elapsed_seconds": total_time}
-            } # Cjto Pareto, junto con estadísticas de la ejecución
+            } # Diccionario con el Pareto externo final y las estadísticas de la ejecución
 
+
+# -----------------------------------------------------------------
+# Utilidades de visualización y exportación de resultados
+# -----------------------------------------------------------------
+
+def summarize_pareto_set(pareto_set): # pareto actual
+    """
+    Calcula un resumen del frente de Pareto final:
+    - máximos de cada objetivo
+    - medias de cada objetivo
+    - máximo global (objective_value)
+    - media global (objective_value)
+    """
+    # Validación inicial
+    if not pareto_set:
+        return {
+            "max_tau": None,
+            "mean_tau": None,
+            "max_eta": None,
+            "mean_eta": None,
+            "max_lbar": None,
+            "mean_lbar": None,
+            "max_sigma": None,
+            "mean_sigma": None,
+            "max_objective_value": None,
+            "mean_objective_value": None,
+        }
+
+    # Inicialización de las listas por componente
+    tau_vals = []
+    eta_vals = []
+    lbar_vals = []
+    sigma_vals = []
+    obj_vals = []
+    
+    # Recorre cada solución del Pareto y extrae sus componentes para calcular máximos y medias
+    for item in pareto_set:
+        c = item.evaluation["components"]
+        tau_vals.append(float(c["tau_sum"]))
+        eta_vals.append(float(c["eta_sum"]))
+        lbar_vals.append(float(c["lbar_sum"]))
+        sigma_vals.append(float(c["sigma_sum"]))
+        obj_vals.append(float(item.evaluation["objective_value"]))
+
+    return {
+        "max_tau": max(tau_vals),
+        "mean_tau": sum(tau_vals) / len(tau_vals),
+        "max_eta": max(eta_vals),
+        "mean_eta": sum(eta_vals) / len(eta_vals),
+        "max_lbar": max(lbar_vals),
+        "mean_lbar": sum(lbar_vals) / len(lbar_vals),
+        "max_sigma": max(sigma_vals),
+        "mean_sigma": sum(sigma_vals) / len(sigma_vals),
+        "max_objective_value": max(obj_vals),
+        "mean_objective_value": sum(obj_vals) / len(obj_vals),
+    } # Diccionario con resumen de máximos y medias de cada componente del Pareto y del objective_value global
 
 def print_pareto_set(pareto_set):
                     # Conjunto Pareto actual --> los elementos son las soluciones empaquetadas en EvaluatedSolution
@@ -134,22 +259,42 @@ def print_pareto_set(pareto_set):
         )
 
 
-def save_results_to_txt(filepath, instance_name, stats, pareto_set):
-                        # Ruta archivo del archivo, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
+def save_results_to_txt(filepath, instance_name, stats, pareto_set, model="---"):
+                        # Ruta del archivo de salida, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
     """
     Guarda los resultados de la ejecución en un archivo txt
     """
+    # Resumen del Pareto
+    summary = summarize_pareto_set(pareto_set)
+    
+    # Escritura en archivo
     with open(filepath, "w", encoding="utf-8") as f:
-        f.write("===== SIPA RANDOM BASELINE RESULTS =====\n\n")
+        f.write(f"===== SIPA {model} RESULTS =====\n\n")
         f.write(f"Instance: {instance_name}\n\n")
-        f.write("---- STATS ----\n")
 
         # stats = iterations, generated, feasible, failures, inserted_into_pareto, pareto_size, elapsed_seconds
+        f.write("---- STATS ----\n")
         for k, v in stats.items():
             f.write(f"{k}: {v}\n")
 
-        f.write("\n---- PARETO SET ----\n")
+        # Escritura del resumen
+        f.write("\n---- SUMMARY ----\n")
+        if summary["max_tau"] is None:
+            f.write("Pareto set vacío\n")
+        else:
+            f.write(f"max_tau: {summary['max_tau']:.6f}\n")
+            f.write(f"mean_tau: {summary['mean_tau']:.6f}\n")
+            f.write(f"max_eta: {summary['max_eta']:.6f}\n")
+            f.write(f"mean_eta: {summary['mean_eta']:.6f}\n")
+            f.write(f"max_lbar: {summary['max_lbar']:.6f}\n")
+            f.write(f"mean_lbar: {summary['mean_lbar']:.6f}\n")
+            f.write(f"max_sigma: {summary['max_sigma']:.6f}\n")
+            f.write(f"mean_sigma: {summary['mean_sigma']:.6f}\n")
+            f.write(f"max_objective_value: {summary['max_objective_value']:.6f}\n")
+            f.write(f"mean_objective_value: {summary['mean_objective_value']:.6f}\n")
 
+        # Pareto set detallado
+        f.write("\n---- PARETO SET ----\n")
         if not pareto_set:
             f.write("Pareto set vacío\n")
             return
