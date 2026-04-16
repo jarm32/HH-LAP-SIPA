@@ -178,6 +178,58 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
 # Utilidades de visualización y exportación de resultados
 # -----------------------------------------------------------------
 
+def summarize_pareto_set(pareto_set): # pareto actual
+    """
+    Calcula un resumen del frente de Pareto final:
+    - máximos de cada objetivo
+    - medias de cada objetivo
+    - máximo global (objective_value)
+    - media global (objective_value)
+    """
+    # Validación inicial
+    if not pareto_set:
+        return {
+            "max_tau": None,
+            "mean_tau": None,
+            "max_eta": None,
+            "mean_eta": None,
+            "max_lbar": None,
+            "mean_lbar": None,
+            "max_sigma": None,
+            "mean_sigma": None,
+            "max_objective_value": None,
+            "mean_objective_value": None,
+        }
+
+    # Inicialización de las listas por componente
+    tau_vals = []
+    eta_vals = []
+    lbar_vals = []
+    sigma_vals = []
+    obj_vals = []
+    
+    # Recorre cada solución del Pareto y extrae sus componentes para calcular máximos y medias
+    for item in pareto_set:
+        c = item.evaluation["components"]
+        tau_vals.append(float(c["tau_sum"]))
+        eta_vals.append(float(c["eta_sum"]))
+        lbar_vals.append(float(c["lbar_sum"]))
+        sigma_vals.append(float(c["sigma_sum"]))
+        obj_vals.append(float(item.evaluation["objective_value"]))
+
+    return {
+        "max_tau": max(tau_vals),
+        "mean_tau": sum(tau_vals) / len(tau_vals),
+        "max_eta": max(eta_vals),
+        "mean_eta": sum(eta_vals) / len(eta_vals),
+        "max_lbar": max(lbar_vals),
+        "mean_lbar": sum(lbar_vals) / len(lbar_vals),
+        "max_sigma": max(sigma_vals),
+        "mean_sigma": sum(sigma_vals) / len(sigma_vals),
+        "max_objective_value": max(obj_vals),
+        "mean_objective_value": sum(obj_vals) / len(obj_vals),
+    } # Diccionario con resumen de máximos y medias de cada componente del Pareto y del objective_value global
+
 def print_pareto_set(pareto_set):
                     # Conjunto Pareto actual --> los elementos son las soluciones empaquetadas en EvaluatedSolution
     """
@@ -207,22 +259,42 @@ def print_pareto_set(pareto_set):
         )
 
 
-def save_results_to_txt(filepath, instance_name, stats, pareto_set):
+def save_results_to_txt(filepath, instance_name, stats, pareto_set, model="---"):
                         # Ruta del archivo de salida, nombre de la instancia sobre la que se trabaja, estadísticas de la ejecución, cjto Pareto
     """
     Guarda los resultados de la ejecución en un archivo txt
     """
+    # Resumen del Pareto
+    summary = summarize_pareto_set(pareto_set)
+    
+    # Escritura en archivo
     with open(filepath, "w", encoding="utf-8") as f:
-        f.write("===== SIPA RANDOM BASELINE RESULTS =====\n\n")
+        f.write(f"===== SIPA {model} RESULTS =====\n\n")
         f.write(f"Instance: {instance_name}\n\n")
-        f.write("---- STATS ----\n")
 
         # stats = iterations, generated, feasible, failures, inserted_into_pareto, pareto_size, elapsed_seconds
+        f.write("---- STATS ----\n")
         for k, v in stats.items():
             f.write(f"{k}: {v}\n")
 
-        f.write("\n---- PARETO SET ----\n")
+        # Escritura del resumen
+        f.write("\n---- SUMMARY ----\n")
+        if summary["max_tau"] is None:
+            f.write("Pareto set vacío\n")
+        else:
+            f.write(f"max_tau: {summary['max_tau']:.6f}\n")
+            f.write(f"mean_tau: {summary['mean_tau']:.6f}\n")
+            f.write(f"max_eta: {summary['max_eta']:.6f}\n")
+            f.write(f"mean_eta: {summary['mean_eta']:.6f}\n")
+            f.write(f"max_lbar: {summary['max_lbar']:.6f}\n")
+            f.write(f"mean_lbar: {summary['mean_lbar']:.6f}\n")
+            f.write(f"max_sigma: {summary['max_sigma']:.6f}\n")
+            f.write(f"mean_sigma: {summary['mean_sigma']:.6f}\n")
+            f.write(f"max_objective_value: {summary['max_objective_value']:.6f}\n")
+            f.write(f"mean_objective_value: {summary['mean_objective_value']:.6f}\n")
 
+        # Pareto set detallado
+        f.write("\n---- PARETO SET ----\n")
         if not pareto_set:
             f.write("Pareto set vacío\n")
             return

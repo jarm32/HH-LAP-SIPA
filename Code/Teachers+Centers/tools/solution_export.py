@@ -2,7 +2,6 @@
 
 # Librerías
 import os
-from typing import Optional
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
