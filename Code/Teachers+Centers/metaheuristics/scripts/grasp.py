@@ -1,10 +1,10 @@
-# Algoritmo GRASP multiobjetivo baseline para SIPA modificado.
-# Implementa:
-# - constructivo greedy-randomized sobre student_to_placement
-# - RCL por umbral relativo
-# - búsqueda local por swap entre dos estudiantes (first improvement)
-# - registro en Pareto externo de la solución final mejorada
-# - reconstrucción de profesores reutilizando _assign_professors_with_repair
+# Implementación de un GRASP multiobjetivo para el problema SIPA mediante:
+# - Constructivo greedy-randomized sobre student_to_placement.
+# - RCL por umbral relativo.
+# - Búsqueda local por swap entre dos estudiantes (first improvement).
+# - Reconstrucción de profesores reutilizando _assign_professors_with_repair.
+# - Registro en Pareto externo de la solución final mejorada.
+
 
 # --------------------------------------------------
 # Librerías
@@ -12,7 +12,6 @@
 import random
 import time
 from itertools import combinations
-
 import numpy as np
 
 from metaheuristics.scripts.random_feasible_fixing import _assign_professors_with_repair
@@ -25,10 +24,14 @@ from tools.solution import Solution
 # Utilidades internas
 # --------------------------------------------------
 
-def _minmax_normalize_rows(a: np.ndarray) -> np.ndarray:
+def _minmax_normalize_rows(a): # matriz numpy de n filas y m columnas
     """
-    Normaliza cada fila a [0,1]. Si una fila es constante, la deja a 0.
+    Normaliza la matriz fila a fila a [0,1]. Si una fila es constante, la deja a 0
     """
+
+    #############################################
+
+    
     mins = a.min(axis=1, keepdims=True)
     maxs = a.max(axis=1, keepdims=True)
     denom = maxs - mins
@@ -36,7 +39,7 @@ def _minmax_normalize_rows(a: np.ndarray) -> np.ndarray:
     out = np.zeros_like(a, dtype=np.float64)
     mask = denom[:, 0] > 1e-12
     out[mask] = (a[mask] - mins[mask]) / denom[mask]
-    return out
+    return out # matriz inicial normalizada fila a fila (por estudiante) en rango [0,1]
 
 
 def _precompute_greedy_matrix(problem, normalize_student_dist: bool = True):
