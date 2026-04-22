@@ -10,7 +10,7 @@ import time
 from deap import base, creator, tools
 
 from metaheuristics.scripts.random_feasible_fixing import generate_random_feasible_fixing, _assign_professors_with_repair
-from tools.evaluator import ObjectiveWeights, evaluate_solution_multi
+from tools.evaluator import evaluate_solution_multi
 from tools.multiobjective_search import register_solution_in_pareto
 from tools.solution import Solution
 
