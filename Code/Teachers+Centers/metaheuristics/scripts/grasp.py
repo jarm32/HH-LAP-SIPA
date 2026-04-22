@@ -28,33 +28,24 @@ def _minmax_normalize_rows(a): # matriz numpy de n filas y m columnas
     """
     Normaliza la matriz fila a fila a [0,1]. Si una fila es constante, la deja a 0
     """
-
-    #############################################
-
-    
+    # Inicialización (cálculo de mínimos y máximos por fila)
     mins = a.min(axis=1, keepdims=True)
     maxs = a.max(axis=1, keepdims=True)
     denom = maxs - mins
-
     out = np.zeros_like(a, dtype=np.float64)
-    mask = denom[:, 0] > 1e-12
-    out[mask] = (a[mask] - mins[mask]) / denom[mask]
+
+    mask = denom[:, 0] > 1e-12 # Evitar división por cero
+    out[mask] = (a[mask] - mins[mask]) / denom[mask] # Normalización
     return out # matriz inicial normalizada fila a fila (por estudiante) en rango [0,1]
 
 
-def _precompute_greedy_matrix(problem, normalize_student_dist: bool = True):
+def _precompute_greedy_matrix(problem, normalize_student_dist = True): 
+                             # instancia del problema, booleano para normalizar distancias estudiante-empresa
     """
-    Precalcula para cada par (estudiante i, plaza j):
-      - tau_ij
-      - eta_ij
-      - g_ij = 0.5 * tau_ij + 0.5 * eta_ij
-
-    Devuelve:
-      tau_matrix: [n_students, n_placements]
-      eta_matrix: [n_students, n_placements]
-      g_matrix:   [n_students, n_placements]
+    Precalcula para cada par (estudiante i, plaza j) las utilidades 
+    (tau_ij, eta_ij, g_ij = 0.5 * tau_ij + 0.5 * eta_ij) para acelerar el constructivo (greedy-randomized)
     """
-    # Datos base
+    # Extracción de datos (datos del problema a arrays)
     placement_company = np.asarray(problem.placement_company, dtype=np.int64)          # [P]
     Phi = np.asarray(problem.placement_comp_needs, dtype=np.float64)                   # [P, C]
     Theta = np.asarray(problem.student_pref, dtype=np.float64)                         # [S, C]
@@ -62,34 +53,33 @@ def _precompute_greedy_matrix(problem, normalize_student_dist: bool = True):
     w_dist = np.asarray(problem.student_w_distance, dtype=np.float64)[:, None]         # [S, 1]
     w_dev = np.asarray(problem.student_w_dev, dtype=np.float64)[:, None]               # [S, 1]
 
-    # Distancia estudiante -> empresa de la plaza
+    # Distancia estudiante -> empresa cada plaza
     dist = np.asarray(problem.student_company_dist, dtype=np.float64)                  # [S, B]
     dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist       # [S, B]
     dist_by_placement = dist_norm[:, placement_company]                                # [S, P]
 
-    # Productos competencia-preferencia y competencia-desarrollo
-    # pref_match[i, j] = Theta_i · Phi_j
-    # comp_match[i, j] = Psi_i   · Phi_j
-    pref_match = Theta @ Phi.T                                                         # [S, P]
-    comp_match = Psi @ Phi.T                                                           # [S, P]
+    # Afinidades estudiante-plaza por preferencias y desviaciones
+    pref_match = Theta @ Phi.T # pref_match[i, j] = Theta_i · Phi_j                    # [S, P]
+    comp_match = Psi @ Phi.T # comp_match[i, j] = Psi_i · Phi_j                        # [S, P]
 
-    tau_matrix = w_dist * (1.0 - dist_by_placement) + w_dev * pref_match               # [S, P]
-    eta_matrix = comp_match                                                            # [S, P]
+    # Construcción de objetivos greedy (tau, eta) y su combinación g para cada par (i,j)
+    tau_matrix = w_dist * (1.0 - dist_by_placement) + w_dev * pref_match               # [S, P] --> utilidad del estudiante por la plaza según distancia y preferencias
+    eta_matrix = comp_match                                                            # [S, P] --> utilidad de la empresa por el estudiante según compatibilidad
     g_matrix = 0.5 * tau_matrix + 0.5 * eta_matrix                                     # [S, P]
 
-    return tau_matrix, eta_matrix, g_matrix
+    return tau_matrix, eta_matrix, g_matrix # matrices de tamaño [n_students, n_placements] con los valores precalculados (tau, eta, g) para cada par (i,j)
 
 
-def _preprocess_dependencies(problem):
+def _preprocess_dependencies(problem): #instancia del problema
     """
-    Preprocesa dependencias para:
-    - saber si una plaza pertenece a algún bloque
-    - mapear plaza -> bloque
-    - conocer tamaños de bloque
+    Preprocesa dependencias para: saber si una plaza pertenece a algún bloque, 
+    mapear plaza -> bloque y conocer tamaños de bloque
     """
+    # Inicialización
     placement_to_block = [-1] * problem.n_placements
     dep_blocks = []
 
+    # Procesamiento de dependencias
     for b, dep in enumerate(problem.dependencies):
         block = list(dep)
         dep_blocks.append(block)
@@ -99,12 +89,12 @@ def _preprocess_dependencies(problem):
     return {
         "placement_to_block": placement_to_block,  # j -> id bloque o -1
         "dep_blocks": dep_blocks,                  # lista de bloques
-    }
+    } # diccionario con mapping plaza -> bloque y lista de bloques (bloque = lista de plazas)
 
 
-def _copy_solution(sol: Solution) -> Solution:
+def _copy_solution(sol): # solución del problema
     """
-    Copia manual de una solución.
+    Duplica la solución para no modificar la original
     """
     new_sol = Solution(sol.problem)
     new_sol.student_to_placement = list(sol.student_to_placement)
@@ -112,32 +102,36 @@ def _copy_solution(sol: Solution) -> Solution:
     new_sol.company_load = list(sol.company_load)
     new_sol.professor_load = list(sol.professor_load)
     new_sol.placement_filled = list(sol.placement_filled)
-    return new_sol
+    return new_sol # copia independiente de la solución
 
 
-def _reset_professor_assignment(sol: Solution):
+def _reset_professor_assignment(sol): # solución del problema
     """
-    Borra la parte de asignación plaza -> profesor.
+    Elimina la asignación plaza -> profesor para recalcularla
     """
     sol.placement_to_professor = [-1] * sol.problem.n_placements
     sol.professor_load = [0] * sol.problem.n_professors
 
 
-def _build_solution_from_assignment_vector(problem, assignments, rng: random.Random):
+def _build_solution_from_assignment_vector(problem, assignments, rng):
+                                          # instancia del problema, vector student_to_placement, generador aleatorio
     """
-    Reconstruye una Solution completa desde student_to_placement.
-    Devuelve None si no consigue una solución válida.
+    Reconstruye una Solution completa y válida desde student_to_placement -->
+    asigna los profesores y verifica todas las restricciones
+    
+    Devuelve None si no consigue una solución válida
     """
     # Validaciones básicas
-    if len(assignments) != problem.n_students:
+    if len(assignments) != problem.n_students: # tamaño correcto
         return None
 
-    if any(j < 0 or j >= problem.n_placements for j in assignments):
+    if any(j < 0 or j >= problem.n_placements for j in assignments): # plazas válidas
         return None
 
-    if len(set(assignments)) != len(assignments):
+    if len(set(assignments)) != len(assignments): # sin duplicados
         return None
 
+    # Inicialización de la solución
     sol = Solution(problem)
 
     # Cargar student -> placement
@@ -147,71 +141,61 @@ def _build_solution_from_assignment_vector(problem, assignments, rng: random.Ran
         k = problem.placement_company[j]
         sol.company_load[k] += 1
 
-    # Cuotas empresa
+    # Comprobar cuotas de empresa
     for k in range(problem.n_companies):
         if sol.company_load[k] < problem.company_min[k]:
             return None
         if sol.company_load[k] > problem.company_max[k]:
             return None
 
-    # Dependencias
+    # Comprobar dependencias
     if not sol.dependencies_ok():
         return None
 
-    # Profesores
+    # Asignación de profesores
     _reset_professor_assignment(sol)
     ok = _assign_professors_with_repair(problem, sol, rng)
     if not ok:
         return None
 
+    # Validación final
     if not sol.validate():
         return None
 
-    return sol
+    return sol # reconstrucción completa de la solución a partir del vector de asignaciones student_to_placement, con validaciones y asignación de profesores
 
 
 def _remaining_min_demand(problem, company_load):
+                         # instancia del problema, carga actual por empresa
     """
-    Suma de mínimos pendientes por cubrir.
+    Calcula cuánto falta para cumplir los mínimos de las empresas
     """
     total = 0
     for k in range(problem.n_companies):
         total += max(int(problem.company_min[k]) - int(company_load[k]), 0)
-    return total
+    return total # suma de los mínimos (estudiantes) pendientes por cubrir para cada empresa, dada la carga actual
 
 
-def _is_candidate_locally_feasible(
-    problem,
-    j: int,
-    company_load,
-    used_placements,
-    remaining_students_after: int,
-    dep_data,
-    current_open_block
-):
+def _is_candidate_locally_feasible(problem, j, company_load, used_placements, remaining_students_after, dep_data, current_open_block):
+                                   # instancia del problema, plaza candidata, carga actual por empresa, vector de plazas usadas, 
+                                   # nº de estudiantes que quedarían sin asignar tras elegir esta plaza, datos de dependencias (preprocesado), bloque de dependencia abierto (si hay)
     """
-    Filtro local de factibilidad para una plaza j.
-
-    Controla:
-    - plaza no usada
-    - no superar máximos de empresa
-    - si hay un bloque abierto, solo tomar plazas de ese bloque
-    - si se abre un nuevo bloque de dependencia, que pueda completarse
-    - que sigan siendo alcanzables los mínimos por empresa
+    Determina si una plaza j puede elegirse en el constructivo sin romper factibilidad: True si es factible, False si no lo es
     """
+    # Plaza no usada
     if used_placements[j]:
         return False
 
+    # Inicializar datos
     placement_to_block = dep_data["placement_to_block"]
     dep_blocks = dep_data["dep_blocks"]
-
     k = int(problem.placement_company[j])
 
-    # Máximo empresa
+    # No superar el máximo de empresa
     if company_load[k] + 1 > int(problem.company_max[k]):
         return False
 
-    # Restricción de bloque abierto: si existe, hay que completarlo antes de seguir
+    # Restricción de bloque de dependencia abierto (si existe, hay que completarlo antes de seguir)
     block_id = placement_to_block[j]
     if current_open_block is not None and block_id != current_open_block:
         return False
@@ -220,8 +204,7 @@ def _is_candidate_locally_feasible(
     if current_open_block is None and block_id != -1:
         block_size = len(dep_blocks[block_id])
 
-        # Al elegir una plaza del bloque, deben quedar suficientes estudiantes
-        # para terminar el resto del bloque de forma contigua
+        # Al elegir una plaza del bloque, deben quedar suficientes estudiantes para terminar el resto del bloque
         if remaining_students_after < (block_size - 1):
             return False
 
@@ -238,118 +221,114 @@ def _is_candidate_locally_feasible(
     return True
 
 
-def _compute_rcl(candidate_pairs, g_matrix, alpha_rcl: float):
+def _compute_rcl(candidate_pairs, g_matrix, alpha_rcl):
+                # lista de tuplas (i, j) factibles, matriz g precalculada (g(i,j)), parámetro de control de la RCL
     """
-    Construye la RCL a partir de candidatas factibles.
-
-    candidate_pairs: lista de tuplas (i, j)
+    Selecciona las mejores candidatas según el score greedy, pero permitiendo cierta aleatoriedad controlada por el parámetro alpha_rcl.
+    alpha_rcl ∈ [0,1]; menor --> más greedy, mayor --> más aleatorio
     """
-    if not candidate_pairs:
+    if not candidate_pairs: # Caso trivial
         return []
 
-    scores = [float(g_matrix[i, j]) for i, j in candidate_pairs]
-    g_max = max(scores)
-    g_min = min(scores)
+    # Calcular scores y umbral
+    scores = [float(g_matrix[i, j]) for i, j in candidate_pairs] # g(i,j) para cada par candidato
+    g_max, g_min = max(scores), min(scores)
     threshold = g_max - alpha_rcl * (g_max - g_min)
 
     rcl = [(i, j) for (i, j), s in zip(candidate_pairs, scores) if s >= threshold]
-    return rcl
+    return rcl # lista de tuplas (i, j) que entran en la RCL
 
 
 # --------------------------------------------------
 # Constructivo GRASP
 # --------------------------------------------------
 
-def construct_grasp_solution(
-    problem,
-    alpha_rcl: float = 0.3,
-    seed=None,
-    normalize_student_dist: bool = True,
-    max_attempts: int = 50,
-    deadline=None,
-):
+def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_student_dist = True, max_attempts = 50, deadline = None):
+                             # instancia del problema, parámetro de control de la RCL, semilla, booleano para normalizar distancias estudiante-empresa, 
+                             # nº máximo de intentos para construir una solución factible, tiempo límite absoluto (prioritario sobre max_attempts)
     """
-    Construye una solución factible mediante un constructivo greedy-randomized.
-    Reintenta varias veces si una trayectoria constructiva no termina en solución válida.
+    Construye una solución factible (estudiantes, plazas, profesores) mediante un proceso greedy-randomized. 
+    Si una construcción falla, reintenta desde cero hasta encontrar una solución válida, agotar tiempo o intentos
     """
-    if not (0.0 <= alpha_rcl <= 1.0):
-        raise ValueError(f"alpha_rcl must be in [0,1], got {alpha_rcl}")
+    # Validación e inicialización general (acelerar constructivo)
+    if not (0.0 <= alpha_rcl <= 1.0): 
+        raise ValueError(f"alpha_rcl must be in [0,1], got {alpha_rcl}") # Validar rango de alpha_rcl
 
-    rng = random.Random(seed)
-    _, _, g_matrix = _precompute_greedy_matrix(problem, normalize_student_dist=normalize_student_dist)
-    dep_data = _preprocess_dependencies(problem)
+    rng = random.Random(seed) # Generador aleatorio para decisiones del constructivo
+    _, _, g_matrix = _precompute_greedy_matrix(problem, normalize_student_dist=normalize_student_dist) # Precalcular matriz g para acelerar el constructivo
+    dep_data = _preprocess_dependencies(problem) # Preprocesar dependencias
 
     placement_to_block = dep_data["placement_to_block"]
     dep_blocks = dep_data["dep_blocks"]
 
+    # Reintentos completos de construcción
     for _ in range(max_attempts):
         if deadline is not None and time.time() >= deadline:
             break
-
+        
+        # Estado inicial de un intento
         assignments = [-1] * problem.n_students
         used_placements = [False] * problem.n_placements
         company_load = [0] * problem.n_companies
         unassigned_students = list(range(problem.n_students))
         rng.shuffle(unassigned_students)
 
-        # Bloque de dependencia abierto que debe completarse contiguamente
+        # Estado auxiliar para dependencias
         current_open_block = None
         remaining_in_open_block = set()
 
         success = True
 
+        # Bucle principal de construcción --> Cada vuelta de este bucle añade una nueva asignación estudiante–plaza a la solución
         while unassigned_students:
             if deadline is not None and time.time() >= deadline:
                 success = False
                 break
 
-            # Si hay un bloque abierto, solo se puede elegir dentro de él
+            # Determinar qué plazas se pueden considerar en este momento
             if current_open_block is not None:
-                candidate_placements = list(remaining_in_open_block)
+                candidate_placements = list(remaining_in_open_block) # Si hay un bloque de dependencia abierto, solo se puede elegir entre las plazas que faltan de ese bloque
             else:
-                candidate_placements = [j for j in range(problem.n_placements) if not used_placements[j]]
+                candidate_placements = [j for j in range(problem.n_placements) if not used_placements[j]] # Si no hay bloque abierto, se pueden considerar todas las plazas no usadas
 
             remaining_students_after = len(unassigned_students) - 1
 
+            # Generar todas las parejas factibles (i, j)
             candidate_pairs = []
             for i in unassigned_students:
                 for j in candidate_placements:
-                    if _is_candidate_locally_feasible(
-                        problem=problem,
-                        j=j,
-                        company_load=company_load,
-                        used_placements=used_placements,
-                        remaining_students_after=remaining_students_after,
-                        dep_data=dep_data,
-                        current_open_block=current_open_block
-                    ):
+                    if _is_candidate_locally_feasible(problem=problem, j=j, company_load=company_load, used_placements=used_placements, remaining_students_after=remaining_students_after, dep_data=dep_data,
+                                                      current_open_block=current_open_block): # Para cada estudiante pendiente y cada plaza candidata, comprueba si esa asignación es localmente viable
                         candidate_pairs.append((i, j))
 
+            # Intento bloqueado porque no hay ninguna pareja localmente factible
             if not candidate_pairs:
                 success = False
                 break
 
-            # RCL y elección aleatoria
+            # Construir la RCL a partir de las parejas factibles
             rcl = _compute_rcl(candidate_pairs, g_matrix, alpha_rcl=alpha_rcl)
             if not rcl:
                 success = False
                 break
-
+            
+            # Elección aleatoria dentro de la RCL
             i_sel, j_sel = rng.choice(rcl)
 
-            # Aplicar la asignación
+            # Aplicar la asignación elegida (actualiza el estado de la construcción)
             assignments[i_sel] = j_sel
             used_placements[j_sel] = True
             k = int(problem.placement_company[j_sel])
             company_load[k] += 1
             unassigned_students.remove(i_sel)
 
-            # Gestión de dependencias
+            # Actualiza el estado de dependencias --> bloque nuevo = se inicializa el seguimiento de ese bloque; bloque abierto = se marca esa plaza como completada dentro del bloque; se completa un bloque = se cierra
             block_id = placement_to_block[j_sel]
             if current_open_block is None and block_id != -1:
                 current_open_block = block_id
                 remaining_in_open_block = set(dep_blocks[block_id])
 
+            
             if current_open_block is not None and j_sel in remaining_in_open_block:
                 remaining_in_open_block.remove(j_sel)
                 if not remaining_in_open_block:
@@ -361,10 +340,17 @@ def construct_grasp_solution(
 
         # Reconstrucción completa de la solución
         sol = _build_solution_from_assignment_vector(problem, assignments, rng)
-        if sol is not None and sol.validate():
-            return sol
 
+        # Comprobar si el intento ha terminado con éxito --> si no, se reintenta desde cero
+        if sol is not None and sol.validate():
+            return sol # solución factible completa, faltándole la optimización que añade la búsqueda local
+
+    # Fallo final tras agotar intentos
     raise ValueError(f"Failed to construct a feasible GRASP solution after {max_attempts} attempts")
+
+
+
+######################################################
 
 
 # --------------------------------------------------
