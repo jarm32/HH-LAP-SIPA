@@ -349,90 +349,81 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
     raise ValueError(f"Failed to construct a feasible GRASP solution after {max_attempts} attempts")
 
 
-
-######################################################
-
-
 # --------------------------------------------------
 # Búsqueda local
 # --------------------------------------------------
 
-def local_search_swap_first_improvement(
-    initial_sol: Solution,
-    weights: ObjectiveWeights,
-    seed=None,
-    normalize_student_dist: bool = True,
-    normalize_supervision_dist: bool = True,
-    deadline=None,
-):
+def local_search_swap_first_improvement(initial_sol, weights, seed = None, normalize_student_dist = True, normalize_supervision_dist = True, deadline = None):
+                                       # solución sobre la que trabajar, pesos de los objetivos, semilla, booleanos para normalizar distancias estudiante-empresa y supervisión, tiempo límite absoluto
     """
-    Búsqueda local por swap entre dos estudiantes.
-    Estrategia: first improvement.
-    Acepta un vecino si:
-    - sigue siendo válido
-    - mejora el objective_value escalar auxiliar
+    Aplica búsqueda local basada en swap entre dos estudiantes. Explora vecinos y acepta el primero (first improvement)
+    que mejora el valor escalar auxiliar, ya que este proporciona una dirección clara de avance, 
+    mientras que el filtrado multiobjetivo real se delega en el Pareto externo.
+
+    Este proceso se repite hasta que no se encuentran mejoras, lo que indica un óptimo local respecto a esta vecindad
     """
+    # Inicialización y evaluación de la solución inicial
     rng = random.Random(seed)
     current_sol = _copy_solution(initial_sol)
-
-    current_eval = evaluate_solution_scalar(
-        current_sol,
-        weights,
-        normalize_student_dist=normalize_student_dist,
-        normalize_supervision_dist=normalize_supervision_dist,
-    )
+    current_eval = evaluate_solution_scalar(current_sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
     if not current_eval.get("valid", False):
-        return current_sol, 0
+        return current_sol, 0 # Si no es válida, no hace búsqueda local
 
+    # Inicialización de variables
     current_obj = float(current_eval["objective_value"])
     improvements = 0
 
-    while True:
-        if deadline is not None and time.time() >= deadline:
+    # Bucle principal de búsqueda local
+    while True: # Se repite mientras se encuentren mejoras
+        # Sale si se alcanza el límite de tiempo
+        if deadline is not None and time.time() >= deadline: 
             break
-
+        
+        # Generación de vecinos (pares de estudiantes)
         improved = False
         students = list(range(current_sol.problem.n_students))
         pairs = list(combinations(students, 2))
         rng.shuffle(pairs)
 
+        # Copia de la asignación actual student_to_placement
         current_assignments = list(current_sol.student_to_placement)
 
+        # Exploración de vecinos
         for i, j in pairs:
+            # Sale si se alcanza el límite de tiempo
             if deadline is not None and time.time() >= deadline:
                 break
 
-            # Swap
+            # Construcción del vecino: Swap
             neighbor_assignments = list(current_assignments)
             neighbor_assignments[i], neighbor_assignments[j] = neighbor_assignments[j], neighbor_assignments[i]
 
+            # Reconstrucción de la solución
             neighbor_sol = _build_solution_from_assignment_vector(current_sol.problem, neighbor_assignments, rng)
-            if neighbor_sol is None:
+            if neighbor_sol is None: # Si no es factible, se descarta
                 continue
-
-            neighbor_eval = evaluate_solution_scalar(
-                neighbor_sol,
-                weights,
-                normalize_student_dist=normalize_student_dist,
-                normalize_supervision_dist=normalize_supervision_dist,
-            )
+            
+            # Evaluación del vecino para comparar con la solución actual
+            neighbor_eval = evaluate_solution_scalar(neighbor_sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
             if not neighbor_eval.get("valid", False):
                 continue
 
             neighbor_obj = float(neighbor_eval["objective_value"])
 
-            # First improvement
+            # Criterio de aceptación: First improvement
             if neighbor_obj > current_obj + 1e-12:
+                # Actualización de la solución
                 current_sol = neighbor_sol
                 current_obj = neighbor_obj
                 improvements += 1
                 improved = True
                 break
-
+        
+        # Fin del ciclo si no hay mejora
         if not improved:
             break
 
-    return current_sol, improvements
+    return current_sol, improvements # tupla: (solución mejorada tras búsqueda local, número de mejoras realizadas durante la búsqueda local)
 
 
 # --------------------------------------------------
@@ -440,38 +431,32 @@ def local_search_swap_first_improvement(
 # --------------------------------------------------
 
 def run_grasp(
-    problem,
-    weights,
-    alpha_rcl: float = 0.3,
-    time_limit_seconds: float = 60,
-    max_iterations=None,
-    max_pareto_size=None,
-    base_seed=None,
-    normalize_student_dist: bool = True,
-    normalize_supervision_dist: bool = True,
-    constructive_max_attempts: int = 50,
-    verbose: bool = True,
+    problem,                           # Instancia del problema
+    weights,                           # Pesos para la evaluación escalar auxiliar
+    alpha_rcl = 0.3,                   # Parámetro de la RCL
+    time_limit_seconds = 60,           # Límite de tiempo
+    max_iterations = None,             # Máximo de iteraciones
+    max_pareto_size = None,            # Tamaño máximo opcional del Pareto
+    base_seed = None,                  # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
+    normalize_student_dist = True,     # booleano para normalizar distancias estudiante-empresa
+    normalize_supervision_dist = True, # booleano para normalizar distancias profesor-plaza
+    constructive_max_attempts = 50,    # Máximo de intentos del constructivo
+    verbose = True                     # booleano para imprimir estadísticas durante la ejecución
 ):
     """
-    Ejecuta GRASP:
-      1. Constructivo greedy-randomized
-      2. Búsqueda local por swap
-      3. Registro en Pareto externo de la solución final mejorada
-
-    Devuelve:
-      {
-        "pareto_set": ...,
-        "stats": ...
-      }
+    Ejecuta repetidamente el esquema GRASP completo (constructivo + búsqueda local + registro en Pareto)
+    hasta que se cumple el criterio de parada, acumulando además estadísticas de la ejecución
     """
+    # Validaciones iniciales
     if time_limit_seconds <= 0:
-        raise ValueError("time_limit_seconds must be > 0")
+        raise ValueError("time_limit_seconds must be > 0") # Tiempo límite positivo
 
     if not (0.0 <= alpha_rcl <= 1.0):
-        raise ValueError(f"alpha_rcl must be in [0,1], got {alpha_rcl}")
+        raise ValueError(f"alpha_rcl must be in [0,1], got {alpha_rcl}") # Validar rango de alpha_rcl
 
-    weights.validate()
+    weights.validate() # Pesos válidos para evaluación escalar
 
+    # Inicialización global del tiempo, contadores y Pareto
     start = time.time()
     deadline = start + time_limit_seconds
 
@@ -483,70 +468,58 @@ def run_grasp(
     local_improvements_total = 0
     pareto_set = []
 
+    # Bucle principal del GRASP (construir, mejorar, registrar)
     while True:
+        # Criterios de parada
         now = time.time()
-        if now >= deadline:
+        if now >= deadline: # Tiempo
             break
-        if max_iterations is not None and iteration >= max_iterations:
+        if max_iterations is not None and iteration >= max_iterations: # Iteraciones
             break
-
+        
+        # Semilla e iteración
         seed = None if base_seed is None else base_seed + iteration
         iteration += 1
         generated += 1
 
         try:
-            # Constructivo
-            constructed_sol = construct_grasp_solution(
-                problem=problem,
-                alpha_rcl=alpha_rcl,
-                seed=seed,
-                normalize_student_dist=normalize_student_dist,
-                max_attempts=constructive_max_attempts,
-                deadline=deadline,
-            )
+            # Fase constructiva
+            constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist, max_attempts=constructive_max_attempts, deadline=deadline)
 
             # Búsqueda local
             ls_seed = None if seed is None else seed + 1000000
-            improved_sol, n_improvements = local_search_swap_first_improvement(
-                initial_sol=constructed_sol,
-                weights=weights,
-                seed=ls_seed,
-                normalize_student_dist=normalize_student_dist,
-                normalize_supervision_dist=normalize_supervision_dist,
-                deadline=deadline,
-            )
+            improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist, 
+                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline)
 
+            # Validación de la solución mejorada
             if not improved_sol.validate():
                 failures += 1
                 continue
-
+            
+            # Actualización de estadísticas de factibilidad
             feasible += 1
             local_improvements_total += n_improvements
 
-            # Registrar solo la solución final mejorada
-            reg = register_solution_in_pareto(
-                sol=improved_sol,
-                pareto_set=pareto_set,
-                iteration=iteration,
-                seed=seed,
-                weights=weights,
-                max_pareto_size=max_pareto_size,
-                normalize_student_dist=normalize_student_dist,
-                normalize_supervision_dist=normalize_supervision_dist,
-            )
+            # Registro en Pareto externo de la solución final mejorada
+            reg = register_solution_in_pareto(sol=improved_sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
+                                              normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
+            # Validación del registro
             if not reg["valid"]:
                 failures += 1
                 continue
-
+            
+            # Actualización del Pareto y de inserciones
             pareto_set = reg["pareto_set"]
             if reg["was_inserted"]:
                 inserted += 1
 
+        # Gestión de errores globales
         except Exception:
             failures += 1
             continue
-
+        
+        # Salida de progreso
         if verbose and iteration % 10 == 0:
             print(
                 f"[it={iteration}] "
@@ -554,7 +527,7 @@ def run_grasp(
                 f"pareto_size={len(pareto_set)} local_improvements={local_improvements_total}"
             )
 
-    total_time = time.time() - start
+    total_time = time.time() - start # Tiempo total final
 
     return {
         "pareto_set": pareto_set,
@@ -567,6 +540,6 @@ def run_grasp(
             "pareto_size": len(pareto_set),
             "elapsed_seconds": total_time,
             "alpha_rcl": alpha_rcl,
-            "local_improvements_total": local_improvements_total,
-        },
-    }
+            "local_improvements_total": local_improvements_total
+        }
+    } # Diccionario con el conjunto Pareto final y estadísticas de la ejecución
