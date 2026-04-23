@@ -165,17 +165,6 @@ def _build_solution_from_assignment_vector(problem, assignments, rng):
     return sol # reconstrucción completa de la solución a partir del vector de asignaciones student_to_placement, con validaciones y asignación de profesores
 
 
-def _remaining_min_demand(problem, company_load):
-                         # instancia del problema, carga actual por empresa
-    """
-    Calcula cuánto falta para cumplir los mínimos de las empresas
-    """
-    total = 0
-    for k in range(problem.n_companies):
-        total += max(int(problem.company_min[k]) - int(company_load[k]), 0)
-    return total # suma de los mínimos (estudiantes) pendientes por cubrir para cada empresa, dada la carga actual
-
-
 def _is_candidate_locally_feasible(problem, j, company_load, used_placements, remaining_students_after, dep_data, current_open_block):
                                    # instancia del problema, plaza candidata, carga actual por empresa, vector de plazas usadas, 
                                    # nº de estudiantes que quedarían sin asignar tras elegir esta plaza, datos de dependencias (preprocesado), bloque de dependencia abierto (si hay)
@@ -211,12 +200,6 @@ def _is_candidate_locally_feasible(problem, j, company_load, used_placements, re
         # La empresa del bloque debe soportar todas las plazas del bloque
         if company_load[k] + block_size > int(problem.company_max[k]):
             return False
-
-    # Comprobar que tras elegir j siguen siendo alcanzables los mínimos
-    company_load_tmp = list(company_load)
-    company_load_tmp[k] += 1
-    if _remaining_min_demand(problem, company_load_tmp) > remaining_students_after:
-        return False
 
     return True
 
@@ -519,8 +502,12 @@ def run_grasp(
             failures += 1
             continue
         
+        # Límite de fallos acumulados para evitar bucles infinitos aparentes si no hay soluciones factibles
+        if failures >= 100:
+            break
+        
         # Salida de progreso
-        if verbose and iteration % 10 == 0:
+        if verbose and iteration % 5 == 0:
             print(
                 f"[it={iteration}] "
                 f"generated={generated} feasible={feasible} failures={failures} "

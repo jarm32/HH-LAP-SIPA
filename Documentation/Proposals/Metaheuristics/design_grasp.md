@@ -67,7 +67,7 @@ La Restricted Candidate List (RCL) se construirá a partir de las mejores asigna
 
 ### 4.1. Parámetro de la RCL
 
-Para este algoritmo se usará una RCL por umbral relativo, ya que se adapta mejor a instancias de distinto tamaño o escala que una RCL de tamaño fijo. Este umbral irá controlado por un parámetro `alpha_rcl = 0.3` (introduce un nivel moderado de aleatoriedad, manteniendo un equilibrio entre exploración y explotación). No se empleará una RCL de cardinalidad fija, ya que ese enfoque depende más del tamaño concreto del conjunto candidato en cada iteración y resulta menos adaptable entre instancias.
+Para este algoritmo se usará una RCL por umbral relativo, ya que se adapta mejor a instancias de distinto tamaño o escala que una RCL de tamaño fijo. Este umbral irá controlado por un parámetro `alpha_rcl = 0.5` (introduce un nivel moderado de aleatoriedad, facilitando la exploración para encontrar soluciones factibles en instancias difíciles). No se empleará una RCL de cardinalidad fija, ya que ese enfoque depende más del tamaño concreto del conjunto candidato en cada iteración y resulta menos adaptable entre instancias.
 
 Además, sea:
 

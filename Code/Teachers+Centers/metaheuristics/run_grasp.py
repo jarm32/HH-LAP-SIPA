@@ -37,7 +37,7 @@ def main():
         result = run_grasp(
             problem=problem,
             weights=weights,
-            alpha_rcl=0.3,
+            alpha_rcl=0.5,
             time_limit_seconds=300,
             max_iterations=None,
             max_pareto_size=None,
