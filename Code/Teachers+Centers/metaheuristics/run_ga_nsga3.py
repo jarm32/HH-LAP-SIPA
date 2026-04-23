@@ -1,7 +1,7 @@
 # Script de ejecución de NSGA-III --> carga una instancia, ejecuta el algoritmo genético multiobjetivo y muestra/guarda el conjunto de Pareto + estadísticas
 
 # cd C:\Code\VRAIN-practicas\Code\Teachers+Centers
-# python -m metaheuristics.run_ga_nsga3_v1
+# python -m metaheuristics.run_ga_nsga3
 
 # --------------------------------------------------
 # Librerías
@@ -11,6 +11,7 @@ from metaheuristics.scripts.ga_nsga3 import run_nsga3
 from tools.multiobjective_search import print_pareto_set, save_results_to_txt
 from tools.evaluator import ObjectiveWeights
 from tools.problem import load_instance
+
 
 # --------------------------------------------------
 # Ejecución principal

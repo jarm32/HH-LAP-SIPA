@@ -3,12 +3,19 @@
 # cd C:\Code\VRAIN-practicas\Code\Teachers+Centers
 # python -m metaheuristics.run_random_baseline
 
+# --------------------------------------------------
 # Librerías
+# --------------------------------------------------
+
 from metaheuristics.scripts.random_feasible_fixing import generate_random_feasible_fixing
 from tools.multiobjective_search import random_search_pareto, print_pareto_set, save_results_to_txt
 from tools.evaluator import ObjectiveWeights
 from tools.problem import load_instance
 
+
+# --------------------------------------------------
+# Ejecución principal
+# --------------------------------------------------
 
 def main():
     """

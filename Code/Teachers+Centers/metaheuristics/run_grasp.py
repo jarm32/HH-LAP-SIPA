@@ -1,5 +1,4 @@
-# Script de ejecución de GRASP --> carga una instancia, ejecuta el algoritmo GRASP
-# y muestra/guarda el conjunto de Pareto + estadísticas
+# Script de ejecución de GRASP --> carga una instancia, ejecuta el algoritmo GRASP y muestra/guarda el conjunto de Pareto + estadísticas
 
 # cd C:\Code\VRAIN-practicas\Code\Teachers+Centers
 # python -m metaheuristics.run_grasp
@@ -20,20 +19,13 @@ from tools.problem import load_instance
 
 def main():
     """
-    Carga una o varias instancias, ejecuta GRASP y muestra/guarda resultados
+    Carga una instancias, ejecuta GRASP y muestra/guarda resultados
     """
-    # Algoritmo empleado
+    # Algoritmo empleado, pesos de los objetivos, instancia sobre la que se trabaja y carga del problema
     modelo = "grasp"
 
-    # Pesos para la evaluación escalar auxiliar
-    weights = ObjectiveWeights(
-        alpha=0.35,
-        beta=0.35,
-        gamma=0.20,
-        delta=0.10,
-    )
+    weights = ObjectiveWeights(alpha=0.35, beta=0.35, gamma=0.20, delta=0.10)
 
-    # Instancias a ejecutar
     for i in [2, 4, 6]:
         instance_path = f"inst_creator/output/problem_instance_ext_{i}00_2.txt"
         instance_name = instance_path.split("/")[-1]
@@ -66,14 +58,7 @@ def main():
 
         # Guardar resultados
         output_file = f"results/results_{modelo}_{instance_name}"
-        save_results_to_txt(
-            filepath=output_file,
-            instance_name=instance_name,
-            stats=result["stats"],
-            pareto_set=result["pareto_set"],
-            model=modelo,
-        )
-
+        save_results_to_txt(filepath=output_file, instance_name=instance_name, stats=result["stats"], pareto_set=result["pareto_set"], model=modelo)
         print(f"\nResults saved in: {output_file}")
 
 
