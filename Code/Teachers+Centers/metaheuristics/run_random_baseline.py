@@ -22,11 +22,11 @@ def main():
     Carga una instancia, ejecuta la búsqueda multiobjetivo con la heurística aleatoria y muestra/guarda resultados
     """
     # Algoritmo empleado
-    modelo = "RS_baseline"
+    modelo = "randomsearch"
 
     for i in [2,4,6]:
         # Instancia escogida + carga
-        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_2.txt"
+        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_0.txt"
         instance_name = instance_path.split("/")[-1]
         problem = load_instance(instance_path)
 
@@ -57,18 +57,21 @@ def main():
         # Imprimir Pareto
         print_pareto_set(result["pareto_set"])
 
-        # Archivo salida
-        output_file = f"results/results_{modelo}_{instance_name}"
-        
+        # Rutas de salida separadas para estadísticas y asignaciones
+        statistics_file = f"results/statistics/statistics_{modelo}_{instance_name}"
+        assignments_file = f"results/assignments/assignments_{modelo}_{instance_name}"
+
         save_results_to_txt(
-            filepath=output_file,
+            statistics_filepath=statistics_file,
+            assignments_filepath=assignments_file,
             instance_name=instance_name,
             stats=result["stats"],
             pareto_set=result["pareto_set"],
             model=modelo
         )
 
-        print(f"\nResults saved in: {output_file}")
+        print(f"\nStatistics saved in: {statistics_file}")
+        print(f"Assignments saved in: {assignments_file}")
 
 
 if __name__ == "__main__":

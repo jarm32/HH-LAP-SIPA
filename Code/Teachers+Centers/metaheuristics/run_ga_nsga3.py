@@ -58,10 +58,21 @@ def main():
         # Mostrar Pareto
         print_pareto_set(result["pareto_set"])
 
-        # Guardar resultados
-        output_file = f"results/results_{modelo}_{instance_name}"
-        save_results_to_txt(filepath=output_file, instance_name=instance_name, stats=result["stats"], pareto_set=result["pareto_set"], model=modelo)
-        print(f"\nResults saved in: {output_file}")
+        # Guardar resultados en archivos separados
+        statistics_file = f"results/statistics/statistics_{modelo}_{instance_name}"
+        assignments_file = f"results/assignments/assignments_{modelo}_{instance_name}"
+
+        save_results_to_txt(
+            statistics_filepath=statistics_file,
+            assignments_filepath=assignments_file,
+            instance_name=instance_name,
+            stats=result["stats"],
+            pareto_set=result["pareto_set"],
+            model=modelo
+        )
+
+        print(f"\nStatistics saved in: {statistics_file}")
+        print(f"Assignments saved in: {assignments_file}")
 
 
 if __name__ == "__main__":
