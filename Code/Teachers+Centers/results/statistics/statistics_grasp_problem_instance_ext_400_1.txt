@@ -3,18 +3,41 @@
 Instance: problem_instance_ext_400_1.txt
 
 ---- STATS ----
-iterations: 1
-generated: 1
-feasible: 0
-failures: 1
-inserted_into_pareto: 0
-pareto_size: 0
-elapsed_seconds: 300.00342559814453
+iterations: 10
+generated: 10
+feasible: 10
+failures: 0
+inserted_into_pareto: 8
+fallback_used: 5
+pareto_size: 8
+elapsed_seconds: 300.01350951194763
 alpha_rcl: 0.5
-local_improvements_total: 0
+local_improvements_total: 90
+constructive_max_attempts: 5
+constructive_time_limit_seconds: 30
+local_max_neighbors_per_pass: 1000
+local_max_improvements: 30
+use_random_fallback: True
+random_fallback_max_attempts: 50
 
 ---- SUMMARY ----
-Pareto set vacío
+max_tau: 244.637575
+mean_tau: 173.727533
+max_eta: 174.499000
+mean_eta: 118.251738
+max_lbar: 4.138471
+mean_lbar: 4.070233
+max_sigma: 0.212805
+mean_sigma: 0.170911
+max_objective_value: 143.552718
+mean_objective_value: 101.361607
 
 ---- PARETO SET ----
-Pareto set vacío
+[1] iter=1 seed=1234 obj=33.055900 | tau=69.639769, eta=27.171100, lbar=4.053390, sigma=0.172262
+[2] iter=2 seed=1235 obj=141.860970 | tau=233.580318, eta=174.119500, lbar=4.101468, sigma=0.136724
+[3] iter=3 seed=1236 obj=143.552718 | tau=244.637575, eta=167.930600, lbar=4.138471, sigma=0.184492
+[4] iter=4 seed=1237 obj=142.545141 | tau=238.568680, eta=171.069500, lbar=4.034707, sigma=0.212805
+[5] iter=5 seed=1238 obj=139.288852 | tau=225.858644, eta=174.499000, lbar=4.096358, sigma=0.170515
+[6] iter=6 seed=1239 obj=35.559983 | tau=72.531939, eta=31.439100, lbar=4.068847, sigma=0.161116
+[7] iter=7 seed=1240 obj=140.806123 | tau=234.616261, eta=170.031400, lbar=4.012700, sigma=0.180178
+[8] iter=10 seed=1243 obj=34.223169 | tau=70.387082, eta=29.753700, lbar=4.055925, sigma=0.149193

@@ -499,6 +499,7 @@ def run_grasp(
     failures = 0
     inserted = 0
     local_improvements_total = 0
+    fallback_used = 0
     pareto_set = []
 
     # Bucle principal del GRASP (construir, mejorar, registrar)
@@ -611,19 +612,25 @@ def run_grasp(
                   f"local_improvements={local_improvements_total} "
                   f"fallback_used={fallback_used}")
 
-    total_time = time.time() - start       
+    total_time = time.time() - start
 
-    return {
-        "pareto_set": pareto_set,
-        "stats": {
-            "iterations": iteration,
-            "generated": generated,
-            "feasible": feasible,
-            "failures": failures,
-            "inserted_into_pareto": inserted,
-            "pareto_size": len(pareto_set),
-            "elapsed_seconds": total_time,
-            "alpha_rcl": alpha_rcl,
-            "local_improvements_total": local_improvements_total
-        }
-    } # Diccionario con el conjunto Pareto final y estadísticas de la ejecución
+    return {"pareto_set": pareto_set,
+            "stats": {
+                "iterations": iteration,
+                "generated": generated,
+                "feasible": feasible,
+                "failures": failures,
+                "inserted_into_pareto": inserted,
+                "fallback_used": fallback_used,
+                "pareto_size": len(pareto_set),
+                "elapsed_seconds": total_time,
+                "alpha_rcl": alpha_rcl,
+                "local_improvements_total": local_improvements_total,
+                "constructive_max_attempts": constructive_max_attempts,
+                "constructive_time_limit_seconds": constructive_time_limit_seconds,
+                "local_max_neighbors_per_pass": local_max_neighbors_per_pass,
+                "local_max_improvements": local_max_improvements,
+                "use_random_fallback": use_random_fallback,
+                "random_fallback_max_attempts": random_fallback_max_attempts
+            }
+        } # Diccionario con el conjunto Pareto final, estadísticas de ejecución y parámetros usados

@@ -45,8 +45,13 @@ def main():
                 base_seed=1234,
                 normalize_student_dist=True,
                 normalize_supervision_dist=True,
-                constructive_max_attempts=50,
-                verbose=True,
+                constructive_max_attempts=5,
+                constructive_time_limit_seconds=30,
+                use_random_fallback=True,
+                random_fallback_max_attempts=50,
+                local_max_neighbors_per_pass=1000,
+                local_max_improvements=30,
+                verbose=True
             )
 
             # Mostrar estadísticas

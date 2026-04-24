@@ -3,27 +3,34 @@
 Instance: problem_instance_ext_200_2.txt
 
 ---- STATS ----
-iterations: 55
-generated: 55
-feasible: 54
-failures: 1
-inserted_into_pareto: 38
-pareto_size: 31
-elapsed_seconds: 300.00175881385803
+iterations: 61
+generated: 61
+feasible: 61
+failures: 0
+inserted_into_pareto: 42
+fallback_used: 0
+pareto_size: 35
+elapsed_seconds: 300.0017714500427
 alpha_rcl: 0.5
-local_improvements_total: 146
+local_improvements_total: 166
+constructive_max_attempts: 5
+constructive_time_limit_seconds: 30
+local_max_neighbors_per_pass: 1000
+local_max_improvements: 30
+use_random_fallback: True
+random_fallback_max_attempts: 50
 
 ---- SUMMARY ----
 max_tau: 127.708050
-mean_tau: 119.144678
+mean_tau: 119.339426
 max_eta: 89.271900
-mean_eta: 86.264881
-max_lbar: 3.030265
-mean_lbar: 2.833736
+mean_eta: 86.161991
+max_lbar: 3.045346
+mean_lbar: 2.841340
 max_sigma: 0.297453
-mean_sigma: 0.186096
+mean_sigma: 0.180962
 max_objective_value: 73.457696
-mean_objective_value: 71.307989
+mean_objective_value: 71.339132
 
 ---- PARETO SET ----
 [1] iter=1 seed=1234 obj=72.364614 | tau=122.890348, eta=85.590300, lbar=2.958827, sigma=0.118473
@@ -57,3 +64,7 @@ mean_objective_value: 71.307989
 [29] iter=45 seed=1278 obj=70.878823 | tau=121.214978, eta=82.973500, lbar=2.867532, sigma=0.136379
 [30] iter=50 seed=1283 obj=71.392546 | tau=119.430587, eta=86.293200, lbar=2.987741, sigma=0.132312
 [31] iter=53 seed=1286 obj=73.457696 | tau=124.365085, eta=87.163400, lbar=2.786249, sigma=0.200238
+[32] iter=55 seed=1288 obj=71.163232 | tau=117.687128, eta=87.396800, lbar=3.045346, sigma=0.070730
+[33] iter=56 seed=1289 obj=71.212441 | tau=119.706733, eta=85.461900, lbar=2.914649, sigma=0.136503
+[34] iter=57 seed=1290 obj=72.893750 | tau=125.291982, eta=84.649700, lbar=2.829094, sigma=0.200193
+[35] iter=59 seed=1292 obj=71.052549 | tau=120.709072, eta=83.950000, lbar=2.811992, sigma=0.157279
