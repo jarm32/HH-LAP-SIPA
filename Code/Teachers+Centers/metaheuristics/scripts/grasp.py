@@ -235,20 +235,14 @@ def _balanced_scalar_score(eval_data, problem, weights):
     """
     n_students = max(int(problem.n_students), 1)
     n_professors = max(int(problem.n_professors), 1)
+    n_centers = max(int(problem.n_centers), 1)
 
-    # Si el problema tiene centros definidos, se usa ese número. Si no, sigma_sum se deja tal cual para evitar depender de un atributo inexistente
-    n_centers = getattr(problem, "n_centers", None)
-    if n_centers is None:
-        n_centers = getattr(problem, "n_schools", None)
-    if n_centers is None:
-        n_centers = 1
-    n_centers = max(int(n_centers), 1)
+    components = eval_data["components"]
 
-    # Normalización de cada componente por su factor de escala
-    tau_norm = float(eval_data["tau_sum"]) / n_students
-    eta_norm = float(eval_data["eta_sum"]) / n_students
-    lbar_norm = float(eval_data["lbar_sum"]) / n_professors
-    sigma_norm = float(eval_data["sigma_sum"]) / n_centers
+    tau_norm = float(components["tau_sum"]) / n_students
+    eta_norm = float(components["eta_sum"]) / n_students
+    lbar_norm = float(components["lbar_sum"]) / n_professors
+    sigma_norm = float(components["sigma_sum"]) / n_centers
 
     return (
         weights.alpha * tau_norm
@@ -552,13 +546,16 @@ def run_grasp(
                 inserted += 1
 
         # Gestión de errores globales
-        except Exception:
+        except Exception as e:
             failures += 1
-            continue
+            if verbose:
+                print(f"[GRASP failure] iteration={iteration}, seed={seed}, error={repr(e)}")
         
-        # Límite de fallos acumulados para evitar bucles infinitos aparentes si no hay soluciones factibles
-        if failures >= 100:
-            break
+            # Límite de fallos acumulados para evitar bucles infinitos aparentes si no hay soluciones factibles
+            if failures >= 100:
+                break
+
+            continue
         
         # Salida de progreso
         if verbose and iteration % 5 == 0:
