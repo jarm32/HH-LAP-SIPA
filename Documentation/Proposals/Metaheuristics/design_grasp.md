@@ -88,9 +88,20 @@ Aunque existen vecindarios más potentes, también son bastante más complejos y
 
 ### 5.1 Aceptación de vecinos
 
-La búsqueda local aceptará un vecino cuando la solución resultante siga siendo válida y mejore el valor escalar auxiliar de la evaluación. Es decir, la mejora local usará una guía monobjetivo auxiliar para decidir avances, mientras que la calidad final del algoritmo seguirá midiéndose mediante Pareto externo multiobjetivo.
+La búsqueda local aceptará un vecino cuando la solución resultante siga siendo válida y mejore un valor escalar auxiliar normalizado de la evaluación. Es decir, la mejora local usará una guía monobjetivo auxiliar para decidir avances, mientras que la calidad final del algoritmo seguirá midiéndose mediante Pareto externo multiobjetivo.
 
 El criterio escalar auxiliar se emplea en lugar de la dominancia Pareto dentro de la búsqueda local porque proporciona una dirección clara de mejora en cada movimiento. Si se utilizara dominancia Pareto como criterio de aceptación, muchos vecinos resultarían no comparables con la solución actual, lo que dificultaría el avance de la búsqueda y podría bloquearla prematuramente. Por tanto, el valor escalar auxiliar se emplea únicamente como criterio de movimiento dentro de la búsqueda local, mientras que la selección multiobjetivo real de soluciones se delega en el Pareto externo.
+
+Dado que `tau_sum` y `eta_sum` son sumas sobre estudiantes, mientras que `lbar_sum` y `sigma_sum` son agregados asociados a profesores y centros, sus magnitudes son muy diferentes. Para evitar que las utilidades estudiante–empresa dominen completamente el criterio de aceptación, la búsqueda local utilizará una versión normalizada del valor escalar auxiliar.
+
+Conceptualmente, el score de aceptación será: `score = alpha * tau_norm + beta * eta_norm - gamma * lbar_norm - delta * sigma_norm`, donde:
+
+- `tau_norm = tau_sum / n_students`
+- `eta_norm = eta_sum / n_students`
+- `lbar_norm = lbar_sum / n_professors`
+- `sigma_norm = sigma_sum / n_centers`
+
+De esta forma, el constructivo GRASP se mantiene guiado por `tau` y `eta`, al operar únicamente sobre asignaciones estudiante–plaza, mientras que la búsqueda local incorpora de forma más equilibrada los cuatro objetivos una vez reconstruida la asignación de profesores.
 
 ### 5.2 Estrategia de exploración
 

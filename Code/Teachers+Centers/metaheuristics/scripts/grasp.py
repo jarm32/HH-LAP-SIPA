@@ -222,6 +222,42 @@ def _compute_rcl(candidate_pairs, g_matrix, alpha_rcl):
     return rcl # lista de tuplas (i, j) que entran en la RCL
 
 
+def _balanced_scalar_score(eval_data, problem, weights):
+                          # datos de evaluación de la solución, instancia del problema, pesos para la combinación escalar
+    """
+    Calcula un score escalar normalizado para equilibrar la influencia de los cuatro objetivos
+    durante la búsqueda local.
+
+    Normaliza:
+    - tau_sum y eta_sum por número de estudiantes
+    - lbar_sum por número de profesores
+    - sigma_sum por número de centros, si existe; si no, se deja sin normalizar
+    """
+    n_students = max(int(problem.n_students), 1)
+    n_professors = max(int(problem.n_professors), 1)
+
+    # Si el problema tiene centros definidos, se usa ese número. Si no, sigma_sum se deja tal cual para evitar depender de un atributo inexistente
+    n_centers = getattr(problem, "n_centers", None)
+    if n_centers is None:
+        n_centers = getattr(problem, "n_schools", None)
+    if n_centers is None:
+        n_centers = 1
+    n_centers = max(int(n_centers), 1)
+
+    # Normalización de cada componente por su factor de escala
+    tau_norm = float(eval_data["tau_sum"]) / n_students
+    eta_norm = float(eval_data["eta_sum"]) / n_students
+    lbar_norm = float(eval_data["lbar_sum"]) / n_professors
+    sigma_norm = float(eval_data["sigma_sum"]) / n_centers
+
+    return (
+        weights.alpha * tau_norm
+        + weights.beta * eta_norm
+        - weights.gamma * lbar_norm
+        - weights.delta * sigma_norm
+    ) # score escalar combinado, con normalización para equilibrar la influencia de cada objetivo durante la búsqueda local
+
+
 # --------------------------------------------------
 # Constructivo GRASP
 # --------------------------------------------------
@@ -340,9 +376,10 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
                                        # solución sobre la que trabajar, pesos de los objetivos, semilla, booleanos para normalizar distancias estudiante-empresa y supervisión, tiempo límite absoluto
     """
     Aplica búsqueda local basada en swap entre dos estudiantes. Explora vecinos y acepta el primero (first improvement)
-    que mejora el valor escalar auxiliar, ya que este proporciona una dirección clara de avance, 
-    mientras que el filtrado multiobjetivo real se delega en el Pareto externo.
+    que mejora un score escalar auxiliar normalizado, ya que este proporciona una dirección clara de avance
+    sin dejar que tau_sum y eta_sum dominen completamente sobre lbar_sum y sigma_sum.
 
+    El filtrado multiobjetivo real se delega en el Pareto externo.
     Este proceso se repite hasta que no se encuentran mejoras, lo que indica un óptimo local respecto a esta vecindad
     """
     # Inicialización y evaluación de la solución inicial
@@ -353,7 +390,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
         return current_sol, 0 # Si no es válida, no hace búsqueda local
 
     # Inicialización de variables
-    current_obj = float(current_eval["objective_value"])
+    current_obj = _balanced_scalar_score(current_eval, current_sol.problem, weights)
     improvements = 0
 
     # Bucle principal de búsqueda local
@@ -391,9 +428,9 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
             if not neighbor_eval.get("valid", False):
                 continue
 
-            neighbor_obj = float(neighbor_eval["objective_value"])
+            neighbor_obj = _balanced_scalar_score(neighbor_eval, current_sol.problem, weights)
 
-            # Criterio de aceptación: First improvement
+            # Criterio de aceptación: First improvement usando score normalizado
             if neighbor_obj > current_obj + 1e-12:
                 # Actualización de la solución
                 current_sol = neighbor_sol

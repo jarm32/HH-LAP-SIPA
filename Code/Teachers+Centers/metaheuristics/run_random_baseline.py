@@ -25,53 +25,54 @@ def main():
     modelo = "randomsearch"
 
     for i in [2,4,6]:
-        # Instancia escogida + carga
-        instance_path = f"inst_creator/output/problem_instance_ext_{i}00_0.txt"
-        instance_name = instance_path.split("/")[-1]
-        problem = load_instance(instance_path)
+        for j in range(3):
+            # Instancia escogida + carga
+            instance_path = f"inst_creator/output/problem_instance_ext_{i}00_{j}.txt"
+            instance_name = instance_path.split("/")[-1]
+            problem = load_instance(instance_path)
 
-        # Pesos de las componentes de la f.o.
-        weights = ObjectiveWeights(
-            alpha=0.35,
-            beta=0.35,
-            gamma=0.20,
-            delta=0.10,
-        )
+            # Pesos de las componentes de la f.o.
+            weights = ObjectiveWeights(
+                alpha=0.35,
+                beta=0.35,
+                gamma=0.20,
+                delta=0.10,
+            )
 
-        # Ejecución del algoritmo
-        result = random_search_pareto(
-            problem=problem,
-            generator_fn=generate_random_feasible_fixing,
-            weights=weights, # Pesos usados solo para el objective_value escalar auxiliar (desempate en poda), no para la dominancia Pareto
-            time_limit_seconds=300,
-            max_pareto_size=None,
-            base_seed=1234,
-            verbose=True
-        )
+            # Ejecución del algoritmo
+            result = random_search_pareto(
+                problem=problem,
+                generator_fn=generate_random_feasible_fixing,
+                weights=weights, # Pesos usados solo para el objective_value escalar auxiliar (desempate en poda), no para la dominancia Pareto
+                time_limit_seconds=300,
+                max_pareto_size=None,
+                base_seed=1234,
+                verbose=True
+            )
 
-        # Imprimir estadísticas
-        print("\n=== STATS ===")
-        for k, v in result["stats"].items():
-            print(k, v)
+            # Imprimir estadísticas
+            print("\n=== STATS ===")
+            for k, v in result["stats"].items():
+                print(k, v)
 
-        # Imprimir Pareto
-        print_pareto_set(result["pareto_set"])
+            # Imprimir Pareto
+            print_pareto_set(result["pareto_set"])
 
-        # Rutas de salida separadas para estadísticas y asignaciones
-        statistics_file = f"results/statistics/statistics_{modelo}_{instance_name}"
-        assignments_file = f"results/assignments/assignments_{modelo}_{instance_name}"
+            # Rutas de salida separadas para estadísticas y asignaciones
+            statistics_file = f"results/statistics/statistics_{modelo}_{instance_name}"
+            assignments_file = f"results/assignments/assignments_{modelo}_{instance_name}"
 
-        save_results_to_txt(
-            statistics_filepath=statistics_file,
-            assignments_filepath=assignments_file,
-            instance_name=instance_name,
-            stats=result["stats"],
-            pareto_set=result["pareto_set"],
-            model=modelo
-        )
+            save_results_to_txt(
+                statistics_filepath=statistics_file,
+                assignments_filepath=assignments_file,
+                instance_name=instance_name,
+                stats=result["stats"],
+                pareto_set=result["pareto_set"],
+                model=modelo
+            )
 
-        print(f"\nStatistics saved in: {statistics_file}")
-        print(f"Assignments saved in: {assignments_file}")
+            print(f"\nStatistics saved in: {statistics_file}")
+            print(f"Assignments saved in: {assignments_file}")
 
 
 if __name__ == "__main__":
