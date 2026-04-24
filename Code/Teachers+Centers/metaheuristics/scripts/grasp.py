@@ -372,15 +372,19 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
 # Búsqueda local
 # --------------------------------------------------
 
-def local_search_swap_first_improvement(initial_sol, weights, seed = None, normalize_student_dist = True, normalize_supervision_dist = True, deadline = None):
-                                       # solución sobre la que trabajar, pesos de los objetivos, semilla, booleanos para normalizar distancias estudiante-empresa y supervisión, tiempo límite absoluto
+def local_search_swap_first_improvement(initial_sol, weights, seed = None, normalize_student_dist = True, normalize_supervision_dist = True, 
+                                        deadline = None, max_neighbors_per_pass = 1000, max_local_improvements = 30):
+                                       # solución sobre la que trabajar, pesos de los objetivos, semilla, booleanos para normalizar distancias estudiante-empresa y supervisión, 
+                                       # tiempo límite absoluto, máximo de vecinos evaluados por pasada y máximo de mejoras aceptadas
     """
     Aplica búsqueda local basada en swap entre dos estudiantes. Explora vecinos y acepta el primero (first improvement)
     que mejora un score escalar auxiliar normalizado, ya que este proporciona una dirección clara de avance
     sin dejar que tau_sum y eta_sum dominen completamente sobre lbar_sum y sigma_sum.
 
-    El filtrado multiobjetivo real se delega en el Pareto externo.
-    Este proceso se repite hasta que no se encuentran mejoras, lo que indica un óptimo local respecto a esta vecindad
+    Para controlar el coste temporal, limita el número de vecinos evaluados por pasada y el número total de mejoras
+    aceptadas. Así se evita que una única solución consuma todo el presupuesto temporal.
+
+    El filtrado multiobjetivo real se delega en el Pareto externo
     """
     # Inicialización y evaluación de la solución inicial
     rng = random.Random(seed)
@@ -395,15 +399,25 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
 
     # Bucle principal de búsqueda local
     while True: # Se repite mientras se encuentren mejoras
+        # Sale si se alcanza el número máximo de mejoras aceptadas para controlar el coste temporal
+        if max_local_improvements is not None and improvements >= max_local_improvements:
+            break
+        
         # Sale si se alcanza el límite de tiempo
         if deadline is not None and time.time() >= deadline: 
             break
-        
+            
         # Generación de vecinos (pares de estudiantes)
         improved = False
         students = list(range(current_sol.problem.n_students))
-        pairs = list(combinations(students, 2))
-        rng.shuffle(pairs)
+        all_pairs = list(combinations(students, 2))
+        rng.shuffle(all_pairs)
+
+        # Limitar el número de vecinos evaluados en esta pasada para reducir coste temporal
+        if max_neighbors_per_pass is not None:
+            pairs = all_pairs[:max_neighbors_per_pass]
+        else:
+            pairs = all_pairs
 
         # Copia de la asignación actual student_to_placement
         current_assignments = list(current_sol.student_to_placement)
@@ -451,17 +465,19 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
 # --------------------------------------------------
 
 def run_grasp(
-    problem,                           # Instancia del problema
-    weights,                           # Pesos para la evaluación escalar auxiliar
-    alpha_rcl = 0.3,                   # Parámetro de la RCL
-    time_limit_seconds = 60,           # Límite de tiempo
-    max_iterations = None,             # Máximo de iteraciones
-    max_pareto_size = None,            # Tamaño máximo opcional del Pareto
-    base_seed = None,                  # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
-    normalize_student_dist = True,     # booleano para normalizar distancias estudiante-empresa
-    normalize_supervision_dist = True, # booleano para normalizar distancias profesor-plaza
-    constructive_max_attempts = 50,    # Máximo de intentos del constructivo
-    verbose = True                     # booleano para imprimir estadísticas durante la ejecución
+    problem,                             # Instancia del problema
+    weights,                             # Pesos para la evaluación escalar auxiliar
+    alpha_rcl = 0.3,                     # Parámetro de la RCL
+    time_limit_seconds = 60,             # Límite de tiempo
+    max_iterations = None,               # Máximo de iteraciones
+    max_pareto_size = None,              # Tamaño máximo opcional del Pareto
+    base_seed = None,                    # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
+    normalize_student_dist = True,       # booleano para normalizar distancias estudiante-empresa
+    normalize_supervision_dist = True,   # booleano para normalizar distancias profesor-plaza
+    constructive_max_attempts = 50,      # Máximo de intentos del constructivo
+    local_max_neighbors_per_pass = 1000, # Máximo de vecinos evaluados por pasada de búsqueda local
+    local_max_improvements = 30,         # Máximo de mejoras aceptadas por búsqueda local
+    verbose = True                       # booleano para imprimir estadísticas durante la ejecución
 ):
     """
     Ejecuta repetidamente el esquema GRASP completo (constructivo + búsqueda local + registro en Pareto)
@@ -509,7 +525,8 @@ def run_grasp(
             # Búsqueda local
             ls_seed = None if seed is None else seed + 1000000
             improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist, 
-                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline)
+                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline, 
+                                                                               max_neighbors_per_pass=local_max_neighbors_per_pass, max_local_improvements=local_max_improvements)
 
             # Validación de la solución mejorada
             if not improved_sol.validate():
