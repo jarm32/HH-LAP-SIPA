@@ -14,8 +14,8 @@ import time
 from itertools import combinations
 import numpy as np
 
-from metaheuristics.scripts.random_feasible_fixing import _assign_professors_with_repair
-from tools.evaluator import evaluate_solution_scalar, ObjectiveWeights
+from metaheuristics.scripts.random_feasible_fixing import _assign_professors_with_repair, generate_random_feasible_fixing
+from tools.evaluator import evaluate_solution_scalar
 from tools.multiobjective_search import register_solution_in_pareto
 from tools.solution import Solution
 
@@ -165,17 +165,6 @@ def _build_solution_from_assignment_vector(problem, assignments, rng):
     return sol # reconstrucción completa de la solución a partir del vector de asignaciones student_to_placement, con validaciones y asignación de profesores
 
 
-def _remaining_min_demand(problem, company_load):
-                         # instancia del problema, carga actual por empresa
-    """
-    Calcula cuánto falta para cumplir los mínimos de las empresas
-    """
-    total = 0
-    for k in range(problem.n_companies):
-        total += max(int(problem.company_min[k]) - int(company_load[k]), 0)
-    return total # suma de los mínimos (estudiantes) pendientes por cubrir para cada empresa, dada la carga actual
-
-
 def _is_candidate_locally_feasible(problem, j, company_load, used_placements, remaining_students_after, dep_data, current_open_block):
                                    # instancia del problema, plaza candidata, carga actual por empresa, vector de plazas usadas, 
                                    # nº de estudiantes que quedarían sin asignar tras elegir esta plaza, datos de dependencias (preprocesado), bloque de dependencia abierto (si hay)
@@ -212,12 +201,6 @@ def _is_candidate_locally_feasible(problem, j, company_load, used_placements, re
         if company_load[k] + block_size > int(problem.company_max[k]):
             return False
 
-    # Comprobar que tras elegir j siguen siendo alcanzables los mínimos
-    company_load_tmp = list(company_load)
-    company_load_tmp[k] += 1
-    if _remaining_min_demand(problem, company_load_tmp) > remaining_students_after:
-        return False
-
     return True
 
 
@@ -237,6 +220,36 @@ def _compute_rcl(candidate_pairs, g_matrix, alpha_rcl):
 
     rcl = [(i, j) for (i, j), s in zip(candidate_pairs, scores) if s >= threshold]
     return rcl # lista de tuplas (i, j) que entran en la RCL
+
+
+def _balanced_scalar_score(eval_data, problem, weights):
+                          # datos de evaluación de la solución, instancia del problema, pesos para la combinación escalar
+    """
+    Calcula un score escalar normalizado para equilibrar la influencia de los cuatro objetivos
+    durante la búsqueda local.
+
+    Normaliza:
+    - tau_sum y eta_sum por número de estudiantes
+    - lbar_sum por número de profesores
+    - sigma_sum por número de centros, si existe; si no, se deja sin normalizar
+    """
+    n_students = max(int(problem.n_students), 1)
+    n_professors = max(int(problem.n_professors), 1)
+    n_centers = max(int(problem.n_centers), 1)
+
+    components = eval_data["components"]
+
+    tau_norm = float(components["tau_sum"]) / n_students
+    eta_norm = float(components["eta_sum"]) / n_students
+    lbar_norm = float(components["lbar_sum"]) / n_professors
+    sigma_norm = float(components["sigma_sum"]) / n_centers
+
+    return (
+        weights.alpha * tau_norm
+        + weights.beta * eta_norm
+        - weights.gamma * lbar_norm
+        - weights.delta * sigma_norm
+    ) # score escalar combinado, con normalización para equilibrar la influencia de cada objetivo durante la búsqueda local
 
 
 # --------------------------------------------------
@@ -353,14 +366,19 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
 # Búsqueda local
 # --------------------------------------------------
 
-def local_search_swap_first_improvement(initial_sol, weights, seed = None, normalize_student_dist = True, normalize_supervision_dist = True, deadline = None):
-                                       # solución sobre la que trabajar, pesos de los objetivos, semilla, booleanos para normalizar distancias estudiante-empresa y supervisión, tiempo límite absoluto
+def local_search_swap_first_improvement(initial_sol, weights, seed = None, normalize_student_dist = True, normalize_supervision_dist = True, 
+                                        deadline = None, max_neighbors_per_pass = 1000, max_local_improvements = 30):
+                                       # solución sobre la que trabajar, pesos de los objetivos, semilla, booleanos para normalizar distancias estudiante-empresa y supervisión, 
+                                       # tiempo límite absoluto, máximo de vecinos evaluados por pasada y máximo de mejoras aceptadas
     """
     Aplica búsqueda local basada en swap entre dos estudiantes. Explora vecinos y acepta el primero (first improvement)
-    que mejora el valor escalar auxiliar, ya que este proporciona una dirección clara de avance, 
-    mientras que el filtrado multiobjetivo real se delega en el Pareto externo.
+    que mejora un score escalar auxiliar normalizado, ya que este proporciona una dirección clara de avance
+    sin dejar que tau_sum y eta_sum dominen completamente sobre lbar_sum y sigma_sum.
 
-    Este proceso se repite hasta que no se encuentran mejoras, lo que indica un óptimo local respecto a esta vecindad
+    Para controlar el coste temporal, limita el número de vecinos evaluados por pasada y el número total de mejoras
+    aceptadas. Así se evita que una única solución consuma todo el presupuesto temporal.
+
+    El filtrado multiobjetivo real se delega en el Pareto externo
     """
     # Inicialización y evaluación de la solución inicial
     rng = random.Random(seed)
@@ -370,20 +388,30 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
         return current_sol, 0 # Si no es válida, no hace búsqueda local
 
     # Inicialización de variables
-    current_obj = float(current_eval["objective_value"])
+    current_obj = _balanced_scalar_score(current_eval, current_sol.problem, weights)
     improvements = 0
 
     # Bucle principal de búsqueda local
     while True: # Se repite mientras se encuentren mejoras
+        # Sale si se alcanza el número máximo de mejoras aceptadas para controlar el coste temporal
+        if max_local_improvements is not None and improvements >= max_local_improvements:
+            break
+        
         # Sale si se alcanza el límite de tiempo
         if deadline is not None and time.time() >= deadline: 
             break
-        
+            
         # Generación de vecinos (pares de estudiantes)
         improved = False
         students = list(range(current_sol.problem.n_students))
-        pairs = list(combinations(students, 2))
-        rng.shuffle(pairs)
+        all_pairs = list(combinations(students, 2))
+        rng.shuffle(all_pairs)
+
+        # Limitar el número de vecinos evaluados en esta pasada para reducir coste temporal
+        if max_neighbors_per_pass is not None:
+            pairs = all_pairs[:max_neighbors_per_pass]
+        else:
+            pairs = all_pairs
 
         # Copia de la asignación actual student_to_placement
         current_assignments = list(current_sol.student_to_placement)
@@ -408,9 +436,9 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
             if not neighbor_eval.get("valid", False):
                 continue
 
-            neighbor_obj = float(neighbor_eval["objective_value"])
+            neighbor_obj = _balanced_scalar_score(neighbor_eval, current_sol.problem, weights)
 
-            # Criterio de aceptación: First improvement
+            # Criterio de aceptación: First improvement usando score normalizado
             if neighbor_obj > current_obj + 1e-12:
                 # Actualización de la solución
                 current_sol = neighbor_sol
@@ -431,17 +459,22 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
 # --------------------------------------------------
 
 def run_grasp(
-    problem,                           # Instancia del problema
-    weights,                           # Pesos para la evaluación escalar auxiliar
-    alpha_rcl = 0.3,                   # Parámetro de la RCL
-    time_limit_seconds = 60,           # Límite de tiempo
-    max_iterations = None,             # Máximo de iteraciones
-    max_pareto_size = None,            # Tamaño máximo opcional del Pareto
-    base_seed = None,                  # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
-    normalize_student_dist = True,     # booleano para normalizar distancias estudiante-empresa
-    normalize_supervision_dist = True, # booleano para normalizar distancias profesor-plaza
-    constructive_max_attempts = 50,    # Máximo de intentos del constructivo
-    verbose = True                     # booleano para imprimir estadísticas durante la ejecución
+    problem,                              # Instancia del problema
+    weights,                              # Pesos para la evaluación escalar auxiliar
+    alpha_rcl = 0.3,                      # Parámetro de la RCL
+    time_limit_seconds = 60,              # Límite de tiempo
+    max_iterations = None,                # Máximo de iteraciones
+    max_pareto_size = None,               # Tamaño máximo opcional del Pareto
+    base_seed = None,                     # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
+    normalize_student_dist = True,        # booleano para normalizar distancias estudiante-empresa
+    normalize_supervision_dist = True,    # booleano para normalizar distancias profesor-plaza
+    constructive_max_attempts = 5,       # Máximo de intentos del constructivo
+    constructive_time_limit_seconds = 30, # Límite de tiempo para cada intento del constructivo (prioritario sobre constructive_max_attempts)
+    use_random_fallback = True,           # booleano para activar un fallback aleatorio que intente generar una solución factible de forma completamente aleatoria si el constructivo falla mucho
+    random_fallback_max_attempts = 50,    # Máximo de intentos del fallback aleatorio
+    local_max_neighbors_per_pass = 1000,  # Máximo de vecinos evaluados por pasada de búsqueda local
+    local_max_improvements = 30,          # Máximo de mejoras aceptadas por búsqueda local
+    verbose = True                        # booleano para imprimir estadísticas durante la ejecución
 ):
     """
     Ejecuta repetidamente el esquema GRASP completo (constructivo + búsqueda local + registro en Pareto)
@@ -466,6 +499,7 @@ def run_grasp(
     failures = 0
     inserted = 0
     local_improvements_total = 0
+    fallback_used = 0
     pareto_set = []
 
     # Bucle principal del GRASP (construir, mejorar, registrar)
@@ -483,63 +517,120 @@ def run_grasp(
         generated += 1
 
         try:
-            # Fase constructiva
-            constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist, max_attempts=constructive_max_attempts, deadline=deadline)
+            # -------- Fase constructiva GRASP con límite local de tiempo --------
 
-            # Búsqueda local
+            # Límite de tiempo específico para cada intento
+            construct_deadline = deadline
+            if constructive_time_limit_seconds is not None:
+                construct_deadline = min(deadline, time.time() + constructive_time_limit_seconds)
+
+            try:
+                # Intento constructivo normal
+                constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist,
+                                                           max_attempts=constructive_max_attempts, deadline=construct_deadline)
+            except Exception as e:
+                constructed_sol = None
+                if verbose:
+                    print(f"[GRASP constructive failure] "
+                          f"iteration={iteration}, seed={seed}, error={repr(e)}")
+
+
+            # -------- Fallback aleatorio factible si falla el constructivo --------
+
+            # Fallback que genera una solución factible aleatoria para no perder iteraciones
+            if constructed_sol is None and use_random_fallback and time.time() < deadline:
+                fallback_seed = None if seed is None else seed + 2000000
+
+                try:
+                    # Intento de fallback aleatorio
+                    constructed_sol = generate_random_feasible_fixing(problem, seed=fallback_seed, max_attempts=random_fallback_max_attempts)
+                    fallback_used += 1
+
+                    if verbose:
+                        print(f"[GRASP fallback used] "
+                              f"iteration={iteration}, seed={fallback_seed}")
+
+                except Exception as e:
+                    constructed_sol = None
+                    if verbose:
+                        print(f"[GRASP fallback failure] "
+                              f"iteration={iteration}, seed={fallback_seed}, error={repr(e)}")
+
+            # Si no se obtiene solución inicial, la iteración falla
+            if constructed_sol is None:
+                failures += 1
+                continue
+
+
+            # -------- Búsqueda local --------
+
+            # Límite de tiempo para evitar que una iteración consuma todo el tiempo
             ls_seed = None if seed is None else seed + 1000000
-            improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist, 
-                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline)
+
+            # Aplicar búsqueda local con límites de vecinos evaluados y control temporal
+            improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist,
+                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline, max_neighbors_per_pass=local_max_neighbors_per_pass,
+                                                                               max_local_improvements=local_max_improvements)
 
             # Validación de la solución mejorada
             if not improved_sol.validate():
                 failures += 1
                 continue
-            
-            # Actualización de estadísticas de factibilidad
+
             feasible += 1
             local_improvements_total += n_improvements
 
-            # Registro en Pareto externo de la solución final mejorada
-            reg = register_solution_in_pareto(sol=improved_sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
+
+            # -------- Registro en Pareto externo --------
+
+            reg = register_solution_in_pareto(sol=improved_sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
                                               normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
-            # Validación del registro
+            # Si el registro no es válido, se cuenta como fallo
             if not reg["valid"]:
                 failures += 1
                 continue
-            
-            # Actualización del Pareto y de inserciones
+
             pareto_set = reg["pareto_set"]
+
+            # Si la solución se ha insertado en el Pareto, se cuenta como mejora real
             if reg["was_inserted"]:
                 inserted += 1
 
-        # Gestión de errores globales
-        except Exception:
+        except Exception as e:
             failures += 1
+            if verbose:
+                print(f"[GRASP failure] "
+                     f"iteration={iteration}, seed={seed}, error={repr(e)}")
             continue
-        
+
         # Salida de progreso
         if verbose and iteration % 10 == 0:
-            print(
-                f"[it={iteration}] "
-                f"generated={generated} feasible={feasible} failures={failures} "
-                f"pareto_size={len(pareto_set)} local_improvements={local_improvements_total}"
-            )
+            print(f"[it={iteration}] "
+                  f"generated={generated} feasible={feasible} failures={failures} "
+                  f"pareto_size={len(pareto_set)} "
+                  f"local_improvements={local_improvements_total} "
+                  f"fallback_used={fallback_used}")
 
-    total_time = time.time() - start # Tiempo total final
+    total_time = time.time() - start
 
-    return {
-        "pareto_set": pareto_set,
-        "stats": {
-            "iterations": iteration,
-            "generated": generated,
-            "feasible": feasible,
-            "failures": failures,
-            "inserted_into_pareto": inserted,
-            "pareto_size": len(pareto_set),
-            "elapsed_seconds": total_time,
-            "alpha_rcl": alpha_rcl,
-            "local_improvements_total": local_improvements_total
-        }
-    } # Diccionario con el conjunto Pareto final y estadísticas de la ejecución
+    return {"pareto_set": pareto_set,
+            "stats": {
+                "iterations": iteration,
+                "generated": generated,
+                "feasible": feasible,
+                "failures": failures,
+                "inserted_into_pareto": inserted,
+                "fallback_used": fallback_used,
+                "pareto_size": len(pareto_set),
+                "elapsed_seconds": total_time,
+                "alpha_rcl": alpha_rcl,
+                "local_improvements_total": local_improvements_total,
+                "constructive_max_attempts": constructive_max_attempts,
+                "constructive_time_limit_seconds": constructive_time_limit_seconds,
+                "local_max_neighbors_per_pass": local_max_neighbors_per_pass,
+                "local_max_improvements": local_max_improvements,
+                "use_random_fallback": use_random_fallback,
+                "random_fallback_max_attempts": random_fallback_max_attempts
+            }
+        } # Diccionario con el conjunto Pareto final, estadísticas de ejecución y parámetros usados
