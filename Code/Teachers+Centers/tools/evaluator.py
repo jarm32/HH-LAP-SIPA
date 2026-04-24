@@ -7,8 +7,6 @@ from dataclasses import dataclass
 import math
 import numpy as np
 
-from tools.solution import Solution
-
 
 @dataclass
 class ObjectiveWeights:
