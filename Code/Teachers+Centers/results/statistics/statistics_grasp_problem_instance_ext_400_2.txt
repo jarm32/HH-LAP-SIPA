@@ -1,0 +1,35 @@
+===== SIPA grasp RESULTS =====
+
+Instance: problem_instance_ext_400_2.txt
+
+---- STATS ----
+iterations: 9
+generated: 9
+feasible: 8
+failures: 1
+inserted_into_pareto: 8
+pareto_size: 7
+elapsed_seconds: 300.04691076278687
+alpha_rcl: 0.5
+local_improvements_total: 26
+
+---- SUMMARY ----
+max_tau: 243.679411
+mean_tau: 237.271141
+max_eta: 170.147200
+mean_eta: 167.379914
+max_lbar: 1.144784
+mean_lbar: 1.127757
+max_sigma: 0.046650
+mean_sigma: 0.031536
+max_objective_value: 143.620681
+mean_objective_value: 141.399165
+
+---- PARETO SET ----
+[1] iter=2 seed=1235 obj=140.552424 | tau=232.079372, eta=170.147200, lbar=1.120757, sigma=0.027253
+[2] iter=3 seed=1236 obj=141.938677 | tau=237.692782, eta=168.506100, lbar=1.144784, sigma=0.019748
+[3] iter=4 seed=1237 obj=141.548404 | tau=239.634204, eta=165.438200, lbar=1.112217, sigma=0.044937
+[4] iter=5 seed=1238 obj=143.620681 | tau=243.679411, eta=167.329800, lbar=1.142378, sigma=0.040673
+[5] iter=6 seed=1239 obj=140.937782 | tau=237.156966, eta=166.174500, lbar=1.133752, sigma=0.014811
+[6] iter=7 seed=1240 obj=138.906281 | tau=230.800215, eta=166.733200, lbar=1.138729, sigma=0.026682
+[7] iter=8 seed=1241 obj=142.289903 | tau=239.855040, eta=167.330400, lbar=1.101680, sigma=0.046650

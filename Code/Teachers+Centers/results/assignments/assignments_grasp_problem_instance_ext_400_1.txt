@@ -1,0 +1,5 @@
+===== SIPA grasp ASSIGNMENTS =====
+
+Instance: problem_instance_ext_400_1.txt
+
+Pareto set vacío

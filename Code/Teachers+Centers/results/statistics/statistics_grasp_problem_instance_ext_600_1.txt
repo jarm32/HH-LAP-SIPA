@@ -1,0 +1,31 @@
+===== SIPA grasp RESULTS =====
+
+Instance: problem_instance_ext_600_1.txt
+
+---- STATS ----
+iterations: 4
+generated: 4
+feasible: 3
+failures: 1
+inserted_into_pareto: 3
+pareto_size: 3
+elapsed_seconds: 300.1235148906708
+alpha_rcl: 0.5
+local_improvements_total: 7
+
+---- SUMMARY ----
+max_tau: 361.018267
+mean_tau: 356.460819
+max_eta: 265.788700
+mean_eta: 260.235067
+max_lbar: 3.683540
+mean_lbar: 3.611190
+max_sigma: 0.153446
+mean_sigma: 0.133773
+max_objective_value: 215.911045
+mean_objective_value: 215.107945
+
+---- PARETO SET ----
+[1] iter=1 seed=1234 obj=214.242810 | tau=357.306201, eta=256.908900, lbar=3.585653, sigma=0.153446
+[2] iter=2 seed=1235 obj=215.911045 | tau=361.018267, eta=258.007600, lbar=3.683540, sigma=0.113009
+[3] iter=3 seed=1236 obj=215.169979 | tau=351.057990, eta=265.788700, lbar=3.564378, sigma=0.134866

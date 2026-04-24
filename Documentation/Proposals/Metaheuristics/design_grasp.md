@@ -111,6 +111,13 @@ La exploración del vecindario se realizará mediante una estrategia de first im
 - Se acepta el primer vecino que mejora la solución actual.
 - Se continúa desde esa nueva solución.
 
+Además, para evitar que una única solución consuma todo el presupuesto temporal del algoritmo, la búsqueda local se encuentra acotada computacionalmente mediante dos límites adicionales:
+
+- Nº máximo de vecinos evaluados por pasada (`max_neighbors_per_pass`).
+- Nº máximo de mejoras aceptadas por solución (`max_local_improvements`).
+
+De esta forma, se evita una intensificación excesiva sobre una sola solución y se favorece la exploración de un mayor número de construcciones GRASP dentro del mismo tiempo total de ejecución. Esto resulta más adecuado para una baseline multiobjetivo, donde interesa combinar calidad individual y diversidad de soluciones.
+
 ---
 
 ## 6. Criterio de parada

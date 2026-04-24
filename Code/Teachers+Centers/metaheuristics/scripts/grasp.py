@@ -14,8 +14,8 @@ import time
 from itertools import combinations
 import numpy as np
 
-from metaheuristics.scripts.random_feasible_fixing import _assign_professors_with_repair
-from tools.evaluator import evaluate_solution_scalar, ObjectiveWeights
+from metaheuristics.scripts.random_feasible_fixing import _assign_professors_with_repair, generate_random_feasible_fixing
+from tools.evaluator import evaluate_solution_scalar
 from tools.multiobjective_search import register_solution_in_pareto
 from tools.solution import Solution
 
@@ -459,19 +459,22 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
 # --------------------------------------------------
 
 def run_grasp(
-    problem,                             # Instancia del problema
-    weights,                             # Pesos para la evaluación escalar auxiliar
-    alpha_rcl = 0.3,                     # Parámetro de la RCL
-    time_limit_seconds = 60,             # Límite de tiempo
-    max_iterations = None,               # Máximo de iteraciones
-    max_pareto_size = None,              # Tamaño máximo opcional del Pareto
-    base_seed = None,                    # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
-    normalize_student_dist = True,       # booleano para normalizar distancias estudiante-empresa
-    normalize_supervision_dist = True,   # booleano para normalizar distancias profesor-plaza
-    constructive_max_attempts = 50,      # Máximo de intentos del constructivo
-    local_max_neighbors_per_pass = 1000, # Máximo de vecinos evaluados por pasada de búsqueda local
-    local_max_improvements = 30,         # Máximo de mejoras aceptadas por búsqueda local
-    verbose = True                       # booleano para imprimir estadísticas durante la ejecución
+    problem,                              # Instancia del problema
+    weights,                              # Pesos para la evaluación escalar auxiliar
+    alpha_rcl = 0.3,                      # Parámetro de la RCL
+    time_limit_seconds = 60,              # Límite de tiempo
+    max_iterations = None,                # Máximo de iteraciones
+    max_pareto_size = None,               # Tamaño máximo opcional del Pareto
+    base_seed = None,                     # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
+    normalize_student_dist = True,        # booleano para normalizar distancias estudiante-empresa
+    normalize_supervision_dist = True,    # booleano para normalizar distancias profesor-plaza
+    constructive_max_attempts = 5,       # Máximo de intentos del constructivo
+    constructive_time_limit_seconds = 30, # Límite de tiempo para cada intento del constructivo (prioritario sobre constructive_max_attempts)
+    use_random_fallback = True,           # booleano para activar un fallback aleatorio que intente generar una solución factible de forma completamente aleatoria si el constructivo falla mucho
+    random_fallback_max_attempts = 50,    # Máximo de intentos del fallback aleatorio
+    local_max_neighbors_per_pass = 1000,  # Máximo de vecinos evaluados por pasada de búsqueda local
+    local_max_improvements = 30,          # Máximo de mejoras aceptadas por búsqueda local
+    verbose = True                        # booleano para imprimir estadísticas durante la ejecución
 ):
     """
     Ejecuta repetidamente el esquema GRASP completo (constructivo + búsqueda local + registro en Pareto)
@@ -513,59 +516,102 @@ def run_grasp(
         generated += 1
 
         try:
-            # Fase constructiva
-            constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist, max_attempts=constructive_max_attempts, deadline=deadline)
+            # -------- Fase constructiva GRASP con límite local de tiempo --------
 
-            # Búsqueda local
+            # Límite de tiempo específico para cada intento
+            construct_deadline = deadline
+            if constructive_time_limit_seconds is not None:
+                construct_deadline = min(deadline, time.time() + constructive_time_limit_seconds)
+
+            try:
+                # Intento constructivo normal
+                constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist,
+                                                           max_attempts=constructive_max_attempts, deadline=construct_deadline)
+            except Exception as e:
+                constructed_sol = None
+                if verbose:
+                    print(f"[GRASP constructive failure] "
+                          f"iteration={iteration}, seed={seed}, error={repr(e)}")
+
+
+            # -------- Fallback aleatorio factible si falla el constructivo --------
+
+            # Fallback que genera una solución factible aleatoria para no perder iteraciones
+            if constructed_sol is None and use_random_fallback and time.time() < deadline:
+                fallback_seed = None if seed is None else seed + 2000000
+
+                try:
+                    # Intento de fallback aleatorio
+                    constructed_sol = generate_random_feasible_fixing(problem, seed=fallback_seed, max_attempts=random_fallback_max_attempts)
+                    fallback_used += 1
+
+                    if verbose:
+                        print(f"[GRASP fallback used] "
+                              f"iteration={iteration}, seed={fallback_seed}")
+
+                except Exception as e:
+                    constructed_sol = None
+                    if verbose:
+                        print(f"[GRASP fallback failure] "
+                              f"iteration={iteration}, seed={fallback_seed}, error={repr(e)}")
+
+            # Si no se obtiene solución inicial, la iteración falla
+            if constructed_sol is None:
+                failures += 1
+                continue
+
+
+            # -------- Búsqueda local --------
+
+            # Límite de tiempo para evitar que una iteración consuma todo el tiempo
             ls_seed = None if seed is None else seed + 1000000
-            improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist, 
-                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline, 
-                                                                               max_neighbors_per_pass=local_max_neighbors_per_pass, max_local_improvements=local_max_improvements)
+
+            # Aplicar búsqueda local con límites de vecinos evaluados y control temporal
+            improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist,
+                                                                               normalize_supervision_dist=normalize_supervision_dist, deadline=deadline, max_neighbors_per_pass=local_max_neighbors_per_pass,
+                                                                               max_local_improvements=local_max_improvements)
 
             # Validación de la solución mejorada
             if not improved_sol.validate():
                 failures += 1
                 continue
-            
-            # Actualización de estadísticas de factibilidad
+
             feasible += 1
             local_improvements_total += n_improvements
 
-            # Registro en Pareto externo de la solución final mejorada
-            reg = register_solution_in_pareto(sol=improved_sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
+
+            # -------- Registro en Pareto externo --------
+
+            reg = register_solution_in_pareto(sol=improved_sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
                                               normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
 
-            # Validación del registro
+            # Si el registro no es válido, se cuenta como fallo
             if not reg["valid"]:
                 failures += 1
                 continue
-            
-            # Actualización del Pareto y de inserciones
+
             pareto_set = reg["pareto_set"]
+
+            # Si la solución se ha insertado en el Pareto, se cuenta como mejora real
             if reg["was_inserted"]:
                 inserted += 1
 
-        # Gestión de errores globales
         except Exception as e:
             failures += 1
             if verbose:
-                print(f"[GRASP failure] iteration={iteration}, seed={seed}, error={repr(e)}")
-        
-            # Límite de fallos acumulados para evitar bucles infinitos aparentes si no hay soluciones factibles
-            if failures >= 100:
-                break
-
+                print(f"[GRASP failure] "
+                     f"iteration={iteration}, seed={seed}, error={repr(e)}")
             continue
-        
-        # Salida de progreso
-        if verbose and iteration % 5 == 0:
-            print(
-                f"[it={iteration}] "
-                f"generated={generated} feasible={feasible} failures={failures} "
-                f"pareto_size={len(pareto_set)} local_improvements={local_improvements_total}"
-            )
 
-    total_time = time.time() - start # Tiempo total final
+        # Salida de progreso
+        if verbose and iteration % 10 == 0:
+            print(f"[it={iteration}] "
+                  f"generated={generated} feasible={feasible} failures={failures} "
+                  f"pareto_size={len(pareto_set)} "
+                  f"local_improvements={local_improvements_total} "
+                  f"fallback_used={fallback_used}")
+
+    total_time = time.time() - start       
 
     return {
         "pareto_set": pareto_set,
