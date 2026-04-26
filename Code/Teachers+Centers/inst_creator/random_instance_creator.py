@@ -1,3 +1,10 @@
+# Código para generar instancias aleatorias del problema de asignación de estudiantes a plazas de empresas, con profesores y centros educativos, y restricciones de dependencias entre plazas.
+
+# cd Code/Teachers+Centers/inst_creator
+# python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
+# python random_instance_creator.py output 200 600 3 20 0.0 30 6 2 1234
+
+
 # ----------------------------
 # Librerías
 # ----------------------------
@@ -10,7 +17,6 @@ import json
 import math
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Optional
 
 
 # ----------------------------
@@ -34,6 +40,7 @@ class GeneratorConfig:
     number_competences: int
     most_important_competences: int
     slack_ratio: float = 0.0
+    seed: int | None = None # Reproducibilidad
 
     # Profesores / centros
     n_centers_min: int = 2
@@ -476,6 +483,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     Genera archivos .txt de instancias factibles por construcción.
     Además, calcula las matrices de distancia
     """
+    # Reproducibilidad
+    if cfg.seed is not None:
+        random.seed(cfg.seed)
+        np.random.seed(cfg.seed)
+
     # Carga distribuciones de localización
     all_student_locations_prop = []
     with open("data/proportion_home.csv", "r") as f: # distribución de vivienda estudiantes
@@ -705,17 +717,20 @@ def parse_args_to_config(argv): # Lista de argumentos pasados por línea de coma
     convierte cada uno al tipo correspondiente (int o float) y construye el objeto GeneratorConfig
     que contiene la configuración global utilizada por el generador de instancias
 
-    python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences>
+    python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
     """
     # Comprueba que se han pasado todos los argumentos necesarios
     if len(argv) < 10:
         raise SystemExit(
             "Usage: python random_instance_creator.py <result_path> <start_size> <end_size> "
-            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences>"
+            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences>"
+            "<most_important_competences> [seed]"
         )
+    
+    seed = int(argv[10]) if len(argv) > 10 else None
 
     return GeneratorConfig(result_path=argv[1], start_size=int(argv[2]), end_size=int(argv[3]), number_instances=int(argv[4]), surplus=int(argv[5]),
-            slack_ratio=float(argv[6]), placement_dep_prob=float(argv[7]), number_competences=int(argv[8]), most_important_competences=int(argv[9]), use_ors=False)
+            slack_ratio=float(argv[6]), placement_dep_prob=float(argv[7]), number_competences=int(argv[8]), most_important_competences=int(argv[9]), use_ors=False, seed=seed)
                           # Convierte los argumentos recibidos a sus tipos adecuados y construye el objeto de configuración que usará el generador de instancias
 
 
