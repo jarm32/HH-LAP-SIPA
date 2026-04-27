@@ -1,3 +1,10 @@
+# Código para generar instancias aleatorias del problema de asignación de estudiantes a plazas de empresas, con profesores y centros educativos, y restricciones de dependencias entre plazas.
+
+# cd Code/Teachers+Centers/inst_creator
+# python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
+# python random_instance_creator.py output 200 600 3 20 0.0 30 6 2 1234
+
+
 # ----------------------------
 # Librerías
 # ----------------------------
@@ -10,7 +17,6 @@ import json
 import math
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Optional
 
 
 # ----------------------------
@@ -34,6 +40,7 @@ class GeneratorConfig:
     number_competences: int
     most_important_competences: int
     slack_ratio: float = 0.0
+    seed: int | None = None # Reproducibilidad
 
     # Profesores / centros
     n_centers_min: int = 2
@@ -476,6 +483,9 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     Genera archivos .txt de instancias factibles por construcción.
     Además, calcula las matrices de distancia
     """
+    # Reproducibilidad --> cfg.seed + global_instance_idx = semilla de la instancia
+    global_instance_idx = 0
+
     # Carga distribuciones de localización
     all_student_locations_prop = []
     with open("data/proportion_home.csv", "r") as f: # distribución de vivienda estudiantes
@@ -507,8 +517,16 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     for n_students in range(cfg.start_size, cfg.end_size + 100, 200):
         n_instance = 0
 
+
         # Para cada tamaño n_students, genera varias instancias distintas
         while n_instance < cfg.number_instances:
+            # Semilla específica de la instancia actual
+            instance_seed = None
+            if cfg.seed is not None:
+                instance_seed = cfg.seed + global_instance_idx
+                random.seed(instance_seed)
+                np.random.seed(instance_seed)
+
             # perfiles (probabilidad aleatoria de cada uno)
             profile_prob = np.random.random(number_profiles)
             profile_prob = profile_prob / np.sum(profile_prob)
@@ -694,9 +712,14 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 company_company_matrix=company_company_matrix
             )
 
-            # Incrementa el contador de instancias generadas para el tamaño actual
+            # Incrementa los contadores de instancias generadas
             n_instance += 1
-            print(f"[OK] written: {out}", flush=True)
+            global_instance_idx += 1
+
+            if instance_seed is None:
+                print(f"[OK] written: {out}", flush=True)
+            else:
+                print(f"[OK] written: {out} | seed={instance_seed}", flush=True)
 
 
 def parse_args_to_config(argv): # Lista de argumentos pasados por línea de comandos
@@ -705,17 +728,20 @@ def parse_args_to_config(argv): # Lista de argumentos pasados por línea de coma
     convierte cada uno al tipo correspondiente (int o float) y construye el objeto GeneratorConfig
     que contiene la configuración global utilizada por el generador de instancias
 
-    python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences>
+    python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
     """
     # Comprueba que se han pasado todos los argumentos necesarios
     if len(argv) < 10:
         raise SystemExit(
             "Usage: python random_instance_creator.py <result_path> <start_size> <end_size> "
-            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences>"
+            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> "
+            "<most_important_competences> [seed]"
         )
+    
+    seed = int(argv[10]) if len(argv) > 10 else None
 
     return GeneratorConfig(result_path=argv[1], start_size=int(argv[2]), end_size=int(argv[3]), number_instances=int(argv[4]), surplus=int(argv[5]),
-            slack_ratio=float(argv[6]), placement_dep_prob=float(argv[7]), number_competences=int(argv[8]), most_important_competences=int(argv[9]), use_ors=False)
+            slack_ratio=float(argv[6]), placement_dep_prob=float(argv[7]), number_competences=int(argv[8]), most_important_competences=int(argv[9]), use_ors=False, seed=seed)
                           # Convierte los argumentos recibidos a sus tipos adecuados y construye el objeto de configuración que usará el generador de instancias
 
 
