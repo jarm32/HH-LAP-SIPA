@@ -25,7 +25,7 @@ def main():
     modelo = "nsga3"
 
     for i in [2,4,6]:
-        for j in range(3):
+        for j in range(4):
             instance_path = f"inst_creator/output/problem_instance_ext_{i}00_{j}.txt"
             instance_name = instance_path.split("/")[-1]
             problem = load_instance(instance_path)
@@ -41,7 +41,7 @@ def main():
                 offspring_size=50,
                 cx_prob=0.8,
                 mut_prob=0.2,
-                time_limit_seconds=300,
+                time_limit_seconds=600,
                 max_generations=None,
                 max_pareto_size=None,
                 base_seed=1234,
