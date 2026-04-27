@@ -483,10 +483,8 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     Genera archivos .txt de instancias factibles por construcción.
     Además, calcula las matrices de distancia
     """
-    # Reproducibilidad
-    if cfg.seed is not None:
-        random.seed(cfg.seed)
-        np.random.seed(cfg.seed)
+    # Reproducibilidad --> cfg.seed + global_instance_idx = semilla de la instancia
+    global_instance_idx = 0
 
     # Carga distribuciones de localización
     all_student_locations_prop = []
@@ -519,8 +517,16 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
     for n_students in range(cfg.start_size, cfg.end_size + 100, 200):
         n_instance = 0
 
+
         # Para cada tamaño n_students, genera varias instancias distintas
         while n_instance < cfg.number_instances:
+            # Semilla específica de la instancia actual
+            instance_seed = None
+            if cfg.seed is not None:
+                instance_seed = cfg.seed + global_instance_idx
+                random.seed(instance_seed)
+                np.random.seed(instance_seed)
+
             # perfiles (probabilidad aleatoria de cada uno)
             profile_prob = np.random.random(number_profiles)
             profile_prob = profile_prob / np.sum(profile_prob)
@@ -706,9 +712,14 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 company_company_matrix=company_company_matrix
             )
 
-            # Incrementa el contador de instancias generadas para el tamaño actual
+            # Incrementa los contadores de instancias generadas
             n_instance += 1
-            print(f"[OK] written: {out}", flush=True)
+            global_instance_idx += 1
+
+            if instance_seed is None:
+                print(f"[OK] written: {out}", flush=True)
+            else:
+                print(f"[OK] written: {out} | seed={instance_seed}", flush=True)
 
 
 def parse_args_to_config(argv): # Lista de argumentos pasados por línea de comandos
@@ -723,7 +734,7 @@ def parse_args_to_config(argv): # Lista de argumentos pasados por línea de coma
     if len(argv) < 10:
         raise SystemExit(
             "Usage: python random_instance_creator.py <result_path> <start_size> <end_size> "
-            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences>"
+            "<number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> "
             "<most_important_competences> [seed]"
         )
     
