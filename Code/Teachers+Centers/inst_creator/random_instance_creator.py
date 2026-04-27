@@ -2,7 +2,7 @@
 
 # cd Code/Teachers+Centers/inst_creator
 # python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
-# python random_instance_creator.py output 200 600 3 20 0.0 30 6 2 1234
+# python random_instance_creator.py output 200 600 4 20 0.0 30 6 2 1234
 
 
 # ----------------------------
