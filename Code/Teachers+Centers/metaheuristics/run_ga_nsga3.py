@@ -41,7 +41,7 @@ def main():
                 offspring_size=50,
                 cx_prob=0.8,
                 mut_prob=0.2,
-                time_limit_seconds=600,
+                time_limit_seconds=300,
                 max_generations=None,
                 max_pareto_size=None,
                 base_seed=1234,

@@ -44,7 +44,7 @@ def main():
                 problem=problem,
                 generator_fn=generate_random_feasible_fixing,
                 weights=weights, # Pesos usados solo para el objective_value escalar auxiliar (desempate en poda), no para la dominancia Pareto
-                time_limit_seconds=600,
+                time_limit_seconds=300,
                 max_pareto_size=None,
                 base_seed=1234,
                 verbose=True

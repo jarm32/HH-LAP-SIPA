@@ -39,7 +39,7 @@ def main():
                 problem=problem,
                 weights=weights,
                 alpha_rcl=0.5,
-                time_limit_seconds=600,
+                time_limit_seconds=300,
                 max_iterations=None,
                 max_pareto_size=None,
                 base_seed=1234,
