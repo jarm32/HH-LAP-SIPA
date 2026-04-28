@@ -3,32 +3,31 @@
 Instance: problem_instance_ext_600_0.txt
 
 ---- STATS ----
-iterations: 602
-generated: 602
-feasible: 602
+iterations: 3045
+generated: 3045
+feasible: 3045
 failures: 0
-inserted_into_pareto: 34
-pareto_size: 8
-elapsed_seconds: 60.04724431037903
+inserted_into_pareto: 48
+pareto_size: 7
+elapsed_seconds: 300.01295375823975
 
 ---- SUMMARY ----
-max_tau: 114.382002
-mean_tau: 107.700697
-max_eta: 48.244300
-mean_eta: 42.035400
-max_lbar: 0.372501
-mean_lbar: 0.369443
+max_tau: 118.679218
+mean_tau: 110.648801
+max_eta: 48.410700
+mean_eta: 46.332186
+max_lbar: 0.373687
+mean_lbar: 0.369213
 max_sigma: 0.000000
 mean_sigma: 0.000000
-max_objective_value: 55.309634
-mean_objective_value: 52.333745
+max_objective_value: 58.406734
+mean_objective_value: 54.869502
 
 ---- PARETO SET ----
-[1] iter=79 seed=1312 obj=47.989985 | tau=101.611285, eta=35.712600, lbar=0.366874, sigma=0.000000
-[2] iter=84 seed=1317 obj=52.477538 | tau=103.759678, eta=46.388100, lbar=0.370920, sigma=0.000000
-[3] iter=153 seed=1386 obj=54.620511 | tau=109.542161, eta=46.729300, lbar=0.372501, sigma=0.000000
-[4] iter=336 seed=1569 obj=55.072395 | tau=109.317855, eta=48.244300, lbar=0.371797, sigma=0.000000
-[5] iter=442 seed=1675 obj=53.746532 | tau=109.829685, eta=43.944200, lbar=0.371638, sigma=0.000000
-[6] iter=462 seed=1695 obj=51.199991 | tau=107.225474, eta=39.270000, lbar=0.367124, sigma=0.000000
-[7] iter=502 seed=1735 obj=55.309634 | tau=114.382002, eta=43.855600, lbar=0.367636, sigma=0.000000
-[8] iter=551 seed=1784 obj=48.253376 | tau=105.937432, eta=32.139100, lbar=0.367051, sigma=0.000000
+[1] iter=336 seed=1569 obj=55.072395 | tau=109.317855, eta=48.244300, lbar=0.371797, sigma=0.000000
+[2] iter=750 seed=1983 obj=55.967615 | tau=112.726366, eta=47.392400, lbar=0.369767, sigma=0.000000
+[3] iter=1358 seed=2591 obj=58.406734 | tau=118.679218, eta=48.410700, lbar=0.373687, sigma=0.000000
+[4] iter=1400 seed=2633 obj=55.677454 | tau=111.533760, eta=47.756500, lbar=0.370685, sigma=0.000000
+[5] iter=1722 seed=2955 obj=52.725955 | tau=104.471827, eta=46.384200, lbar=0.368274, sigma=0.000000
+[6] iter=2032 seed=3265 obj=50.499530 | tau=103.173676, eta=41.319200, lbar=0.364883, sigma=0.000000
+[7] iter=2942 seed=4175 obj=55.736835 | tau=114.638900, eta=44.818000, lbar=0.365402, sigma=0.000000
