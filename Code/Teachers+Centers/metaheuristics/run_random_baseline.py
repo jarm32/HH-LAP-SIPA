@@ -24,10 +24,10 @@ def main():
     # Algoritmo empleado
     modelo = "randomsearch"
 
-    for i in [2,4,6]:
-        for j in range(3):
+    for i in [5,20,40,60]:
+        for j in range(4):
             # Instancia escogida + carga
-            instance_path = f"inst_creator/output/problem_instance_ext_{i}00_{j}.txt"
+            instance_path = f"inst_creator/output/problem_instance_ext_{i}0_{j}.txt"
             instance_name = instance_path.split("/")[-1]
             problem = load_instance(instance_path)
 
