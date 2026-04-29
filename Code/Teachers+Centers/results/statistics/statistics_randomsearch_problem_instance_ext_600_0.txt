@@ -1,0 +1,33 @@
+===== SIPA randomsearch RESULTS =====
+
+Instance: problem_instance_ext_600_0.txt
+
+---- STATS ----
+iterations: 3045
+generated: 3045
+feasible: 3045
+failures: 0
+inserted_into_pareto: 48
+pareto_size: 7
+elapsed_seconds: 300.01295375823975
+
+---- SUMMARY ----
+max_tau: 118.679218
+mean_tau: 110.648801
+max_eta: 48.410700
+mean_eta: 46.332186
+max_lbar: 0.373687
+mean_lbar: 0.369213
+max_sigma: 0.000000
+mean_sigma: 0.000000
+max_objective_value: 58.406734
+mean_objective_value: 54.869502
+
+---- PARETO SET ----
+[1] iter=336 seed=1569 obj=55.072395 | tau=109.317855, eta=48.244300, lbar=0.371797, sigma=0.000000
+[2] iter=750 seed=1983 obj=55.967615 | tau=112.726366, eta=47.392400, lbar=0.369767, sigma=0.000000
+[3] iter=1358 seed=2591 obj=58.406734 | tau=118.679218, eta=48.410700, lbar=0.373687, sigma=0.000000
+[4] iter=1400 seed=2633 obj=55.677454 | tau=111.533760, eta=47.756500, lbar=0.370685, sigma=0.000000
+[5] iter=1722 seed=2955 obj=52.725955 | tau=104.471827, eta=46.384200, lbar=0.368274, sigma=0.000000
+[6] iter=2032 seed=3265 obj=50.499530 | tau=103.173676, eta=41.319200, lbar=0.364883, sigma=0.000000
+[7] iter=2942 seed=4175 obj=55.736835 | tau=114.638900, eta=44.818000, lbar=0.365402, sigma=0.000000

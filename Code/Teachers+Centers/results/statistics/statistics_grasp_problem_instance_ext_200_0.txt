@@ -1,0 +1,48 @@
+===== SIPA grasp RESULTS =====
+
+Instance: problem_instance_ext_200_0.txt
+
+---- STATS ----
+iterations: 27
+generated: 27
+feasible: 26
+failures: 1
+inserted_into_pareto: 17
+fallback_used: 1
+pareto_size: 13
+elapsed_seconds: 300.02178859710693
+alpha_rcl: 0.5
+local_improvements_total: 97
+constructive_max_attempts: 5
+constructive_time_limit_seconds: 30
+local_max_neighbors_per_pass: 1000
+local_max_improvements: 30
+use_random_fallback: True
+random_fallback_max_attempts: 50
+
+---- SUMMARY ----
+max_tau: 119.350936
+mean_tau: 109.808620
+max_eta: 84.448300
+mean_eta: 77.292808
+max_lbar: 2.661084
+mean_lbar: 2.578124
+max_sigma: 0.295436
+mean_sigma: 0.222159
+max_objective_value: 69.953195
+mean_objective_value: 64.947659
+
+---- PARETO SET ----
+[1] iter=2 seed=1235 obj=69.163309 | tau=115.060947, eta=84.076500, lbar=2.526270, sigma=0.295436
+[2] iter=4 seed=1237 obj=69.953195 | tau=117.757366, eta=83.685300, lbar=2.661084, sigma=0.195213
+[3] iter=5 seed=1238 obj=66.026241 | tau=107.824346, eta=82.343800, lbar=2.552637, sigma=0.220828
+[4] iter=8 seed=1241 obj=66.385711 | tau=108.868614, eta=82.327000, lbar=2.562532, sigma=0.202480
+[5] iter=10 seed=1243 obj=69.193378 | tau=116.050197, eta=83.162200, lbar=2.537900, sigma=0.233804
+[6] iter=12 seed=1245 obj=69.640977 | tau=116.817327, eta=83.693800, lbar=2.635225, sigma=0.108725
+[7] iter=14 seed=1247 obj=69.600214 | tau=116.390892, eta=83.949600, lbar=2.471467, sigma=0.246649
+[8] iter=15 seed=1248 obj=68.347589 | tau=114.684392, eta=82.133600, lbar=2.580914, sigma=0.225258
+[9] iter=16 seed=1249 obj=68.882402 | tau=119.241279, eta=79.101400, lbar=2.559640, sigma=0.256078
+[10] iter=18 seed=1251 obj=69.725439 | tau=116.336444, eta=84.448300, lbar=2.629525, sigma=0.233161
+[11] iter=19 seed=1252 obj=68.421628 | tau=117.622576, eta=79.433400, lbar=2.630392, sigma=0.218848
+[12] iter=22 seed=1255 obj=69.880514 | tau=119.350936, eta=81.877600, lbar=2.637167, sigma=0.220398
+[13] iter=23 seed=1256 obj=19.098972 | tau=41.506747, eta=14.574000, lbar=2.530856, sigma=0.231187

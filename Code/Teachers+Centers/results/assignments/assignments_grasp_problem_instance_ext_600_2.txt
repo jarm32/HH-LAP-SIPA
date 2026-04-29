@@ -1,0 +1,2860 @@
+===== SIPA grasp ASSIGNMENTS =====
+
+Instance: problem_instance_ext_600_2.txt
+
+================================================================================
+SOLUTION [1]
+================================================================================
+iteration: 1
+seed: 1234
+objective_value: 50.420279
+tau_sum: 106.619165
+eta_sum: 38.525000
+lbar_sum: 1.870724
+sigma_sum: 0.060337
+
+---- STUDENT -> PLACEMENT / COMPANY / PROFESSOR ----
+student 000 -> placement 282 | company 030 | professor 004
+student 001 -> placement 005 | company 000 | professor 005
+student 002 -> placement 333 | company 036 | professor 003
+student 003 -> placement 500 | company 054 | professor 005
+student 004 -> placement 552 | company 060 | professor 005
+student 005 -> placement 400 | company 043 | professor 006
+student 006 -> placement 359 | company 039 | professor 005
+student 007 -> placement 452 | company 049 | professor 007
+student 008 -> placement 461 | company 050 | professor 002
+student 009 -> placement 067 | company 007 | professor 006
+student 010 -> placement 439 | company 048 | professor 002
+student 011 -> placement 014 | company 001 | professor 003
+student 012 -> placement 516 | company 056 | professor 005
+student 013 -> placement 651 | company 071 | professor 006
+student 014 -> placement 658 | company 072 | professor 006
+student 015 -> placement 308 | company 033 | professor 002
+student 016 -> placement 321 | company 034 | professor 002
+student 017 -> placement 246 | company 026 | professor 001
+student 018 -> placement 627 | company 068 | professor 006
+student 019 -> placement 054 | company 005 | professor 000
+student 020 -> placement 679 | company 074 | professor 001
+student 021 -> placement 699 | company 076 | professor 006
+student 022 -> placement 550 | company 060 | professor 000
+student 023 -> placement 124 | company 013 | professor 005
+student 024 -> placement 003 | company 000 | professor 000
+student 025 -> placement 428 | company 046 | professor 006
+student 026 -> placement 370 | company 040 | professor 002
+student 027 -> placement 171 | company 018 | professor 003
+student 028 -> placement 102 | company 010 | professor 004
+student 029 -> placement 248 | company 026 | professor 005
+student 030 -> placement 173 | company 018 | professor 007
+student 031 -> placement 156 | company 016 | professor 005
+student 032 -> placement 647 | company 071 | professor 007
+student 033 -> placement 262 | company 028 | professor 003
+student 034 -> placement 257 | company 027 | professor 000
+student 035 -> placement 298 | company 032 | professor 004
+student 036 -> placement 465 | company 050 | professor 005
+student 037 -> placement 418 | company 045 | professor 004
+student 038 -> placement 633 | company 069 | professor 006
+student 039 -> placement 376 | company 041 | professor 000
+student 040 -> placement 382 | company 041 | professor 002
+student 041 -> placement 092 | company 009 | professor 004
+student 042 -> placement 635 | company 069 | professor 000
+student 043 -> placement 528 | company 057 | professor 003
+student 044 -> placement 273 | company 029 | professor 004
+student 045 -> placement 293 | company 031 | professor 004
+student 046 -> placement 300 | company 032 | professor 006
+student 047 -> placement 707 | company 077 | professor 005
+student 048 -> placement 234 | company 025 | professor 001
+student 049 -> placement 113 | company 012 | professor 002
+student 050 -> placement 688 | company 075 | professor 000
+student 051 -> placement 549 | company 060 | professor 006
+student 052 -> placement 185 | company 020 | professor 005
+student 053 -> placement 155 | company 016 | professor 003
+student 054 -> placement 714 | company 078 | professor 003
+student 055 -> placement 240 | company 026 | professor 003
+student 056 -> placement 517 | company 056 | professor 006
+student 057 -> placement 218 | company 023 | professor 002
+student 058 -> placement 154 | company 016 | professor 005
+student 059 -> placement 147 | company 015 | professor 004
+student 060 -> placement 036 | company 003 | professor 000
+student 061 -> placement 708 | company 077 | professor 001
+student 062 -> placement 419 | company 045 | professor 001
+student 063 -> placement 674 | company 073 | professor 002
+student 064 -> placement 208 | company 022 | professor 004
+student 065 -> placement 344 | company 037 | professor 001
+student 066 -> placement 235 | company 025 | professor 003
+student 067 -> placement 086 | company 009 | professor 002
+student 068 -> placement 242 | company 026 | professor 003
+student 069 -> placement 463 | company 050 | professor 002
+student 070 -> placement 717 | company 078 | professor 005
+student 071 -> placement 045 | company 004 | professor 000
+student 072 -> placement 363 | company 039 | professor 000
+student 073 -> placement 203 | company 022 | professor 003
+student 074 -> placement 512 | company 056 | professor 002
+student 075 -> placement 278 | company 030 | professor 006
+student 076 -> placement 307 | company 033 | professor 007
+student 077 -> placement 390 | company 042 | professor 001
+student 078 -> placement 008 | company 000 | professor 006
+student 079 -> placement 184 | company 020 | professor 004
+student 080 -> placement 404 | company 044 | professor 005
+student 081 -> placement 126 | company 013 | professor 000
+student 082 -> placement 353 | company 038 | professor 001
+student 083 -> placement 317 | company 034 | professor 000
+student 084 -> placement 434 | company 047 | professor 007
+student 085 -> placement 212 | company 023 | professor 004
+student 086 -> placement 291 | company 031 | professor 003
+student 087 -> placement 144 | company 015 | professor 004
+student 088 -> placement 481 | company 052 | professor 005
+student 089 -> placement 292 | company 031 | professor 001
+student 090 -> placement 601 | company 065 | professor 001
+student 091 -> placement 074 | company 007 | professor 005
+student 092 -> placement 207 | company 022 | professor 003
+student 093 -> placement 253 | company 027 | professor 000
+student 094 -> placement 150 | company 016 | professor 006
+student 095 -> placement 535 | company 058 | professor 001
+student 096 -> placement 229 | company 024 | professor 006
+student 097 -> placement 612 | company 067 | professor 004
+student 098 -> placement 352 | company 038 | professor 000
+student 099 -> placement 174 | company 018 | professor 000
+student 100 -> placement 462 | company 050 | professor 002
+student 101 -> placement 011 | company 001 | professor 000
+student 102 -> placement 541 | company 059 | professor 007
+student 103 -> placement 264 | company 028 | professor 001
+student 104 -> placement 676 | company 074 | professor 001
+student 105 -> placement 405 | company 044 | professor 004
+student 106 -> placement 710 | company 077 | professor 004
+student 107 -> placement 443 | company 048 | professor 002
+student 108 -> placement 642 | company 070 | professor 003
+student 109 -> placement 205 | company 022 | professor 001
+student 110 -> placement 540 | company 059 | professor 005
+student 111 -> placement 047 | company 005 | professor 007
+student 112 -> placement 093 | company 009 | professor 003
+student 113 -> placement 668 | company 073 | professor 007
+student 114 -> placement 713 | company 078 | professor 004
+student 115 -> placement 577 | company 063 | professor 000
+student 116 -> placement 007 | company 000 | professor 006
+student 117 -> placement 197 | company 021 | professor 006
+student 118 -> placement 116 | company 012 | professor 004
+student 119 -> placement 269 | company 029 | professor 000
+student 120 -> placement 368 | company 040 | professor 000
+student 121 -> placement 626 | company 068 | professor 003
+student 122 -> placement 474 | company 051 | professor 001
+student 123 -> placement 422 | company 046 | professor 001
+student 124 -> placement 332 | company 036 | professor 007
+student 125 -> placement 482 | company 052 | professor 003
+student 126 -> placement 386 | company 042 | professor 003
+student 127 -> placement 505 | company 055 | professor 005
+student 128 -> placement 252 | company 027 | professor 002
+student 129 -> placement 557 | company 061 | professor 001
+student 130 -> placement 600 | company 065 | professor 001
+student 131 -> placement 555 | company 060 | professor 000
+student 132 -> placement 065 | company 007 | professor 004
+student 133 -> placement 398 | company 043 | professor 002
+student 134 -> placement 393 | company 042 | professor 007
+student 135 -> placement 408 | company 044 | professor 005
+student 136 -> placement 502 | company 054 | professor 005
+student 137 -> placement 438 | company 047 | professor 004
+student 138 -> placement 449 | company 049 | professor 006
+student 139 -> placement 127 | company 013 | professor 004
+student 140 -> placement 672 | company 073 | professor 007
+student 141 -> placement 587 | company 064 | professor 000
+student 142 -> placement 459 | company 050 | professor 003
+student 143 -> placement 604 | company 066 | professor 001
+student 144 -> placement 619 | company 067 | professor 007
+student 145 -> placement 657 | company 072 | professor 004
+student 146 -> placement 201 | company 021 | professor 000
+student 147 -> placement 594 | company 065 | professor 006
+student 148 -> placement 175 | company 019 | professor 003
+student 149 -> placement 105 | company 011 | professor 006
+student 150 -> placement 157 | company 017 | professor 006
+student 151 -> placement 406 | company 044 | professor 007
+student 152 -> placement 675 | company 074 | professor 006
+student 153 -> placement 013 | company 001 | professor 004
+student 154 -> placement 339 | company 036 | professor 006
+student 155 -> placement 595 | company 065 | professor 006
+student 156 -> placement 199 | company 021 | professor 000
+student 157 -> placement 401 | company 043 | professor 006
+student 158 -> placement 340 | company 037 | professor 001
+student 159 -> placement 544 | company 059 | professor 005
+student 160 -> placement 130 | company 014 | professor 004
+student 161 -> placement 023 | company 002 | professor 006
+student 162 -> placement 592 | company 064 | professor 002
+student 163 -> placement 718 | company 078 | professor 006
+student 164 -> placement 375 | company 040 | professor 003
+student 165 -> placement 211 | company 022 | professor 007
+student 166 -> placement 219 | company 023 | professor 007
+student 167 -> placement 709 | company 077 | professor 003
+student 168 -> placement 663 | company 072 | professor 003
+student 169 -> placement 158 | company 017 | professor 005
+student 170 -> placement 345 | company 037 | professor 002
+student 171 -> placement 630 | company 069 | professor 007
+student 172 -> placement 622 | company 068 | professor 007
+student 173 -> placement 109 | company 011 | professor 002
+student 174 -> placement 182 | company 019 | professor 001
+student 175 -> placement 188 | company 020 | professor 006
+student 176 -> placement 685 | company 075 | professor 006
+student 177 -> placement 608 | company 066 | professor 000
+student 178 -> placement 084 | company 008 | professor 006
+student 179 -> placement 492 | company 053 | professor 004
+student 180 -> placement 049 | company 005 | professor 002
+student 181 -> placement 698 | company 076 | professor 000
+student 182 -> placement 001 | company 000 | professor 002
+student 183 -> placement 097 | company 010 | professor 004
+student 184 -> placement 656 | company 072 | professor 005
+student 185 -> placement 121 | company 013 | professor 003
+student 186 -> placement 677 | company 074 | professor 001
+student 187 -> placement 176 | company 019 | professor 002
+student 188 -> placement 160 | company 017 | professor 007
+student 189 -> placement 385 | company 042 | professor 007
+student 190 -> placement 224 | company 024 | professor 006
+student 191 -> placement 320 | company 034 | professor 006
+student 192 -> placement 286 | company 031 | professor 007
+student 193 -> placement 582 | company 063 | professor 003
+student 194 -> placement 523 | company 057 | professor 004
+student 195 -> placement 496 | company 054 | professor 003
+student 196 -> placement 276 | company 030 | professor 001
+student 197 -> placement 706 | company 077 | professor 000
+student 198 -> placement 104 | company 011 | professor 004
+student 199 -> placement 415 | company 045 | professor 003
+student 200 -> placement 341 | company 037 | professor 000
+student 201 -> placement 128 | company 013 | professor 002
+student 202 -> placement 441 | company 048 | professor 001
+student 203 -> placement 575 | company 063 | professor 005
+student 204 -> placement 192 | company 020 | professor 005
+student 205 -> placement 503 | company 055 | professor 002
+student 206 -> placement 354 | company 038 | professor 002
+student 207 -> placement 151 | company 016 | professor 002
+student 208 -> placement 266 | company 028 | professor 003
+student 209 -> placement 511 | company 055 | professor 005
+student 210 -> placement 532 | company 058 | professor 003
+student 211 -> placement 632 | company 069 | professor 002
+student 212 -> placement 167 | company 018 | professor 006
+student 213 -> placement 671 | company 073 | professor 003
+student 214 -> placement 596 | company 065 | professor 005
+student 215 -> placement 110 | company 011 | professor 004
+student 216 -> placement 323 | company 035 | professor 004
+student 217 -> placement 665 | company 072 | professor 007
+student 218 -> placement 431 | company 047 | professor 002
+student 219 -> placement 556 | company 060 | professor 003
+student 220 -> placement 250 | company 027 | professor 003
+student 221 -> placement 639 | company 070 | professor 002
+student 222 -> placement 119 | company 012 | professor 000
+student 223 -> placement 125 | company 013 | professor 004
+student 224 -> placement 649 | company 071 | professor 000
+student 225 -> placement 209 | company 022 | professor 001
+student 226 -> placement 684 | company 075 | professor 004
+student 227 -> placement 260 | company 028 | professor 006
+student 228 -> placement 388 | company 042 | professor 004
+student 229 -> placement 299 | company 032 | professor 004
+student 230 -> placement 249 | company 027 | professor 005
+student 231 -> placement 670 | company 073 | professor 005
+student 232 -> placement 548 | company 060 | professor 002
+student 233 -> placement 046 | company 004 | professor 006
+student 234 -> placement 349 | company 038 | professor 000
+student 235 -> placement 566 | company 062 | professor 006
+student 236 -> placement 277 | company 030 | professor 001
+student 237 -> placement 711 | company 078 | professor 002
+student 238 -> placement 267 | company 029 | professor 007
+student 239 -> placement 605 | company 066 | professor 007
+student 240 -> placement 645 | company 070 | professor 000
+student 241 -> placement 692 | company 075 | professor 001
+student 242 -> placement 035 | company 003 | professor 003
+student 243 -> placement 430 | company 047 | professor 001
+student 244 -> placement 373 | company 040 | professor 004
+student 245 -> placement 374 | company 040 | professor 006
+student 246 -> placement 256 | company 027 | professor 002
+student 247 -> placement 487 | company 053 | professor 004
+student 248 -> placement 599 | company 065 | professor 000
+student 249 -> placement 704 | company 077 | professor 001
+student 250 -> placement 322 | company 035 | professor 000
+student 251 -> placement 426 | company 046 | professor 006
+student 252 -> placement 284 | company 030 | professor 004
+student 253 -> placement 232 | company 025 | professor 002
+student 254 -> placement 068 | company 007 | professor 005
+student 255 -> placement 689 | company 075 | professor 002
+student 256 -> placement 420 | company 045 | professor 003
+student 257 -> placement 314 | company 034 | professor 002
+student 258 -> placement 491 | company 053 | professor 002
+student 259 -> placement 369 | company 040 | professor 007
+student 260 -> placement 377 | company 041 | professor 003
+student 261 -> placement 521 | company 057 | professor 001
+student 262 -> placement 245 | company 026 | professor 005
+student 263 -> placement 041 | company 004 | professor 000
+student 264 -> placement 118 | company 012 | professor 005
+student 265 -> placement 666 | company 073 | professor 006
+student 266 -> placement 453 | company 049 | professor 000
+student 267 -> placement 432 | company 047 | professor 001
+student 268 -> placement 072 | company 007 | professor 004
+student 269 -> placement 096 | company 010 | professor 001
+student 270 -> placement 220 | company 023 | professor 001
+student 271 -> placement 427 | company 046 | professor 005
+student 272 -> placement 424 | company 046 | professor 007
+student 273 -> placement 010 | company 001 | professor 000
+student 274 -> placement 696 | company 076 | professor 001
+student 275 -> placement 611 | company 067 | professor 000
+student 276 -> placement 655 | company 071 | professor 007
+student 277 -> placement 080 | company 008 | professor 004
+student 278 -> placement 083 | company 008 | professor 003
+student 279 -> placement 712 | company 078 | professor 000
+student 280 -> placement 585 | company 064 | professor 002
+student 281 -> placement 004 | company 000 | professor 006
+student 282 -> placement 178 | company 019 | professor 004
+student 283 -> placement 221 | company 024 | professor 001
+student 284 -> placement 153 | company 016 | professor 004
+student 285 -> placement 297 | company 032 | professor 006
+student 286 -> placement 233 | company 025 | professor 000
+student 287 -> placement 216 | company 023 | professor 007
+student 288 -> placement 172 | company 018 | professor 004
+student 289 -> placement 372 | company 040 | professor 006
+student 290 -> placement 324 | company 035 | professor 002
+student 291 -> placement 581 | company 063 | professor 007
+student 292 -> placement 447 | company 048 | professor 007
+student 293 -> placement 589 | company 064 | professor 006
+student 294 -> placement 542 | company 059 | professor 000
+student 295 -> placement 669 | company 073 | professor 004
+student 296 -> placement 025 | company 002 | professor 004
+student 297 -> placement 028 | company 003 | professor 007
+student 298 -> placement 693 | company 076 | professor 003
+student 299 -> placement 506 | company 055 | professor 002
+student 300 -> placement 288 | company 031 | professor 005
+student 301 -> placement 378 | company 041 | professor 003
+student 302 -> placement 602 | company 066 | professor 000
+student 303 -> placement 350 | company 038 | professor 003
+student 304 -> placement 062 | company 006 | professor 002
+student 305 -> placement 450 | company 049 | professor 006
+student 306 -> placement 106 | company 011 | professor 001
+student 307 -> placement 588 | company 064 | professor 000
+student 308 -> placement 660 | company 072 | professor 006
+student 309 -> placement 515 | company 056 | professor 002
+student 310 -> placement 583 | company 063 | professor 004
+student 311 -> placement 032 | company 003 | professor 006
+student 312 -> placement 478 | company 052 | professor 002
+student 313 -> placement 667 | company 073 | professor 000
+student 314 -> placement 616 | company 067 | professor 002
+student 315 -> placement 471 | company 051 | professor 006
+student 316 -> placement 000 | company 000 | professor 007
+student 317 -> placement 379 | company 041 | professor 003
+student 318 -> placement 576 | company 063 | professor 004
+student 319 -> placement 448 | company 049 | professor 000
+student 320 -> placement 586 | company 064 | professor 003
+student 321 -> placement 283 | company 030 | professor 006
+student 322 -> placement 002 | company 000 | professor 005
+student 323 -> placement 103 | company 011 | professor 002
+student 324 -> placement 598 | company 065 | professor 007
+student 325 -> placement 042 | company 004 | professor 003
+student 326 -> placement 397 | company 043 | professor 001
+student 327 -> placement 572 | company 062 | professor 004
+student 328 -> placement 027 | company 002 | professor 000
+student 329 -> placement 387 | company 042 | professor 001
+student 330 -> placement 538 | company 058 | professor 002
+student 331 -> placement 210 | company 022 | professor 003
+student 332 -> placement 545 | company 059 | professor 003
+student 333 -> placement 501 | company 054 | professor 005
+student 334 -> placement 719 | company 078 | professor 007
+student 335 -> placement 662 | company 072 | professor 005
+student 336 -> placement 056 | company 006 | professor 003
+student 337 -> placement 190 | company 020 | professor 001
+student 338 -> placement 180 | company 019 | professor 003
+student 339 -> placement 470 | company 051 | professor 000
+student 340 -> placement 609 | company 066 | professor 001
+student 341 -> placement 263 | company 028 | professor 003
+student 342 -> placement 070 | company 007 | professor 003
+student 343 -> placement 265 | company 028 | professor 006
+student 344 -> placement 138 | company 014 | professor 000
+student 345 -> placement 052 | company 005 | professor 007
+student 346 -> placement 152 | company 016 | professor 005
+student 347 -> placement 170 | company 018 | professor 001
+student 348 -> placement 089 | company 009 | professor 005
+student 349 -> placement 048 | company 005 | professor 006
+student 350 -> placement 117 | company 012 | professor 000
+student 351 -> placement 355 | company 038 | professor 001
+student 352 -> placement 306 | company 033 | professor 001
+student 353 -> placement 237 | company 025 | professor 003
+student 354 -> placement 330 | company 035 | professor 001
+student 355 -> placement 497 | company 054 | professor 004
+student 356 -> placement 059 | company 006 | professor 005
+student 357 -> placement 579 | company 063 | professor 003
+student 358 -> placement 112 | company 012 | professor 006
+student 359 -> placement 653 | company 071 | professor 004
+student 360 -> placement 166 | company 018 | professor 001
+student 361 -> placement 606 | company 066 | professor 002
+student 362 -> placement 479 | company 052 | professor 005
+student 363 -> placement 513 | company 056 | professor 007
+student 364 -> placement 195 | company 021 | professor 003
+student 365 -> placement 435 | company 047 | professor 007
+student 366 -> placement 137 | company 014 | professor 001
+student 367 -> placement 247 | company 026 | professor 004
+student 368 -> placement 423 | company 046 | professor 002
+student 369 -> placement 522 | company 057 | professor 007
+student 370 -> placement 231 | company 025 | professor 002
+student 371 -> placement 181 | company 019 | professor 005
+student 372 -> placement 593 | company 065 | professor 006
+student 373 -> placement 640 | company 070 | professor 004
+student 374 -> placement 638 | company 070 | professor 007
+student 375 -> placement 510 | company 055 | professor 006
+student 376 -> placement 275 | company 029 | professor 003
+student 377 -> placement 624 | company 068 | professor 007
+student 378 -> placement 646 | company 070 | professor 006
+student 379 -> placement 021 | company 002 | professor 002
+student 380 -> placement 620 | company 068 | professor 006
+student 381 -> placement 701 | company 076 | professor 000
+student 382 -> placement 560 | company 061 | professor 006
+student 383 -> placement 571 | company 062 | professor 007
+student 384 -> placement 200 | company 021 | professor 004
+student 385 -> placement 468 | company 051 | professor 002
+student 386 -> placement 543 | company 059 | professor 006
+student 387 -> placement 318 | company 034 | professor 007
+student 388 -> placement 508 | company 055 | professor 000
+student 389 -> placement 554 | company 060 | professor 002
+student 390 -> placement 191 | company 020 | professor 005
+student 391 -> placement 227 | company 024 | professor 000
+student 392 -> placement 407 | company 044 | professor 003
+student 393 -> placement 395 | company 043 | professor 002
+student 394 -> placement 259 | company 028 | professor 001
+student 395 -> placement 507 | company 055 | professor 001
+student 396 -> placement 268 | company 029 | professor 002
+student 397 -> placement 015 | company 001 | professor 003
+student 398 -> placement 132 | company 014 | professor 000
+student 399 -> placement 682 | company 074 | professor 006
+student 400 -> placement 509 | company 055 | professor 005
+student 401 -> placement 409 | company 044 | professor 001
+student 402 -> placement 129 | company 013 | professor 003
+student 403 -> placement 270 | company 029 | professor 007
+student 404 -> placement 018 | company 002 | professor 001
+student 405 -> placement 066 | company 007 | professor 007
+student 406 -> placement 371 | company 040 | professor 007
+student 407 -> placement 073 | company 007 | professor 004
+student 408 -> placement 681 | company 074 | professor 005
+student 409 -> placement 179 | company 019 | professor 006
+student 410 -> placement 328 | company 035 | professor 007
+student 411 -> placement 012 | company 001 | professor 000
+student 412 -> placement 436 | company 047 | professor 006
+student 413 -> placement 392 | company 042 | professor 006
+student 414 -> placement 634 | company 069 | professor 000
+student 415 -> placement 050 | company 005 | professor 006
+student 416 -> placement 134 | company 014 | professor 000
+student 417 -> placement 194 | company 021 | professor 006
+student 418 -> placement 440 | company 048 | professor 004
+student 419 -> placement 136 | company 014 | professor 004
+student 420 -> placement 690 | company 075 | professor 004
+student 421 -> placement 458 | company 050 | professor 004
+student 422 -> placement 239 | company 025 | professor 000
+student 423 -> placement 148 | company 016 | professor 004
+student 424 -> placement 636 | company 069 | professor 000
+student 425 -> placement 357 | company 038 | professor 001
+student 426 -> placement 017 | company 001 | professor 001
+student 427 -> placement 351 | company 038 | professor 000
+student 428 -> placement 539 | company 059 | professor 004
+student 429 -> placement 703 | company 077 | professor 000
+student 430 -> placement 026 | company 002 | professor 004
+student 431 -> placement 417 | company 045 | professor 000
+student 432 -> placement 590 | company 064 | professor 002
+student 433 -> placement 271 | company 029 | professor 007
+student 434 -> placement 673 | company 073 | professor 000
+student 435 -> placement 617 | company 067 | professor 005
+student 436 -> placement 637 | company 069 | professor 006
+student 437 -> placement 498 | company 054 | professor 005
+student 438 -> placement 493 | company 053 | professor 003
+student 439 -> placement 546 | company 059 | professor 007
+student 440 -> placement 631 | company 069 | professor 001
+student 441 -> placement 162 | company 017 | professor 006
+student 442 -> placement 214 | company 023 | professor 001
+student 443 -> placement 464 | company 050 | professor 003
+student 444 -> placement 107 | company 011 | professor 003
+student 445 -> placement 475 | company 052 | professor 004
+student 446 -> placement 251 | company 027 | professor 003
+student 447 -> placement 258 | company 028 | professor 002
+student 448 -> placement 411 | company 044 | professor 002
+student 449 -> placement 457 | company 050 | professor 001
+student 450 -> placement 123 | company 013 | professor 001
+student 451 -> placement 090 | company 009 | professor 001
+student 452 -> placement 473 | company 051 | professor 004
+student 453 -> placement 533 | company 058 | professor 006
+student 454 -> placement 022 | company 002 | professor 007
+student 455 -> placement 697 | company 076 | professor 003
+student 456 -> placement 272 | company 029 | professor 003
+student 457 -> placement 135 | company 014 | professor 006
+student 458 -> placement 346 | company 037 | professor 005
+student 459 -> placement 329 | company 035 | professor 002
+student 460 -> placement 615 | company 067 | professor 005
+student 461 -> placement 654 | company 071 | professor 002
+student 462 -> placement 526 | company 057 | professor 007
+student 463 -> placement 504 | company 055 | professor 000
+student 464 -> placement 641 | company 070 | professor 002
+student 465 -> placement 531 | company 058 | professor 003
+student 466 -> placement 618 | company 067 | professor 003
+student 467 -> placement 057 | company 006 | professor 002
+student 468 -> placement 281 | company 030 | professor 003
+student 469 -> placement 486 | company 053 | professor 000
+student 470 -> placement 445 | company 048 | professor 005
+student 471 -> placement 140 | company 015 | professor 005
+student 472 -> placement 530 | company 058 | professor 002
+student 473 -> placement 568 | company 062 | professor 002
+student 474 -> placement 460 | company 050 | professor 007
+student 475 -> placement 412 | company 045 | professor 003
+student 476 -> placement 570 | company 062 | professor 003
+student 477 -> placement 163 | company 017 | professor 003
+student 478 -> placement 488 | company 053 | professor 005
+student 479 -> placement 705 | company 077 | professor 007
+student 480 -> placement 584 | company 064 | professor 006
+student 481 -> placement 198 | company 021 | professor 006
+student 482 -> placement 661 | company 072 | professor 002
+student 483 -> placement 213 | company 023 | professor 005
+student 484 -> placement 536 | company 058 | professor 003
+student 485 -> placement 394 | company 043 | professor 004
+student 486 -> placement 680 | company 074 | professor 007
+student 487 -> placement 033 | company 003 | professor 006
+student 488 -> placement 016 | company 001 | professor 002
+student 489 -> placement 316 | company 034 | professor 000
+student 490 -> placement 087 | company 009 | professor 001
+student 491 -> placement 304 | company 033 | professor 000
+student 492 -> placement 683 | company 074 | professor 003
+student 493 -> placement 100 | company 010 | professor 000
+student 494 -> placement 169 | company 018 | professor 000
+student 495 -> placement 367 | company 040 | professor 005
+student 496 -> placement 433 | company 047 | professor 004
+student 497 -> placement 389 | company 042 | professor 005
+student 498 -> placement 603 | company 066 | professor 004
+student 499 -> placement 414 | company 045 | professor 002
+student 500 -> placement 597 | company 065 | professor 000
+student 501 -> placement 114 | company 012 | professor 005
+student 502 -> placement 364 | company 039 | professor 006
+student 503 -> placement 358 | company 039 | professor 007
+student 504 -> placement 071 | company 007 | professor 003
+student 505 -> placement 614 | company 067 | professor 006
+student 506 -> placement 416 | company 045 | professor 003
+student 507 -> placement 311 | company 033 | professor 007
+student 508 -> placement 567 | company 062 | professor 003
+student 509 -> placement 055 | company 005 | professor 003
+student 510 -> placement 088 | company 009 | professor 000
+student 511 -> placement 091 | company 009 | professor 005
+student 512 -> placement 063 | company 006 | professor 007
+student 513 -> placement 580 | company 063 | professor 006
+student 514 -> placement 480 | company 052 | professor 004
+student 515 -> placement 702 | company 077 | professor 001
+student 516 -> placement 623 | company 068 | professor 006
+student 517 -> placement 467 | company 051 | professor 000
+student 518 -> placement 547 | company 059 | professor 003
+student 519 -> placement 518 | company 056 | professor 002
+student 520 -> placement 274 | company 029 | professor 002
+student 521 -> placement 241 | company 026 | professor 006
+student 522 -> placement 303 | company 033 | professor 003
+student 523 -> placement 659 | company 072 | professor 000
+student 524 -> placement 348 | company 037 | professor 001
+student 525 -> placement 495 | company 054 | professor 003
+student 526 -> placement 527 | company 057 | professor 004
+student 527 -> placement 715 | company 078 | professor 002
+student 528 -> placement 165 | company 017 | professor 004
+student 529 -> placement 402 | company 043 | professor 001
+student 530 -> placement 290 | company 031 | professor 001
+student 531 -> placement 687 | company 075 | professor 006
+student 532 -> placement 122 | company 013 | professor 002
+student 533 -> placement 361 | company 039 | professor 001
+student 534 -> placement 466 | company 051 | professor 005
+student 535 -> placement 664 | company 072 | professor 007
+student 536 -> placement 381 | company 041 | professor 006
+student 537 -> placement 009 | company 001 | professor 005
+student 538 -> placement 326 | company 035 | professor 003
+student 539 -> placement 029 | company 003 | professor 001
+student 540 -> placement 085 | company 009 | professor 006
+student 541 -> placement 613 | company 067 | professor 001
+student 542 -> placement 425 | company 046 | professor 007
+student 543 -> placement 643 | company 070 | professor 004
+student 544 -> placement 206 | company 022 | professor 004
+student 545 -> placement 716 | company 078 | professor 006
+student 546 -> placement 226 | company 024 | professor 003
+student 547 -> placement 686 | company 075 | professor 004
+student 548 -> placement 315 | company 034 | professor 004
+student 549 -> placement 095 | company 010 | professor 002
+student 550 -> placement 244 | company 026 | professor 007
+student 551 -> placement 168 | company 018 | professor 004
+student 552 -> placement 142 | company 015 | professor 007
+student 553 -> placement 287 | company 031 | professor 000
+student 554 -> placement 648 | company 071 | professor 005
+student 555 -> placement 285 | company 031 | professor 007
+student 556 -> placement 380 | company 041 | professor 004
+student 557 -> placement 483 | company 052 | professor 006
+student 558 -> placement 621 | company 068 | professor 003
+student 559 -> placement 396 | company 043 | professor 007
+student 560 -> placement 222 | company 024 | professor 002
+student 561 -> placement 444 | company 048 | professor 005
+student 562 -> placement 514 | company 056 | professor 007
+student 563 -> placement 537 | company 058 | professor 001
+student 564 -> placement 243 | company 026 | professor 003
+student 565 -> placement 678 | company 074 | professor 004
+student 566 -> placement 456 | company 049 | professor 002
+student 567 -> placement 058 | company 006 | professor 002
+student 568 -> placement 561 | company 061 | professor 007
+student 569 -> placement 280 | company 030 | professor 001
+student 570 -> placement 437 | company 047 | professor 003
+student 571 -> placement 391 | company 042 | professor 005
+student 572 -> placement 069 | company 007 | professor 001
+student 573 -> placement 534 | company 058 | professor 005
+student 574 -> placement 569 | company 062 | professor 000
+student 575 -> placement 031 | company 003 | professor 007
+student 576 -> placement 075 | company 007 | professor 005
+student 577 -> placement 183 | company 019 | professor 004
+student 578 -> placement 342 | company 037 | professor 002
+student 579 -> placement 610 | company 066 | professor 005
+student 580 -> placement 451 | company 049 | professor 005
+student 581 -> placement 485 | company 053 | professor 000
+student 582 -> placement 399 | company 043 | professor 002
+student 583 -> placement 331 | company 036 | professor 002
+student 584 -> placement 289 | company 031 | professor 000
+student 585 -> placement 279 | company 030 | professor 005
+student 586 -> placement 302 | company 032 | professor 005
+student 587 -> placement 149 | company 016 | professor 004
+student 588 -> placement 691 | company 075 | professor 003
+student 589 -> placement 204 | company 022 | professor 000
+student 590 -> placement 177 | company 019 | professor 007
+student 591 -> placement 006 | company 000 | professor 000
+student 592 -> placement 578 | company 063 | professor 004
+student 593 -> placement 644 | company 070 | professor 005
+student 594 -> placement 591 | company 064 | professor 006
+student 595 -> placement 356 | company 038 | professor 006
+student 596 -> placement 094 | company 010 | professor 001
+student 597 -> placement 695 | company 076 | professor 001
+student 598 -> placement 607 | company 066 | professor 005
+student 599 -> placement 060 | company 006 | professor 001
+
+---- PROFESSOR -> PLACEMENTS ----
+professor 000 | load=77 | placements: 3, 6, 10, 11, 12, 27, 36, 41, 45, 54, 88, 100, 117, 119, 126, 132, 134, 138, 169, 174, 199, 201, 204, 227, 233, 239, 253, 257, 269, 287, 289, 304, 316, 317, 322, 341, 349, 351, 352, 363, 368, 376, 417, 448, 453, 467, 470, 485, 486, 504, 508, 542, 550, 555, 569, 577, 587, 588, 597, 599, 602, 608, 611, 634, 635, 636, 645, 649, 659, 667, 673, 688, 698, 701, 703, 706, 712
+professor 001 | load=71 | placements: 17, 18, 29, 60, 69, 87, 90, 94, 96, 106, 123, 137, 166, 170, 182, 190, 205, 209, 214, 220, 221, 234, 246, 259, 264, 276, 277, 280, 290, 292, 306, 330, 340, 344, 348, 353, 355, 357, 361, 387, 390, 397, 402, 409, 419, 422, 430, 432, 441, 457, 474, 507, 521, 535, 537, 557, 600, 601, 604, 609, 613, 631, 676, 677, 679, 692, 695, 696, 702, 704, 708
+professor 002 | load=76 | placements: 1, 16, 21, 49, 57, 58, 62, 86, 95, 103, 109, 113, 122, 128, 151, 176, 218, 222, 231, 232, 252, 256, 258, 268, 274, 308, 314, 321, 324, 329, 331, 342, 345, 354, 370, 382, 395, 398, 399, 411, 414, 423, 431, 439, 443, 456, 461, 462, 463, 468, 478, 491, 503, 506, 512, 515, 518, 530, 538, 548, 554, 568, 585, 590, 592, 606, 616, 632, 639, 641, 654, 661, 674, 689, 711, 715
+professor 003 | load=82 | placements: 14, 15, 35, 42, 55, 56, 70, 71, 83, 93, 107, 121, 129, 155, 163, 171, 175, 180, 195, 203, 207, 210, 226, 235, 237, 240, 242, 243, 250, 251, 262, 263, 266, 272, 275, 281, 291, 303, 326, 333, 350, 375, 377, 378, 379, 386, 407, 412, 415, 416, 420, 437, 459, 464, 482, 493, 495, 496, 528, 531, 532, 536, 545, 547, 556, 567, 570, 579, 582, 586, 618, 621, 626, 642, 663, 671, 683, 691, 693, 697, 709, 714
+professor 004 | load=77 | placements: 13, 25, 26, 65, 72, 73, 80, 92, 97, 102, 104, 110, 116, 125, 127, 130, 136, 144, 147, 148, 149, 153, 165, 168, 172, 178, 183, 184, 200, 206, 208, 212, 247, 273, 282, 284, 293, 298, 299, 315, 323, 373, 380, 388, 394, 405, 418, 433, 438, 440, 458, 473, 475, 480, 487, 492, 497, 523, 527, 539, 572, 576, 578, 583, 603, 612, 640, 643, 653, 657, 669, 678, 684, 686, 690, 710, 713
+professor 005 | load=70 | placements: 2, 5, 9, 59, 68, 74, 75, 89, 91, 114, 118, 124, 140, 152, 154, 156, 158, 181, 185, 191, 192, 213, 245, 248, 249, 279, 288, 302, 346, 359, 367, 389, 391, 404, 408, 427, 444, 445, 451, 465, 466, 479, 481, 488, 498, 500, 501, 502, 505, 509, 511, 516, 534, 540, 544, 552, 575, 596, 607, 610, 615, 617, 644, 648, 656, 662, 670, 681, 707, 717
+professor 006 | load=82 | placements: 4, 7, 8, 23, 32, 33, 46, 48, 50, 67, 84, 85, 105, 112, 135, 150, 157, 162, 167, 179, 188, 194, 197, 198, 224, 229, 241, 260, 265, 278, 283, 297, 300, 320, 339, 356, 364, 372, 374, 381, 392, 400, 401, 426, 428, 436, 449, 450, 471, 483, 510, 517, 533, 543, 549, 560, 566, 580, 584, 589, 591, 593, 594, 595, 614, 620, 623, 627, 633, 637, 646, 651, 658, 660, 666, 675, 682, 685, 687, 699, 716, 718
+professor 007 | load=65 | placements: 0, 22, 28, 31, 47, 52, 63, 66, 142, 160, 173, 177, 211, 216, 219, 244, 267, 270, 271, 285, 286, 307, 311, 318, 328, 332, 358, 369, 371, 385, 393, 396, 406, 424, 425, 434, 435, 447, 452, 460, 513, 514, 522, 526, 541, 546, 561, 571, 581, 598, 605, 619, 622, 624, 630, 638, 647, 655, 664, 665, 668, 672, 680, 705, 719
+
+---- COMPANY LOAD ----
+company 000 | load=9 | min=2 | max=9
+company 001 | load=9 | min=1 | max=9
+company 002 | load=7 | min=3 | max=10
+company 003 | load=7 | min=6 | max=10
+company 004 | load=4 | min=2 | max=9
+company 005 | load=7 | min=1 | max=9
+company 006 | load=7 | min=2 | max=9
+company 007 | load=11 | min=5 | max=11
+company 008 | load=3 | min=3 | max=9
+company 009 | load=9 | min=1 | max=9
+company 010 | load=6 | min=1 | max=9
+company 011 | load=7 | min=4 | max=9
+company 012 | load=7 | min=1 | max=9
+company 013 | load=9 | min=5 | max=9
+company 014 | load=7 | min=3 | max=9
+company 015 | load=4 | min=3 | max=9
+company 016 | load=9 | min=3 | max=9
+company 017 | load=6 | min=4 | max=9
+company 018 | load=9 | min=2 | max=9
+company 019 | load=9 | min=2 | max=9
+company 020 | load=6 | min=4 | max=10
+company 021 | load=7 | min=2 | max=9
+company 022 | load=9 | min=2 | max=9
+company 023 | load=7 | min=4 | max=9
+company 024 | load=6 | min=5 | max=10
+company 025 | load=7 | min=2 | max=9
+company 026 | load=9 | min=3 | max=9
+company 027 | load=7 | min=5 | max=9
+company 028 | load=8 | min=4 | max=9
+company 029 | load=9 | min=2 | max=9
+company 030 | load=9 | min=4 | max=9
+company 031 | load=9 | min=3 | max=9
+company 032 | load=5 | min=1 | max=9
+company 033 | load=6 | min=4 | max=10
+company 034 | load=7 | min=3 | max=9
+company 035 | load=7 | min=1 | max=9
+company 036 | load=4 | min=4 | max=9
+company 037 | load=7 | min=3 | max=9
+company 038 | load=9 | min=2 | max=9
+company 039 | load=5 | min=2 | max=9
+company 040 | load=9 | min=3 | max=9
+company 041 | load=7 | min=6 | max=9
+company 042 | load=9 | min=3 | max=9
+company 043 | load=9 | min=4 | max=9
+company 044 | load=7 | min=4 | max=9
+company 045 | load=8 | min=2 | max=9
+company 046 | load=7 | min=7 | max=9
+company 047 | load=9 | min=2 | max=9
+company 048 | load=7 | min=3 | max=9
+company 049 | load=7 | min=5 | max=9
+company 050 | load=9 | min=1 | max=9
+company 051 | load=7 | min=4 | max=9
+company 052 | load=7 | min=0 | max=10
+company 053 | load=7 | min=2 | max=9
+company 054 | load=7 | min=1 | max=9
+company 055 | load=9 | min=6 | max=9
+company 056 | load=7 | min=1 | max=9
+company 057 | load=6 | min=3 | max=9
+company 058 | load=9 | min=3 | max=9
+company 059 | load=9 | min=2 | max=9
+company 060 | load=7 | min=4 | max=9
+company 061 | load=3 | min=1 | max=9
+company 062 | load=7 | min=3 | max=9
+company 063 | load=9 | min=1 | max=9
+company 064 | load=9 | min=4 | max=9
+company 065 | load=9 | min=4 | max=9
+company 066 | load=9 | min=4 | max=9
+company 067 | load=9 | min=5 | max=9
+company 068 | load=7 | min=6 | max=9
+company 069 | load=8 | min=1 | max=9
+company 070 | load=9 | min=3 | max=9
+company 071 | load=7 | min=3 | max=9
+company 072 | load=10 | min=4 | max=10
+company 073 | load=9 | min=1 | max=9
+company 074 | load=9 | min=3 | max=9
+company 075 | load=9 | min=3 | max=9
+company 076 | load=7 | min=4 | max=9
+company 077 | load=9 | min=2 | max=9
+company 078 | load=9 | min=2 | max=9
+
+---- PROFESSOR LOAD ----
+professor 000 | load=77 | capacity=89
+professor 001 | load=71 | capacity=94
+professor 002 | load=76 | capacity=97
+professor 003 | load=82 | capacity=91
+professor 004 | load=77 | capacity=82
+professor 005 | load=70 | capacity=83
+professor 006 | load=82 | capacity=98
+professor 007 | load=65 | capacity=86
+
+================================================================================
+SOLUTION [2]
+================================================================================
+iteration: 2
+seed: 1235
+objective_value: 49.381287
+tau_sum: 103.853554
+eta_sum: 38.332600
+lbar_sum: 1.898278
+sigma_sum: 0.042117
+
+---- STUDENT -> PLACEMENT / COMPANY / PROFESSOR ----
+student 000 -> placement 106 | company 011 | professor 003
+student 001 -> placement 392 | company 042 | professor 001
+student 002 -> placement 235 | company 025 | professor 000
+student 003 -> placement 691 | company 075 | professor 005
+student 004 -> placement 282 | company 030 | professor 002
+student 005 -> placement 439 | company 048 | professor 006
+student 006 -> placement 650 | company 071 | professor 007
+student 007 -> placement 147 | company 015 | professor 002
+student 008 -> placement 426 | company 046 | professor 001
+student 009 -> placement 054 | company 005 | professor 007
+student 010 -> placement 179 | company 019 | professor 007
+student 011 -> placement 595 | company 065 | professor 000
+student 012 -> placement 665 | company 072 | professor 000
+student 013 -> placement 114 | company 012 | professor 003
+student 014 -> placement 174 | company 018 | professor 004
+student 015 -> placement 056 | company 006 | professor 003
+student 016 -> placement 603 | company 066 | professor 001
+student 017 -> placement 552 | company 060 | professor 002
+student 018 -> placement 400 | company 043 | professor 003
+student 019 -> placement 411 | company 044 | professor 004
+student 020 -> placement 677 | company 074 | professor 003
+student 021 -> placement 011 | company 001 | professor 000
+student 022 -> placement 610 | company 066 | professor 000
+student 023 -> placement 591 | company 064 | professor 004
+student 024 -> placement 148 | company 016 | professor 006
+student 025 -> placement 268 | company 029 | professor 004
+student 026 -> placement 117 | company 012 | professor 002
+student 027 -> placement 454 | company 049 | professor 003
+student 028 -> placement 122 | company 013 | professor 007
+student 029 -> placement 003 | company 000 | professor 007
+student 030 -> placement 095 | company 010 | professor 007
+student 031 -> placement 125 | company 013 | professor 003
+student 032 -> placement 175 | company 019 | professor 006
+student 033 -> placement 422 | company 046 | professor 007
+student 034 -> placement 168 | company 018 | professor 001
+student 035 -> placement 071 | company 007 | professor 005
+student 036 -> placement 352 | company 038 | professor 003
+student 037 -> placement 703 | company 077 | professor 006
+student 038 -> placement 320 | company 034 | professor 007
+student 039 -> placement 696 | company 076 | professor 004
+student 040 -> placement 418 | company 045 | professor 006
+student 041 -> placement 272 | company 029 | professor 007
+student 042 -> placement 481 | company 052 | professor 005
+student 043 -> placement 018 | company 002 | professor 005
+student 044 -> placement 523 | company 057 | professor 000
+student 045 -> placement 504 | company 055 | professor 005
+student 046 -> placement 391 | company 042 | professor 007
+student 047 -> placement 192 | company 020 | professor 004
+student 048 -> placement 466 | company 051 | professor 002
+student 049 -> placement 635 | company 069 | professor 000
+student 050 -> placement 340 | company 037 | professor 003
+student 051 -> placement 600 | company 065 | professor 003
+student 052 -> placement 299 | company 032 | professor 003
+student 053 -> placement 224 | company 024 | professor 003
+student 054 -> placement 146 | company 015 | professor 003
+student 055 -> placement 497 | company 054 | professor 001
+student 056 -> placement 394 | company 043 | professor 004
+student 057 -> placement 058 | company 006 | professor 002
+student 058 -> placement 052 | company 005 | professor 004
+student 059 -> placement 249 | company 027 | professor 004
+student 060 -> placement 611 | company 067 | professor 001
+student 061 -> placement 528 | company 057 | professor 006
+student 062 -> placement 557 | company 061 | professor 005
+student 063 -> placement 538 | company 058 | professor 003
+student 064 -> placement 044 | company 004 | professor 007
+student 065 -> placement 445 | company 048 | professor 002
+student 066 -> placement 166 | company 018 | professor 004
+student 067 -> placement 092 | company 009 | professor 000
+student 068 -> placement 322 | company 035 | professor 002
+student 069 -> placement 483 | company 052 | professor 003
+student 070 -> placement 138 | company 014 | professor 005
+student 071 -> placement 213 | company 023 | professor 001
+student 072 -> placement 630 | company 069 | professor 007
+student 073 -> placement 075 | company 007 | professor 007
+student 074 -> placement 354 | company 038 | professor 000
+student 075 -> placement 524 | company 057 | professor 007
+student 076 -> placement 370 | company 040 | professor 002
+student 077 -> placement 631 | company 069 | professor 007
+student 078 -> placement 381 | company 041 | professor 003
+student 079 -> placement 065 | company 007 | professor 003
+student 080 -> placement 471 | company 051 | professor 004
+student 081 -> placement 050 | company 005 | professor 005
+student 082 -> placement 256 | company 027 | professor 005
+student 083 -> placement 261 | company 028 | professor 004
+student 084 -> placement 667 | company 073 | professor 003
+student 085 -> placement 512 | company 056 | professor 002
+student 086 -> placement 086 | company 009 | professor 005
+student 087 -> placement 500 | company 054 | professor 001
+student 088 -> placement 267 | company 029 | professor 002
+student 089 -> placement 013 | company 001 | professor 006
+student 090 -> placement 577 | company 063 | professor 004
+student 091 -> placement 163 | company 017 | professor 006
+student 092 -> placement 048 | company 005 | professor 004
+student 093 -> placement 190 | company 020 | professor 002
+student 094 -> placement 239 | company 025 | professor 000
+student 095 -> placement 269 | company 029 | professor 005
+student 096 -> placement 275 | company 029 | professor 007
+student 097 -> placement 388 | company 042 | professor 007
+student 098 -> placement 185 | company 020 | professor 000
+student 099 -> placement 270 | company 029 | professor 001
+student 100 -> placement 639 | company 070 | professor 000
+student 101 -> placement 274 | company 029 | professor 001
+student 102 -> placement 597 | company 065 | professor 004
+student 103 -> placement 412 | company 045 | professor 001
+student 104 -> placement 022 | company 002 | professor 002
+student 105 -> placement 280 | company 030 | professor 007
+student 106 -> placement 396 | company 043 | professor 007
+student 107 -> placement 215 | company 023 | professor 007
+student 108 -> placement 571 | company 062 | professor 004
+student 109 -> placement 151 | company 016 | professor 004
+student 110 -> placement 644 | company 070 | professor 003
+student 111 -> placement 035 | company 003 | professor 005
+student 112 -> placement 047 | company 005 | professor 004
+student 113 -> placement 428 | company 046 | professor 000
+student 114 -> placement 198 | company 021 | professor 004
+student 115 -> placement 589 | company 064 | professor 006
+student 116 -> placement 433 | company 047 | professor 004
+student 117 -> placement 091 | company 009 | professor 001
+student 118 -> placement 070 | company 007 | professor 003
+student 119 -> placement 221 | company 024 | professor 001
+student 120 -> placement 142 | company 015 | professor 005
+student 121 -> placement 112 | company 012 | professor 000
+student 122 -> placement 088 | company 009 | professor 000
+student 123 -> placement 045 | company 004 | professor 001
+student 124 -> placement 599 | company 065 | professor 002
+student 125 -> placement 453 | company 049 | professor 004
+student 126 -> placement 643 | company 070 | professor 000
+student 127 -> placement 330 | company 035 | professor 003
+student 128 -> placement 556 | company 060 | professor 006
+student 129 -> placement 233 | company 025 | professor 004
+student 130 -> placement 409 | company 044 | professor 003
+student 131 -> placement 021 | company 002 | professor 005
+student 132 -> placement 502 | company 054 | professor 006
+student 133 -> placement 099 | company 010 | professor 006
+student 134 -> placement 030 | company 003 | professor 001
+student 135 -> placement 195 | company 021 | professor 006
+student 136 -> placement 477 | company 052 | professor 005
+student 137 -> placement 621 | company 068 | professor 003
+student 138 -> placement 495 | company 054 | professor 002
+student 139 -> placement 283 | company 030 | professor 003
+student 140 -> placement 051 | company 005 | professor 000
+student 141 -> placement 368 | company 040 | professor 001
+student 142 -> placement 242 | company 026 | professor 004
+student 143 -> placement 253 | company 027 | professor 005
+student 144 -> placement 017 | company 001 | professor 006
+student 145 -> placement 407 | company 044 | professor 002
+student 146 -> placement 281 | company 030 | professor 004
+student 147 -> placement 568 | company 062 | professor 003
+student 148 -> placement 292 | company 031 | professor 006
+student 149 -> placement 545 | company 059 | professor 005
+student 150 -> placement 420 | company 045 | professor 003
+student 151 -> placement 434 | company 047 | professor 001
+student 152 -> placement 247 | company 026 | professor 002
+student 153 -> placement 700 | company 076 | professor 003
+student 154 -> placement 536 | company 058 | professor 002
+student 155 -> placement 590 | company 064 | professor 001
+student 156 -> placement 237 | company 025 | professor 002
+student 157 -> placement 015 | company 001 | professor 002
+student 158 -> placement 323 | company 035 | professor 000
+student 159 -> placement 716 | company 078 | professor 001
+student 160 -> placement 033 | company 003 | professor 002
+student 161 -> placement 673 | company 073 | professor 001
+student 162 -> placement 632 | company 069 | professor 006
+student 163 -> placement 139 | company 015 | professor 002
+student 164 -> placement 670 | company 073 | professor 005
+student 165 -> placement 246 | company 026 | professor 005
+student 166 -> placement 277 | company 030 | professor 005
+student 167 -> placement 172 | company 018 | professor 007
+student 168 -> placement 141 | company 015 | professor 006
+student 169 -> placement 676 | company 074 | professor 001
+student 170 -> placement 100 | company 010 | professor 005
+student 171 -> placement 607 | company 066 | professor 002
+student 172 -> placement 390 | company 042 | professor 002
+student 173 -> placement 137 | company 014 | professor 003
+student 174 -> placement 686 | company 075 | professor 001
+student 175 -> placement 693 | company 076 | professor 006
+student 176 -> placement 565 | company 061 | professor 001
+student 177 -> placement 633 | company 069 | professor 003
+student 178 -> placement 655 | company 071 | professor 007
+student 179 -> placement 135 | company 014 | professor 002
+student 180 -> placement 581 | company 063 | professor 001
+student 181 -> placement 397 | company 043 | professor 005
+student 182 -> placement 350 | company 038 | professor 002
+student 183 -> placement 718 | company 078 | professor 007
+student 184 -> placement 093 | company 009 | professor 001
+student 185 -> placement 671 | company 073 | professor 006
+student 186 -> placement 690 | company 075 | professor 003
+student 187 -> placement 038 | company 004 | professor 004
+student 188 -> placement 145 | company 015 | professor 004
+student 189 -> placement 698 | company 076 | professor 002
+student 190 -> placement 019 | company 002 | professor 000
+student 191 -> placement 704 | company 077 | professor 004
+student 192 -> placement 485 | company 053 | professor 005
+student 193 -> placement 324 | company 035 | professor 000
+student 194 -> placement 457 | company 050 | professor 007
+student 195 -> placement 264 | company 028 | professor 003
+student 196 -> placement 334 | company 036 | professor 002
+student 197 -> placement 288 | company 031 | professor 002
+student 198 -> placement 613 | company 067 | professor 001
+student 199 -> placement 206 | company 022 | professor 005
+student 200 -> placement 331 | company 036 | professor 003
+student 201 -> placement 008 | company 000 | professor 004
+student 202 -> placement 425 | company 046 | professor 002
+student 203 -> placement 554 | company 060 | professor 007
+student 204 -> placement 260 | company 028 | professor 006
+student 205 -> placement 132 | company 014 | professor 004
+student 206 -> placement 369 | company 040 | professor 007
+student 207 -> placement 449 | company 049 | professor 001
+student 208 -> placement 660 | company 072 | professor 003
+student 209 -> placement 488 | company 053 | professor 004
+student 210 -> placement 371 | company 040 | professor 006
+student 211 -> placement 462 | company 050 | professor 003
+student 212 -> placement 029 | company 003 | professor 001
+student 213 -> placement 097 | company 010 | professor 003
+student 214 -> placement 301 | company 032 | professor 004
+student 215 -> placement 638 | company 070 | professor 000
+student 216 -> placement 532 | company 058 | professor 007
+student 217 -> placement 547 | company 059 | professor 004
+student 218 -> placement 337 | company 036 | professor 006
+student 219 -> placement 055 | company 005 | professor 000
+student 220 -> placement 360 | company 039 | professor 001
+student 221 -> placement 290 | company 031 | professor 002
+student 222 -> placement 470 | company 051 | professor 003
+student 223 -> placement 053 | company 005 | professor 007
+student 224 -> placement 039 | company 004 | professor 001
+student 225 -> placement 614 | company 067 | professor 001
+student 226 -> placement 562 | company 061 | professor 006
+student 227 -> placement 094 | company 010 | professor 001
+student 228 -> placement 641 | company 070 | professor 004
+student 229 -> placement 702 | company 077 | professor 003
+student 230 -> placement 415 | company 045 | professor 006
+student 231 -> placement 336 | company 036 | professor 002
+student 232 -> placement 558 | company 061 | professor 002
+student 233 -> placement 214 | company 023 | professor 002
+student 234 -> placement 708 | company 077 | professor 003
+student 235 -> placement 683 | company 074 | professor 002
+student 236 -> placement 531 | company 058 | professor 000
+student 237 -> placement 344 | company 037 | professor 003
+student 238 -> placement 184 | company 020 | professor 002
+student 239 -> placement 321 | company 034 | professor 007
+student 240 -> placement 014 | company 001 | professor 005
+student 241 -> placement 004 | company 000 | professor 006
+student 242 -> placement 305 | company 033 | professor 000
+student 243 -> placement 620 | company 068 | professor 003
+student 244 -> placement 548 | company 060 | professor 005
+student 245 -> placement 546 | company 059 | professor 004
+student 246 -> placement 127 | company 013 | professor 004
+student 247 -> placement 359 | company 039 | professor 003
+student 248 -> placement 447 | company 048 | professor 004
+student 249 -> placement 250 | company 027 | professor 003
+student 250 -> placement 377 | company 041 | professor 003
+student 251 -> placement 194 | company 021 | professor 007
+student 252 -> placement 176 | company 019 | professor 002
+student 253 -> placement 079 | company 008 | professor 004
+student 254 -> placement 399 | company 043 | professor 005
+student 255 -> placement 232 | company 025 | professor 003
+student 256 -> placement 468 | company 051 | professor 003
+student 257 -> placement 286 | company 031 | professor 007
+student 258 -> placement 585 | company 064 | professor 003
+student 259 -> placement 709 | company 077 | professor 003
+student 260 -> placement 687 | company 075 | professor 005
+student 261 -> placement 273 | company 029 | professor 005
+student 262 -> placement 074 | company 007 | professor 007
+student 263 -> placement 697 | company 076 | professor 003
+student 264 -> placement 668 | company 073 | professor 003
+student 265 -> placement 405 | company 044 | professor 005
+student 266 -> placement 167 | company 018 | professor 000
+student 267 -> placement 618 | company 067 | professor 003
+student 268 -> placement 181 | company 019 | professor 000
+student 269 -> placement 555 | company 060 | professor 000
+student 270 -> placement 162 | company 017 | professor 006
+student 271 -> placement 113 | company 012 | professor 002
+student 272 -> placement 295 | company 032 | professor 007
+student 273 -> placement 244 | company 026 | professor 001
+student 274 -> placement 694 | company 076 | professor 000
+student 275 -> placement 105 | company 011 | professor 000
+student 276 -> placement 443 | company 048 | professor 007
+student 277 -> placement 240 | company 026 | professor 000
+student 278 -> placement 241 | company 026 | professor 000
+student 279 -> placement 209 | company 022 | professor 001
+student 280 -> placement 710 | company 077 | professor 007
+student 281 -> placement 265 | company 028 | professor 005
+student 282 -> placement 715 | company 078 | professor 003
+student 283 -> placement 404 | company 044 | professor 002
+student 284 -> placement 608 | company 066 | professor 003
+student 285 -> placement 062 | company 006 | professor 005
+student 286 -> placement 218 | company 023 | professor 001
+student 287 -> placement 622 | company 068 | professor 002
+student 288 -> placement 475 | company 052 | professor 001
+student 289 -> placement 382 | company 041 | professor 006
+student 290 -> placement 541 | company 059 | professor 005
+student 291 -> placement 262 | company 028 | professor 000
+student 292 -> placement 027 | company 002 | professor 001
+student 293 -> placement 685 | company 075 | professor 001
+student 294 -> placement 441 | company 048 | professor 002
+student 295 -> placement 211 | company 022 | professor 001
+student 296 -> placement 089 | company 009 | professor 004
+student 297 -> placement 205 | company 022 | professor 007
+student 298 -> placement 302 | company 032 | professor 002
+student 299 -> placement 605 | company 066 | professor 000
+student 300 -> placement 025 | company 002 | professor 007
+student 301 -> placement 333 | company 036 | professor 003
+student 302 -> placement 303 | company 033 | professor 002
+student 303 -> placement 111 | company 011 | professor 002
+student 304 -> placement 036 | company 003 | professor 002
+student 305 -> placement 121 | company 013 | professor 001
+student 306 -> placement 389 | company 042 | professor 000
+student 307 -> placement 522 | company 057 | professor 002
+student 308 -> placement 098 | company 010 | professor 002
+student 309 -> placement 386 | company 042 | professor 005
+student 310 -> placement 579 | company 063 | professor 001
+student 311 -> placement 076 | company 008 | professor 000
+student 312 -> placement 199 | company 021 | professor 004
+student 313 -> placement 448 | company 049 | professor 000
+student 314 -> placement 251 | company 027 | professor 002
+student 315 -> placement 587 | company 064 | professor 005
+student 316 -> placement 452 | company 049 | professor 000
+student 317 -> placement 609 | company 066 | professor 005
+student 318 -> placement 573 | company 062 | professor 004
+student 319 -> placement 043 | company 004 | professor 002
+student 320 -> placement 534 | company 058 | professor 000
+student 321 -> placement 578 | company 063 | professor 006
+student 322 -> placement 572 | company 062 | professor 000
+student 323 -> placement 437 | company 047 | professor 004
+student 324 -> placement 560 | company 061 | professor 000
+student 325 -> placement 037 | company 003 | professor 006
+student 326 -> placement 484 | company 052 | professor 005
+student 327 -> placement 032 | company 003 | professor 002
+student 328 -> placement 009 | company 001 | professor 001
+student 329 -> placement 104 | company 011 | professor 006
+student 330 -> placement 598 | company 065 | professor 007
+student 331 -> placement 596 | company 065 | professor 007
+student 332 -> placement 231 | company 025 | professor 003
+student 333 -> placement 408 | company 044 | professor 001
+student 334 -> placement 318 | company 034 | professor 003
+student 335 -> placement 569 | company 062 | professor 006
+student 336 -> placement 664 | company 072 | professor 002
+student 337 -> placement 654 | company 071 | professor 003
+student 338 -> placement 666 | company 073 | professor 001
+student 339 -> placement 345 | company 037 | professor 006
+student 340 -> placement 629 | company 069 | professor 006
+student 341 -> placement 467 | company 051 | professor 000
+student 342 -> placement 663 | company 072 | professor 001
+student 343 -> placement 584 | company 064 | professor 006
+student 344 -> placement 535 | company 058 | professor 003
+student 345 -> placement 450 | company 049 | professor 007
+student 346 -> placement 427 | company 046 | professor 002
+student 347 -> placement 308 | company 033 | professor 003
+student 348 -> placement 000 | company 000 | professor 007
+student 349 -> placement 316 | company 034 | professor 004
+student 350 -> placement 279 | company 030 | professor 002
+student 351 -> placement 657 | company 072 | professor 005
+student 352 -> placement 647 | company 071 | professor 002
+student 353 -> placement 271 | company 029 | professor 000
+student 354 -> placement 134 | company 014 | professor 000
+student 355 -> placement 602 | company 066 | professor 000
+student 356 -> placement 719 | company 078 | professor 000
+student 357 -> placement 191 | company 020 | professor 002
+student 358 -> placement 326 | company 035 | professor 004
+student 359 -> placement 440 | company 048 | professor 001
+student 360 -> placement 140 | company 015 | professor 003
+student 361 -> placement 674 | company 073 | professor 002
+student 362 -> placement 307 | company 033 | professor 000
+student 363 -> placement 341 | company 037 | professor 004
+student 364 -> placement 028 | company 003 | professor 006
+student 365 -> placement 648 | company 071 | professor 007
+student 366 -> placement 419 | company 045 | professor 005
+student 367 -> placement 296 | company 032 | professor 002
+student 368 -> placement 157 | company 017 | professor 005
+student 369 -> placement 220 | company 023 | professor 006
+student 370 -> placement 124 | company 013 | professor 001
+student 371 -> placement 102 | company 010 | professor 002
+student 372 -> placement 492 | company 053 | professor 002
+student 373 -> placement 612 | company 067 | professor 003
+student 374 -> placement 695 | company 076 | professor 000
+student 375 -> placement 684 | company 075 | professor 007
+student 376 -> placement 460 | company 050 | professor 002
+student 377 -> placement 402 | company 043 | professor 004
+student 378 -> placement 636 | company 069 | professor 000
+student 379 -> placement 012 | company 001 | professor 003
+student 380 -> placement 284 | company 030 | professor 005
+student 381 -> placement 217 | company 023 | professor 001
+student 382 -> placement 078 | company 008 | professor 003
+student 383 -> placement 563 | company 061 | professor 002
+student 384 -> placement 208 | company 022 | professor 002
+student 385 -> placement 252 | company 027 | professor 001
+student 386 -> placement 474 | company 051 | professor 000
+student 387 -> placement 712 | company 078 | professor 000
+student 388 -> placement 508 | company 055 | professor 007
+student 389 -> placement 376 | company 041 | professor 004
+student 390 -> placement 549 | company 060 | professor 006
+student 391 -> placement 338 | company 036 | professor 000
+student 392 -> placement 623 | company 068 | professor 002
+student 393 -> placement 193 | company 020 | professor 006
+student 394 -> placement 173 | company 018 | professor 005
+student 395 -> placement 298 | company 032 | professor 004
+student 396 -> placement 024 | company 002 | professor 004
+student 397 -> placement 026 | company 002 | professor 002
+student 398 -> placement 574 | company 062 | professor 004
+student 399 -> placement 335 | company 036 | professor 001
+student 400 -> placement 165 | company 017 | professor 005
+student 401 -> placement 297 | company 032 | professor 006
+student 402 -> placement 464 | company 050 | professor 007
+student 403 -> placement 212 | company 023 | professor 006
+student 404 -> placement 550 | company 060 | professor 005
+student 405 -> placement 204 | company 022 | professor 006
+student 406 -> placement 588 | company 064 | professor 003
+student 407 -> placement 436 | company 047 | professor 006
+student 408 -> placement 699 | company 076 | professor 004
+student 409 -> placement 451 | company 049 | professor 006
+student 410 -> placement 144 | company 015 | professor 005
+student 411 -> placement 527 | company 057 | professor 002
+student 412 -> placement 431 | company 047 | professor 007
+student 413 -> placement 526 | company 057 | professor 006
+student 414 -> placement 493 | company 053 | professor 003
+student 415 -> placement 539 | company 059 | professor 003
+student 416 -> placement 073 | company 007 | professor 000
+student 417 -> placement 234 | company 025 | professor 000
+student 418 -> placement 230 | company 024 | professor 002
+student 419 -> placement 108 | company 011 | professor 004
+student 420 -> placement 143 | company 015 | professor 004
+student 421 -> placement 438 | company 047 | professor 007
+student 422 -> placement 374 | company 040 | professor 003
+student 423 -> placement 652 | company 071 | professor 001
+student 424 -> placement 458 | company 050 | professor 003
+student 425 -> placement 640 | company 070 | professor 004
+student 426 -> placement 463 | company 050 | professor 007
+student 427 -> placement 040 | company 004 | professor 004
+student 428 -> placement 087 | company 009 | professor 005
+student 429 -> placement 236 | company 025 | professor 001
+student 430 -> placement 423 | company 046 | professor 003
+student 431 -> placement 503 | company 055 | professor 000
+student 432 -> placement 118 | company 012 | professor 002
+student 433 -> placement 582 | company 063 | professor 003
+student 434 -> placement 238 | company 025 | professor 003
+student 435 -> placement 533 | company 058 | professor 007
+student 436 -> placement 395 | company 043 | professor 005
+student 437 -> placement 245 | company 026 | professor 007
+student 438 -> placement 713 | company 078 | professor 006
+student 439 -> placement 616 | company 067 | professor 005
+student 440 -> placement 476 | company 052 | professor 006
+student 441 -> placement 570 | company 062 | professor 005
+student 442 -> placement 059 | company 006 | professor 006
+student 443 -> placement 314 | company 034 | professor 000
+student 444 -> placement 306 | company 033 | professor 000
+student 445 -> placement 023 | company 002 | professor 000
+student 446 -> placement 248 | company 026 | professor 006
+student 447 -> placement 653 | company 071 | professor 005
+student 448 -> placement 158 | company 017 | professor 004
+student 449 -> placement 486 | company 053 | professor 000
+student 450 -> placement 126 | company 013 | professor 002
+student 451 -> placement 530 | company 058 | professor 006
+student 452 -> placement 161 | company 017 | professor 000
+student 453 -> placement 606 | company 066 | professor 000
+student 454 -> placement 372 | company 040 | professor 007
+student 455 -> placement 031 | company 003 | professor 007
+student 456 -> placement 646 | company 070 | professor 000
+student 457 -> placement 189 | company 020 | professor 007
+student 458 -> placement 081 | company 008 | professor 000
+student 459 -> placement 561 | company 061 | professor 001
+student 460 -> placement 156 | company 016 | professor 006
+student 461 -> placement 342 | company 037 | professor 005
+student 462 -> placement 416 | company 045 | professor 007
+student 463 -> placement 379 | company 041 | professor 005
+student 464 -> placement 263 | company 028 | professor 002
+student 465 -> placement 525 | company 057 | professor 000
+student 466 -> placement 258 | company 028 | professor 007
+student 467 -> placement 542 | company 059 | professor 006
+student 468 -> placement 002 | company 000 | professor 006
+student 469 -> placement 005 | company 000 | professor 002
+student 470 -> placement 171 | company 018 | professor 000
+student 471 -> placement 627 | company 068 | professor 001
+student 472 -> placement 592 | company 064 | professor 005
+student 473 -> placement 435 | company 047 | professor 003
+student 474 -> placement 243 | company 026 | professor 006
+student 475 -> placement 543 | company 059 | professor 002
+student 476 -> placement 049 | company 005 | professor 005
+student 477 -> placement 346 | company 037 | professor 000
+student 478 -> placement 717 | company 078 | professor 005
+student 479 -> placement 662 | company 072 | professor 000
+student 480 -> placement 406 | company 044 | professor 005
+student 481 -> placement 289 | company 031 | professor 003
+student 482 -> placement 505 | company 055 | professor 006
+student 483 -> placement 046 | company 004 | professor 006
+student 484 -> placement 455 | company 049 | professor 006
+student 485 -> placement 329 | company 035 | professor 003
+student 486 -> placement 096 | company 010 | professor 004
+student 487 -> placement 187 | company 020 | professor 001
+student 488 -> placement 507 | company 055 | professor 006
+student 489 -> placement 711 | company 078 | professor 000
+student 490 -> placement 007 | company 000 | professor 000
+student 491 -> placement 385 | company 042 | professor 000
+student 492 -> placement 328 | company 035 | professor 005
+student 493 -> placement 459 | company 050 | professor 003
+student 494 -> placement 119 | company 012 | professor 007
+student 495 -> placement 188 | company 020 | professor 006
+student 496 -> placement 365 | company 039 | professor 002
+student 497 -> placement 276 | company 030 | professor 004
+student 498 -> placement 150 | company 016 | professor 004
+student 499 -> placement 294 | company 032 | professor 005
+student 500 -> placement 300 | company 032 | professor 001
+student 501 -> placement 651 | company 071 | professor 002
+student 502 -> placement 170 | company 018 | professor 001
+student 503 -> placement 077 | company 008 | professor 005
+student 504 -> placement 661 | company 072 | professor 001
+student 505 -> placement 169 | company 018 | professor 001
+student 506 -> placement 034 | company 003 | professor 005
+student 507 -> placement 001 | company 000 | professor 003
+student 508 -> placement 566 | company 062 | professor 001
+student 509 -> placement 367 | company 040 | professor 004
+student 510 -> placement 656 | company 072 | professor 004
+student 511 -> placement 130 | company 014 | professor 000
+student 512 -> placement 706 | company 077 | professor 006
+student 513 -> placement 219 | company 023 | professor 004
+student 514 -> placement 559 | company 061 | professor 007
+student 515 -> placement 348 | company 037 | professor 006
+student 516 -> placement 580 | company 063 | professor 003
+student 517 -> placement 304 | company 033 | professor 001
+student 518 -> placement 057 | company 006 | professor 006
+student 519 -> placement 129 | company 013 | professor 007
+student 520 -> placement 085 | company 009 | professor 000
+student 521 -> placement 186 | company 020 | professor 003
+student 522 -> placement 529 | company 057 | professor 000
+student 523 -> placement 266 | company 028 | professor 007
+student 524 -> placement 123 | company 013 | professor 004
+student 525 -> placement 373 | company 040 | professor 001
+student 526 -> placement 216 | company 023 | professor 001
+student 527 -> placement 063 | company 006 | professor 006
+student 528 -> placement 510 | company 055 | professor 004
+student 529 -> placement 152 | company 016 | professor 005
+student 530 -> placement 317 | company 034 | professor 006
+student 531 -> placement 499 | company 054 | professor 001
+student 532 -> placement 417 | company 045 | professor 006
+student 533 -> placement 511 | company 055 | professor 003
+student 534 -> placement 082 | company 008 | professor 007
+student 535 -> placement 287 | company 031 | professor 000
+student 536 -> placement 659 | company 072 | professor 007
+student 537 -> placement 624 | company 068 | professor 004
+student 538 -> placement 257 | company 027 | professor 003
+student 539 -> placement 689 | company 075 | professor 002
+student 540 -> placement 473 | company 051 | professor 001
+student 541 -> placement 072 | company 007 | professor 002
+student 542 -> placement 601 | company 065 | professor 002
+student 543 -> placement 020 | company 002 | professor 000
+student 544 -> placement 160 | company 017 | professor 007
+student 545 -> placement 210 | company 022 | professor 004
+student 546 -> placement 259 | company 028 | professor 006
+student 547 -> placement 375 | company 040 | professor 005
+student 548 -> placement 576 | company 063 | professor 000
+student 549 -> placement 069 | company 007 | professor 003
+student 550 -> placement 521 | company 057 | professor 003
+student 551 -> placement 311 | company 033 | professor 003
+student 552 -> placement 645 | company 070 | professor 005
+student 553 -> placement 084 | company 008 | professor 003
+student 554 -> placement 378 | company 041 | professor 000
+student 555 -> placement 042 | company 004 | professor 006
+student 556 -> placement 496 | company 054 | professor 000
+student 557 -> placement 136 | company 014 | professor 007
+student 558 -> placement 060 | company 006 | professor 001
+student 559 -> placement 006 | company 000 | professor 000
+student 560 -> placement 222 | company 024 | professor 001
+student 561 -> placement 491 | company 053 | professor 006
+student 562 -> placement 229 | company 024 | professor 003
+student 563 -> placement 567 | company 062 | professor 006
+student 564 -> placement 413 | company 045 | professor 005
+student 565 -> placement 626 | company 068 | professor 004
+student 566 -> placement 642 | company 070 | professor 004
+student 567 -> placement 478 | company 052 | professor 004
+student 568 -> placement 200 | company 021 | professor 006
+student 569 -> placement 701 | company 076 | professor 004
+student 570 -> placement 128 | company 013 | professor 006
+student 571 -> placement 494 | company 054 | professor 007
+student 572 -> placement 101 | company 010 | professor 004
+student 573 -> placement 649 | company 071 | professor 001
+student 574 -> placement 514 | company 056 | professor 000
+student 575 -> placement 564 | company 061 | professor 004
+student 576 -> placement 201 | company 021 | professor 004
+student 577 -> placement 658 | company 072 | professor 006
+student 578 -> placement 424 | company 046 | professor 003
+student 579 -> placement 153 | company 016 | professor 004
+student 580 -> placement 116 | company 012 | professor 004
+student 581 -> placement 604 | company 066 | professor 000
+student 582 -> placement 456 | company 049 | professor 003
+student 583 -> placement 619 | company 067 | professor 004
+student 584 -> placement 515 | company 056 | professor 007
+student 585 -> placement 293 | company 031 | professor 001
+student 586 -> placement 487 | company 053 | professor 000
+student 587 -> placement 041 | company 004 | professor 002
+student 588 -> placement 278 | company 030 | professor 007
+student 589 -> placement 501 | company 054 | professor 002
+student 590 -> placement 149 | company 016 | professor 002
+student 591 -> placement 197 | company 021 | professor 006
+student 592 -> placement 444 | company 048 | professor 006
+student 593 -> placement 414 | company 045 | professor 006
+student 594 -> placement 498 | company 054 | professor 004
+student 595 -> placement 090 | company 009 | professor 005
+student 596 -> placement 586 | company 064 | professor 001
+student 597 -> placement 315 | company 034 | professor 004
+student 598 -> placement 714 | company 078 | professor 001
+student 599 -> placement 537 | company 058 | professor 002
+
+---- PROFESSOR -> PLACEMENTS ----
+professor 000 | load=81 | placements: 6, 7, 11, 19, 20, 23, 51, 55, 73, 76, 81, 85, 88, 92, 105, 112, 130, 134, 161, 167, 171, 181, 185, 234, 235, 239, 240, 241, 262, 271, 287, 305, 306, 307, 314, 323, 324, 338, 346, 354, 378, 385, 389, 428, 448, 452, 467, 474, 486, 487, 496, 503, 514, 523, 525, 529, 531, 534, 555, 560, 572, 576, 595, 602, 604, 605, 606, 610, 635, 636, 638, 639, 643, 646, 662, 665, 694, 695, 711, 712, 719
+professor 001 | load=71 | placements: 9, 27, 29, 30, 39, 45, 60, 91, 93, 94, 121, 124, 168, 169, 170, 187, 209, 211, 213, 216, 217, 218, 221, 222, 236, 244, 252, 270, 274, 293, 300, 304, 335, 360, 368, 373, 392, 408, 412, 426, 434, 440, 449, 473, 475, 497, 499, 500, 561, 565, 566, 579, 581, 586, 590, 603, 611, 613, 614, 627, 649, 652, 661, 663, 666, 673, 676, 685, 686, 714, 716
+professor 002 | load=80 | placements: 5, 15, 22, 26, 32, 33, 36, 41, 43, 58, 72, 98, 102, 111, 113, 117, 118, 126, 135, 139, 147, 149, 176, 184, 190, 191, 208, 214, 230, 237, 247, 251, 263, 267, 279, 282, 288, 290, 296, 302, 303, 322, 334, 336, 350, 365, 370, 390, 404, 407, 425, 427, 441, 445, 460, 466, 492, 495, 501, 512, 522, 527, 536, 537, 543, 552, 558, 563, 599, 601, 607, 622, 623, 647, 651, 664, 674, 683, 689, 698
+professor 003 | load=86 | placements: 1, 12, 56, 65, 69, 70, 78, 84, 97, 106, 114, 125, 137, 140, 146, 186, 224, 229, 231, 232, 238, 250, 257, 264, 283, 289, 299, 308, 311, 318, 329, 330, 331, 333, 340, 344, 352, 359, 374, 377, 381, 400, 409, 420, 423, 424, 435, 454, 456, 458, 459, 462, 468, 470, 483, 493, 511, 521, 535, 538, 539, 568, 580, 582, 585, 588, 600, 608, 612, 618, 620, 621, 633, 644, 654, 660, 667, 668, 677, 690, 697, 700, 702, 708, 709, 715
+professor 004 | load=77 | placements: 8, 24, 38, 40, 47, 48, 52, 79, 89, 96, 101, 108, 116, 123, 127, 132, 143, 145, 150, 151, 153, 158, 166, 174, 192, 198, 199, 201, 210, 219, 233, 242, 249, 261, 268, 276, 281, 298, 301, 315, 316, 326, 341, 367, 376, 394, 402, 411, 433, 437, 447, 453, 471, 478, 488, 498, 510, 546, 547, 564, 571, 573, 574, 577, 591, 597, 619, 624, 626, 640, 641, 642, 656, 696, 699, 701, 704
+professor 005 | load=65 | placements: 14, 18, 21, 34, 35, 49, 50, 62, 71, 77, 86, 87, 90, 100, 138, 142, 144, 152, 157, 165, 173, 206, 246, 253, 256, 265, 269, 273, 277, 284, 294, 328, 342, 375, 379, 386, 395, 397, 399, 405, 406, 413, 419, 477, 481, 484, 485, 504, 541, 545, 548, 550, 557, 570, 587, 592, 609, 616, 645, 653, 657, 670, 687, 691, 717
+professor 006 | load=74 | placements: 2, 4, 13, 17, 28, 37, 42, 46, 57, 59, 63, 99, 104, 128, 141, 148, 156, 162, 163, 175, 188, 193, 195, 197, 200, 204, 212, 220, 243, 248, 259, 260, 292, 297, 317, 337, 345, 348, 371, 382, 414, 415, 417, 418, 436, 439, 444, 451, 455, 476, 491, 502, 505, 507, 526, 528, 530, 542, 549, 556, 562, 567, 569, 578, 584, 589, 629, 632, 658, 671, 693, 703, 706, 713
+professor 007 | load=66 | placements: 0, 3, 25, 31, 44, 53, 54, 74, 75, 82, 95, 119, 122, 129, 136, 160, 172, 179, 189, 194, 205, 215, 245, 258, 266, 272, 275, 278, 280, 286, 295, 320, 321, 369, 372, 388, 391, 396, 416, 422, 431, 438, 443, 450, 457, 463, 464, 494, 508, 515, 524, 532, 533, 554, 559, 596, 598, 630, 631, 648, 650, 655, 659, 684, 710, 718
+
+---- COMPANY LOAD ----
+company 000 | load=9 | min=2 | max=9
+company 001 | load=7 | min=1 | max=9
+company 002 | load=10 | min=3 | max=10
+company 003 | load=10 | min=6 | max=10
+company 004 | load=9 | min=2 | max=9
+company 005 | load=9 | min=1 | max=9
+company 006 | load=7 | min=2 | max=9
+company 007 | load=8 | min=5 | max=11
+company 008 | load=7 | min=3 | max=9
+company 009 | load=9 | min=1 | max=9
+company 010 | load=9 | min=1 | max=9
+company 011 | load=5 | min=4 | max=9
+company 012 | load=7 | min=1 | max=9
+company 013 | load=9 | min=5 | max=9
+company 014 | load=7 | min=3 | max=9
+company 015 | load=9 | min=3 | max=9
+company 016 | load=7 | min=3 | max=9
+company 017 | load=7 | min=4 | max=9
+company 018 | load=9 | min=2 | max=9
+company 019 | load=4 | min=2 | max=9
+company 020 | load=10 | min=4 | max=10
+company 021 | load=7 | min=2 | max=9
+company 022 | load=7 | min=2 | max=9
+company 023 | load=9 | min=4 | max=9
+company 024 | load=5 | min=5 | max=10
+company 025 | load=9 | min=2 | max=9
+company 026 | load=9 | min=3 | max=9
+company 027 | load=7 | min=5 | max=9
+company 028 | load=9 | min=4 | max=9
+company 029 | load=9 | min=2 | max=9
+company 030 | load=9 | min=4 | max=9
+company 031 | load=7 | min=3 | max=9
+company 032 | load=9 | min=1 | max=9
+company 033 | load=7 | min=4 | max=10
+company 034 | load=7 | min=3 | max=9
+company 035 | load=7 | min=1 | max=9
+company 036 | load=7 | min=4 | max=9
+company 037 | load=7 | min=3 | max=9
+company 038 | load=3 | min=2 | max=9
+company 039 | load=3 | min=2 | max=9
+company 040 | load=9 | min=3 | max=9
+company 041 | load=6 | min=6 | max=9
+company 042 | load=7 | min=3 | max=9
+company 043 | load=7 | min=4 | max=9
+company 044 | load=7 | min=4 | max=9
+company 045 | load=9 | min=2 | max=9
+company 046 | load=7 | min=7 | max=9
+company 047 | load=7 | min=2 | max=9
+company 048 | load=7 | min=3 | max=9
+company 049 | load=9 | min=5 | max=9
+company 050 | load=7 | min=1 | max=9
+company 051 | load=7 | min=4 | max=9
+company 052 | load=7 | min=0 | max=10
+company 053 | load=7 | min=2 | max=9
+company 054 | load=9 | min=1 | max=9
+company 055 | load=7 | min=6 | max=9
+company 056 | load=3 | min=1 | max=9
+company 057 | load=9 | min=3 | max=9
+company 058 | load=9 | min=3 | max=9
+company 059 | load=7 | min=2 | max=9
+company 060 | load=7 | min=4 | max=9
+company 061 | load=9 | min=1 | max=9
+company 062 | load=9 | min=3 | max=9
+company 063 | load=7 | min=1 | max=9
+company 064 | load=9 | min=4 | max=9
+company 065 | load=7 | min=4 | max=9
+company 066 | load=9 | min=4 | max=9
+company 067 | load=7 | min=5 | max=9
+company 068 | load=7 | min=6 | max=9
+company 069 | load=7 | min=1 | max=9
+company 070 | load=9 | min=3 | max=9
+company 071 | load=9 | min=3 | max=9
+company 072 | load=10 | min=4 | max=10
+company 073 | load=7 | min=1 | max=9
+company 074 | load=3 | min=3 | max=9
+company 075 | load=7 | min=3 | max=9
+company 076 | load=9 | min=4 | max=9
+company 077 | load=7 | min=2 | max=9
+company 078 | load=9 | min=2 | max=9
+
+---- PROFESSOR LOAD ----
+professor 000 | load=81 | capacity=89
+professor 001 | load=71 | capacity=94
+professor 002 | load=80 | capacity=97
+professor 003 | load=86 | capacity=91
+professor 004 | load=77 | capacity=82
+professor 005 | load=65 | capacity=83
+professor 006 | load=74 | capacity=98
+professor 007 | load=66 | capacity=86
+
+================================================================================
+SOLUTION [3]
+================================================================================
+iteration: 3
+seed: 1236
+objective_value: 52.337062
+tau_sum: 109.092207
+eta_sum: 41.530500
+lbar_sum: 1.873636
+sigma_sum: 0.061585
+
+---- STUDENT -> PLACEMENT / COMPANY / PROFESSOR ----
+student 000 -> placement 060 | company 006 | professor 000
+student 001 -> placement 419 | company 045 | professor 007
+student 002 -> placement 024 | company 002 | professor 003
+student 003 -> placement 188 | company 020 | professor 003
+student 004 -> placement 352 | company 038 | professor 005
+student 005 -> placement 355 | company 038 | professor 007
+student 006 -> placement 647 | company 071 | professor 001
+student 007 -> placement 415 | company 045 | professor 000
+student 008 -> placement 408 | company 044 | professor 004
+student 009 -> placement 532 | company 058 | professor 003
+student 010 -> placement 388 | company 042 | professor 004
+student 011 -> placement 200 | company 021 | professor 003
+student 012 -> placement 195 | company 021 | professor 003
+student 013 -> placement 041 | company 004 | professor 000
+student 014 -> placement 514 | company 056 | professor 001
+student 015 -> placement 229 | company 024 | professor 006
+student 016 -> placement 549 | company 060 | professor 006
+student 017 -> placement 271 | company 029 | professor 002
+student 018 -> placement 047 | company 005 | professor 005
+student 019 -> placement 174 | company 018 | professor 001
+student 020 -> placement 359 | company 039 | professor 004
+student 021 -> placement 413 | company 045 | professor 000
+student 022 -> placement 517 | company 056 | professor 005
+student 023 -> placement 175 | company 019 | professor 003
+student 024 -> placement 324 | company 035 | professor 007
+student 025 -> placement 158 | company 017 | professor 000
+student 026 -> placement 214 | company 023 | professor 002
+student 027 -> placement 140 | company 015 | professor 007
+student 028 -> placement 568 | company 062 | professor 000
+student 029 -> placement 363 | company 039 | professor 003
+student 030 -> placement 002 | company 000 | professor 005
+student 031 -> placement 249 | company 027 | professor 003
+student 032 -> placement 308 | company 033 | professor 003
+student 033 -> placement 354 | company 038 | professor 004
+student 034 -> placement 144 | company 015 | professor 003
+student 035 -> placement 539 | company 059 | professor 003
+student 036 -> placement 383 | company 041 | professor 005
+student 037 -> placement 505 | company 055 | professor 000
+student 038 -> placement 335 | company 036 | professor 007
+student 039 -> placement 280 | company 030 | professor 001
+student 040 -> placement 030 | company 003 | professor 001
+student 041 -> placement 244 | company 026 | professor 003
+student 042 -> placement 616 | company 067 | professor 003
+student 043 -> placement 411 | company 044 | professor 006
+student 044 -> placement 202 | company 021 | professor 007
+student 045 -> placement 560 | company 061 | professor 004
+student 046 -> placement 112 | company 012 | professor 002
+student 047 -> placement 548 | company 060 | professor 002
+student 048 -> placement 260 | company 028 | professor 001
+student 049 -> placement 342 | company 037 | professor 002
+student 050 -> placement 572 | company 062 | professor 007
+student 051 -> placement 122 | company 013 | professor 007
+student 052 -> placement 504 | company 055 | professor 001
+student 053 -> placement 706 | company 077 | professor 006
+student 054 -> placement 054 | company 005 | professor 004
+student 055 -> placement 239 | company 025 | professor 002
+student 056 -> placement 037 | company 003 | professor 002
+student 057 -> placement 272 | company 029 | professor 001
+student 058 -> placement 615 | company 067 | professor 005
+student 059 -> placement 485 | company 053 | professor 003
+student 060 -> placement 690 | company 075 | professor 004
+student 061 -> placement 083 | company 008 | professor 000
+student 062 -> placement 613 | company 067 | professor 000
+student 063 -> placement 399 | company 043 | professor 001
+student 064 -> placement 587 | company 064 | professor 005
+student 065 -> placement 044 | company 004 | professor 002
+student 066 -> placement 269 | company 029 | professor 004
+student 067 -> placement 389 | company 042 | professor 006
+student 068 -> placement 167 | company 018 | professor 003
+student 069 -> placement 087 | company 009 | professor 004
+student 070 -> placement 251 | company 027 | professor 007
+student 071 -> placement 198 | company 021 | professor 004
+student 072 -> placement 611 | company 067 | professor 002
+student 073 -> placement 046 | company 004 | professor 004
+student 074 -> placement 685 | company 075 | professor 007
+student 075 -> placement 226 | company 024 | professor 005
+student 076 -> placement 433 | company 047 | professor 003
+student 077 -> placement 187 | company 020 | professor 007
+student 078 -> placement 220 | company 023 | professor 003
+student 079 -> placement 467 | company 051 | professor 000
+student 080 -> placement 392 | company 042 | professor 001
+student 081 -> placement 442 | company 048 | professor 007
+student 082 -> placement 148 | company 016 | professor 006
+student 083 -> placement 709 | company 077 | professor 001
+student 084 -> placement 668 | company 073 | professor 000
+student 085 -> placement 331 | company 036 | professor 007
+student 086 -> placement 217 | company 023 | professor 001
+student 087 -> placement 350 | company 038 | professor 001
+student 088 -> placement 045 | company 004 | professor 005
+student 089 -> placement 121 | company 013 | professor 002
+student 090 -> placement 161 | company 017 | professor 003
+student 091 -> placement 684 | company 075 | professor 005
+student 092 -> placement 307 | company 033 | professor 001
+student 093 -> placement 703 | company 077 | professor 004
+student 094 -> placement 626 | company 068 | professor 007
+student 095 -> placement 675 | company 074 | professor 004
+student 096 -> placement 143 | company 015 | professor 006
+student 097 -> placement 206 | company 022 | professor 004
+student 098 -> placement 199 | company 021 | professor 000
+student 099 -> placement 336 | company 036 | professor 007
+student 100 -> placement 337 | company 036 | professor 004
+student 101 -> placement 119 | company 012 | professor 001
+student 102 -> placement 691 | company 075 | professor 000
+student 103 -> placement 468 | company 051 | professor 006
+student 104 -> placement 109 | company 011 | professor 001
+student 105 -> placement 256 | company 027 | professor 002
+student 106 -> placement 113 | company 012 | professor 002
+student 107 -> placement 163 | company 017 | professor 004
+student 108 -> placement 142 | company 015 | professor 000
+student 109 -> placement 428 | company 046 | professor 004
+student 110 -> placement 230 | company 024 | professor 000
+student 111 -> placement 407 | company 044 | professor 006
+student 112 -> placement 102 | company 010 | professor 007
+student 113 -> placement 612 | company 067 | professor 005
+student 114 -> placement 576 | company 063 | professor 003
+student 115 -> placement 603 | company 066 | professor 002
+student 116 -> placement 443 | company 048 | professor 006
+student 117 -> placement 547 | company 059 | professor 002
+student 118 -> placement 679 | company 074 | professor 001
+student 119 -> placement 501 | company 054 | professor 003
+student 120 -> placement 477 | company 052 | professor 000
+student 121 -> placement 683 | company 074 | professor 007
+student 122 -> placement 579 | company 063 | professor 003
+student 123 -> placement 160 | company 017 | professor 006
+student 124 -> placement 286 | company 031 | professor 005
+student 125 -> placement 398 | company 043 | professor 005
+student 126 -> placement 107 | company 011 | professor 006
+student 127 -> placement 463 | company 050 | professor 001
+student 128 -> placement 583 | company 063 | professor 000
+student 129 -> placement 596 | company 065 | professor 001
+student 130 -> placement 500 | company 054 | professor 003
+student 131 -> placement 470 | company 051 | professor 007
+student 132 -> placement 172 | company 018 | professor 006
+student 133 -> placement 567 | company 062 | professor 004
+student 134 -> placement 581 | company 063 | professor 007
+student 135 -> placement 190 | company 020 | professor 000
+student 136 -> placement 695 | company 076 | professor 002
+student 137 -> placement 103 | company 011 | professor 007
+student 138 -> placement 347 | company 037 | professor 002
+student 139 -> placement 513 | company 056 | professor 006
+student 140 -> placement 367 | company 040 | professor 007
+student 141 -> placement 240 | company 026 | professor 003
+student 142 -> placement 305 | company 033 | professor 000
+student 143 -> placement 278 | company 030 | professor 005
+student 144 -> placement 204 | company 022 | professor 000
+student 145 -> placement 100 | company 010 | professor 005
+student 146 -> placement 032 | company 003 | professor 004
+student 147 -> placement 488 | company 053 | professor 001
+student 148 -> placement 216 | company 023 | professor 000
+student 149 -> placement 558 | company 061 | professor 001
+student 150 -> placement 562 | company 061 | professor 005
+student 151 -> placement 620 | company 068 | professor 003
+student 152 -> placement 537 | company 058 | professor 000
+student 153 -> placement 708 | company 077 | professor 001
+student 154 -> placement 473 | company 051 | professor 004
+student 155 -> placement 115 | company 012 | professor 005
+student 156 -> placement 674 | company 073 | professor 002
+student 157 -> placement 194 | company 021 | professor 001
+student 158 -> placement 031 | company 003 | professor 001
+student 159 -> placement 556 | company 060 | professor 001
+student 160 -> placement 689 | company 075 | professor 000
+student 161 -> placement 134 | company 014 | professor 003
+student 162 -> placement 165 | company 017 | professor 001
+student 163 -> placement 664 | company 072 | professor 002
+student 164 -> placement 149 | company 016 | professor 006
+student 165 -> placement 285 | company 031 | professor 000
+student 166 -> placement 518 | company 056 | professor 005
+student 167 -> placement 590 | company 064 | professor 007
+student 168 -> placement 186 | company 020 | professor 003
+student 169 -> placement 241 | company 026 | professor 000
+student 170 -> placement 717 | company 078 | professor 000
+student 171 -> placement 677 | company 074 | professor 000
+student 172 -> placement 593 | company 065 | professor 002
+student 173 -> placement 058 | company 006 | professor 007
+student 174 -> placement 114 | company 012 | professor 001
+student 175 -> placement 231 | company 025 | professor 004
+student 176 -> placement 657 | company 072 | professor 006
+student 177 -> placement 553 | company 060 | professor 006
+student 178 -> placement 296 | company 032 | professor 003
+student 179 -> placement 092 | company 009 | professor 003
+student 180 -> placement 566 | company 062 | professor 000
+student 181 -> placement 498 | company 054 | professor 007
+student 182 -> placement 193 | company 020 | professor 001
+student 183 -> placement 465 | company 050 | professor 005
+student 184 -> placement 096 | company 010 | professor 007
+student 185 -> placement 281 | company 030 | professor 004
+student 186 -> placement 084 | company 008 | professor 005
+student 187 -> placement 110 | company 011 | professor 000
+student 188 -> placement 598 | company 065 | professor 005
+student 189 -> placement 702 | company 077 | professor 000
+student 190 -> placement 577 | company 063 | professor 006
+student 191 -> placement 339 | company 036 | professor 000
+student 192 -> placement 266 | company 028 | professor 000
+student 193 -> placement 617 | company 067 | professor 007
+student 194 -> placement 218 | company 023 | professor 007
+student 195 -> placement 563 | company 061 | professor 004
+student 196 -> placement 125 | company 013 | professor 006
+student 197 -> placement 227 | company 024 | professor 002
+student 198 -> placement 416 | company 045 | professor 005
+student 199 -> placement 001 | company 000 | professor 003
+student 200 -> placement 262 | company 028 | professor 007
+student 201 -> placement 718 | company 078 | professor 000
+student 202 -> placement 561 | company 061 | professor 004
+student 203 -> placement 326 | company 035 | professor 006
+student 204 -> placement 055 | company 005 | professor 000
+student 205 -> placement 525 | company 057 | professor 001
+student 206 -> placement 439 | company 048 | professor 003
+student 207 -> placement 012 | company 001 | professor 001
+student 208 -> placement 510 | company 055 | professor 002
+student 209 -> placement 386 | company 042 | professor 001
+student 210 -> placement 585 | company 064 | professor 000
+student 211 -> placement 288 | company 031 | professor 004
+student 212 -> placement 671 | company 073 | professor 003
+student 213 -> placement 527 | company 057 | professor 005
+student 214 -> placement 495 | company 054 | professor 004
+student 215 -> placement 672 | company 073 | professor 005
+student 216 -> placement 233 | company 025 | professor 004
+student 217 -> placement 178 | company 019 | professor 006
+student 218 -> placement 139 | company 015 | professor 003
+student 219 -> placement 483 | company 052 | professor 005
+student 220 -> placement 356 | company 038 | professor 003
+student 221 -> placement 522 | company 057 | professor 003
+student 222 -> placement 117 | company 012 | professor 005
+student 223 -> placement 557 | company 061 | professor 001
+student 224 -> placement 321 | company 034 | professor 005
+student 225 -> placement 020 | company 002 | professor 007
+student 226 -> placement 701 | company 076 | professor 004
+student 227 -> placement 391 | company 042 | professor 002
+student 228 -> placement 056 | company 006 | professor 003
+student 229 -> placement 209 | company 022 | professor 003
+student 230 -> placement 607 | company 066 | professor 000
+student 231 -> placement 499 | company 054 | professor 002
+student 232 -> placement 491 | company 053 | professor 007
+student 233 -> placement 693 | company 076 | professor 000
+student 234 -> placement 424 | company 046 | professor 006
+student 235 -> placement 697 | company 076 | professor 001
+student 236 -> placement 578 | company 063 | professor 004
+student 237 -> placement 215 | company 023 | professor 006
+student 238 -> placement 091 | company 009 | professor 006
+student 239 -> placement 555 | company 060 | professor 002
+student 240 -> placement 508 | company 055 | professor 003
+student 241 -> placement 257 | company 027 | professor 006
+student 242 -> placement 466 | company 051 | professor 001
+student 243 -> placement 077 | company 008 | professor 004
+student 244 -> placement 676 | company 074 | professor 003
+student 245 -> placement 052 | company 005 | professor 001
+student 246 -> placement 234 | company 025 | professor 004
+student 247 -> placement 453 | company 049 | professor 002
+student 248 -> placement 375 | company 040 | professor 001
+student 249 -> placement 036 | company 003 | professor 005
+student 250 -> placement 348 | company 037 | professor 007
+student 251 -> placement 253 | company 027 | professor 005
+student 252 -> placement 357 | company 038 | professor 005
+student 253 -> placement 595 | company 065 | professor 004
+student 254 -> placement 478 | company 052 | professor 003
+student 255 -> placement 221 | company 024 | professor 006
+student 256 -> placement 492 | company 053 | professor 005
+student 257 -> placement 130 | company 014 | professor 004
+student 258 -> placement 710 | company 077 | professor 006
+student 259 -> placement 048 | company 005 | professor 006
+student 260 -> placement 170 | company 018 | professor 001
+student 261 -> placement 208 | company 022 | professor 002
+student 262 -> placement 079 | company 008 | professor 002
+student 263 -> placement 481 | company 052 | professor 001
+student 264 -> placement 608 | company 066 | professor 006
+student 265 -> placement 681 | company 074 | professor 000
+student 266 -> placement 570 | company 062 | professor 004
+student 267 -> placement 358 | company 039 | professor 002
+student 268 -> placement 210 | company 022 | professor 002
+student 269 -> placement 026 | company 002 | professor 001
+student 270 -> placement 437 | company 047 | professor 005
+student 271 -> placement 469 | company 051 | professor 000
+student 272 -> placement 351 | company 038 | professor 003
+student 273 -> placement 393 | company 042 | professor 006
+student 274 -> placement 297 | company 032 | professor 007
+student 275 -> placement 682 | company 074 | professor 005
+student 276 -> placement 475 | company 052 | professor 002
+student 277 -> placement 546 | company 059 | professor 002
+student 278 -> placement 665 | company 072 | professor 001
+student 279 -> placement 319 | company 034 | professor 006
+student 280 -> placement 639 | company 070 | professor 002
+student 281 -> placement 655 | company 071 | professor 003
+student 282 -> placement 493 | company 053 | professor 000
+student 283 -> placement 295 | company 032 | professor 002
+student 284 -> placement 382 | company 041 | professor 000
+student 285 -> placement 171 | company 018 | professor 000
+student 286 -> placement 311 | company 033 | professor 004
+student 287 -> placement 531 | company 058 | professor 006
+student 288 -> placement 232 | company 025 | professor 006
+student 289 -> placement 564 | company 061 | professor 002
+student 290 -> placement 487 | company 053 | professor 001
+student 291 -> placement 277 | company 030 | professor 000
+student 292 -> placement 162 | company 017 | professor 003
+student 293 -> placement 106 | company 011 | professor 002
+student 294 -> placement 575 | company 063 | professor 002
+student 295 -> placement 649 | company 071 | professor 004
+student 296 -> placement 666 | company 073 | professor 002
+student 297 -> placement 185 | company 020 | professor 001
+student 298 -> placement 599 | company 065 | professor 006
+student 299 -> placement 126 | company 013 | professor 004
+student 300 -> placement 118 | company 012 | professor 000
+student 301 -> placement 197 | company 021 | professor 002
+student 302 -> placement 228 | company 024 | professor 000
+student 303 -> placement 318 | company 034 | professor 006
+student 304 -> placement 284 | company 030 | professor 005
+student 305 -> placement 182 | company 019 | professor 005
+student 306 -> placement 283 | company 030 | professor 006
+student 307 -> placement 033 | company 003 | professor 000
+student 308 -> placement 147 | company 015 | professor 006
+student 309 -> placement 049 | company 005 | professor 007
+student 310 -> placement 133 | company 014 | professor 000
+student 311 -> placement 580 | company 063 | professor 003
+student 312 -> placement 515 | company 056 | professor 006
+student 313 -> placement 153 | company 016 | professor 003
+student 314 -> placement 648 | company 071 | professor 006
+student 315 -> placement 237 | company 025 | professor 006
+student 316 -> placement 385 | company 042 | professor 001
+student 317 -> placement 571 | company 062 | professor 002
+student 318 -> placement 656 | company 072 | professor 007
+student 319 -> placement 630 | company 069 | professor 007
+student 320 -> placement 412 | company 045 | professor 006
+student 321 -> placement 301 | company 032 | professor 000
+student 322 -> placement 378 | company 041 | professor 005
+student 323 -> placement 454 | company 049 | professor 007
+student 324 -> placement 445 | company 048 | professor 000
+student 325 -> placement 291 | company 031 | professor 006
+student 326 -> placement 619 | company 067 | professor 000
+student 327 -> placement 293 | company 031 | professor 005
+student 328 -> placement 069 | company 007 | professor 001
+student 329 -> placement 173 | company 018 | professor 006
+student 330 -> placement 600 | company 065 | professor 000
+student 331 -> placement 059 | company 006 | professor 000
+student 332 -> placement 459 | company 050 | professor 005
+student 333 -> placement 381 | company 041 | professor 007
+student 334 -> placement 591 | company 064 | professor 007
+student 335 -> placement 081 | company 008 | professor 002
+student 336 -> placement 506 | company 055 | professor 002
+student 337 -> placement 315 | company 034 | professor 004
+student 338 -> placement 334 | company 036 | professor 004
+student 339 -> placement 434 | company 047 | professor 004
+student 340 -> placement 673 | company 073 | professor 001
+student 341 -> placement 516 | company 056 | professor 003
+student 342 -> placement 623 | company 068 | professor 000
+student 343 -> placement 168 | company 018 | professor 000
+student 344 -> placement 328 | company 035 | professor 007
+student 345 -> placement 264 | company 028 | professor 001
+student 346 -> placement 644 | company 070 | professor 000
+student 347 -> placement 131 | company 014 | professor 006
+student 348 -> placement 094 | company 010 | professor 002
+student 349 -> placement 436 | company 047 | professor 003
+student 350 -> placement 219 | company 023 | professor 007
+student 351 -> placement 401 | company 043 | professor 002
+student 352 -> placement 542 | company 059 | professor 004
+student 353 -> placement 369 | company 040 | professor 007
+student 354 -> placement 698 | company 076 | professor 002
+student 355 -> placement 323 | company 035 | professor 003
+student 356 -> placement 640 | company 070 | professor 007
+student 357 -> placement 250 | company 027 | professor 006
+student 358 -> placement 340 | company 037 | professor 000
+student 359 -> placement 618 | company 067 | professor 004
+student 360 -> placement 422 | company 046 | professor 000
+student 361 -> placement 035 | company 003 | professor 005
+student 362 -> placement 127 | company 013 | professor 001
+student 363 -> placement 276 | company 030 | professor 003
+student 364 -> placement 314 | company 034 | professor 006
+student 365 -> placement 213 | company 023 | professor 003
+student 366 -> placement 569 | company 062 | professor 005
+student 367 -> placement 180 | company 019 | professor 005
+student 368 -> placement 376 | company 041 | professor 004
+student 369 -> placement 317 | company 034 | professor 006
+student 370 -> placement 446 | company 048 | professor 000
+student 371 -> placement 680 | company 074 | professor 002
+student 372 -> placement 543 | company 059 | professor 004
+student 373 -> placement 246 | company 026 | professor 004
+student 374 -> placement 533 | company 058 | professor 001
+student 375 -> placement 440 | company 048 | professor 002
+student 376 -> placement 472 | company 051 | professor 007
+student 377 -> placement 075 | company 007 | professor 000
+student 378 -> placement 189 | company 020 | professor 005
+student 379 -> placement 559 | company 061 | professor 007
+student 380 -> placement 384 | company 041 | professor 004
+student 381 -> placement 662 | company 072 | professor 001
+student 382 -> placement 494 | company 054 | professor 004
+student 383 -> placement 458 | company 050 | professor 007
+student 384 -> placement 604 | company 066 | professor 005
+student 385 -> placement 212 | company 023 | professor 002
+student 386 -> placement 365 | company 039 | professor 002
+student 387 -> placement 159 | company 017 | professor 001
+student 388 -> placement 097 | company 010 | professor 007
+student 389 -> placement 287 | company 031 | professor 007
+student 390 -> placement 042 | company 004 | professor 000
+student 391 -> placement 476 | company 052 | professor 004
+student 392 -> placement 132 | company 014 | professor 007
+student 393 -> placement 329 | company 035 | professor 007
+student 394 -> placement 511 | company 055 | professor 001
+student 395 -> placement 123 | company 013 | professor 003
+student 396 -> placement 306 | company 033 | professor 004
+student 397 -> placement 423 | company 046 | professor 006
+student 398 -> placement 156 | company 016 | professor 007
+student 399 -> placement 017 | company 001 | professor 002
+student 400 -> placement 646 | company 070 | professor 002
+student 401 -> placement 486 | company 053 | professor 002
+student 402 -> placement 441 | company 048 | professor 000
+student 403 -> placement 073 | company 007 | professor 006
+student 404 -> placement 418 | company 045 | professor 003
+student 405 -> placement 686 | company 075 | professor 001
+student 406 -> placement 379 | company 041 | professor 000
+student 407 -> placement 503 | company 055 | professor 006
+student 408 -> placement 078 | company 008 | professor 002
+student 409 -> placement 104 | company 011 | professor 003
+student 410 -> placement 509 | company 055 | professor 006
+student 411 -> placement 444 | company 048 | professor 007
+student 412 -> placement 431 | company 047 | professor 003
+student 413 -> placement 360 | company 039 | professor 007
+student 414 -> placement 435 | company 047 | professor 002
+student 415 -> placement 614 | company 067 | professor 005
+student 416 -> placement 191 | company 020 | professor 004
+student 417 -> placement 124 | company 013 | professor 007
+student 418 -> placement 141 | company 015 | professor 002
+student 419 -> placement 538 | company 058 | professor 000
+student 420 -> placement 621 | company 068 | professor 004
+student 421 -> placement 034 | company 003 | professor 006
+student 422 -> placement 452 | company 049 | professor 004
+student 423 -> placement 462 | company 050 | professor 003
+student 424 -> placement 322 | company 035 | professor 007
+student 425 -> placement 080 | company 008 | professor 000
+student 426 -> placement 245 | company 026 | professor 001
+student 427 -> placement 404 | company 044 | professor 007
+student 428 -> placement 028 | company 003 | professor 003
+student 429 -> placement 076 | company 008 | professor 005
+student 430 -> placement 395 | company 043 | professor 002
+student 431 -> placement 184 | company 020 | professor 007
+student 432 -> placement 050 | company 005 | professor 002
+student 433 -> placement 265 | company 028 | professor 006
+student 434 -> placement 074 | company 007 | professor 003
+student 435 -> placement 070 | company 007 | professor 003
+student 436 -> placement 659 | company 072 | professor 002
+student 437 -> placement 303 | company 033 | professor 004
+student 438 -> placement 535 | company 058 | professor 005
+student 439 -> placement 223 | company 024 | professor 005
+student 440 -> placement 707 | company 077 | professor 006
+student 441 -> placement 138 | company 014 | professor 000
+student 442 -> placement 349 | company 038 | professor 006
+student 443 -> placement 471 | company 051 | professor 002
+student 444 -> placement 151 | company 016 | professor 006
+student 445 -> placement 565 | company 061 | professor 003
+student 446 -> placement 313 | company 034 | professor 006
+student 447 -> placement 409 | company 044 | professor 003
+student 448 -> placement 551 | company 060 | professor 007
+student 449 -> placement 420 | company 045 | professor 004
+student 450 -> placement 650 | company 071 | professor 001
+student 451 -> placement 129 | company 013 | professor 002
+student 452 -> placement 450 | company 049 | professor 005
+student 453 -> placement 502 | company 054 | professor 002
+student 454 -> placement 545 | company 059 | professor 005
+student 455 -> placement 696 | company 076 | professor 006
+student 456 -> placement 157 | company 017 | professor 001
+student 457 -> placement 136 | company 014 | professor 006
+student 458 -> placement 687 | company 075 | professor 004
+student 459 -> placement 040 | company 004 | professor 000
+student 460 -> placement 095 | company 010 | professor 002
+student 461 -> placement 298 | company 032 | professor 003
+student 462 -> placement 179 | company 019 | professor 007
+student 463 -> placement 660 | company 072 | professor 004
+student 464 -> placement 461 | company 050 | professor 007
+student 465 -> placement 670 | company 073 | professor 001
+student 466 -> placement 120 | company 012 | professor 007
+student 467 -> placement 011 | company 001 | professor 001
+student 468 -> placement 316 | company 034 | professor 001
+student 469 -> placement 601 | company 065 | professor 003
+student 470 -> placement 082 | company 008 | professor 006
+student 471 -> placement 377 | company 041 | professor 001
+student 472 -> placement 530 | company 058 | professor 002
+student 473 -> placement 387 | company 042 | professor 002
+student 474 -> placement 474 | company 051 | professor 004
+student 475 -> placement 242 | company 026 | professor 001
+student 476 -> placement 346 | company 037 | professor 007
+student 477 -> placement 279 | company 030 | professor 001
+student 478 -> placement 282 | company 030 | professor 001
+student 479 -> placement 526 | company 057 | professor 005
+student 480 -> placement 009 | company 001 | professor 007
+student 481 -> placement 135 | company 014 | professor 003
+student 482 -> placement 390 | company 042 | professor 000
+student 483 -> placement 380 | company 041 | professor 005
+student 484 -> placement 211 | company 022 | professor 001
+student 485 -> placement 455 | company 049 | professor 001
+student 486 -> placement 299 | company 032 | professor 003
+student 487 -> placement 259 | company 028 | professor 002
+student 488 -> placement 536 | company 058 | professor 001
+student 489 -> placement 592 | company 064 | professor 007
+student 490 -> placement 263 | company 028 | professor 002
+student 491 -> placement 643 | company 070 | professor 004
+student 492 -> placement 654 | company 071 | professor 000
+student 493 -> placement 152 | company 016 | professor 007
+student 494 -> placement 289 | company 031 | professor 006
+student 495 -> placement 029 | company 003 | professor 002
+student 496 -> placement 507 | company 055 | professor 004
+student 497 -> placement 541 | company 059 | professor 000
+student 498 -> placement 300 | company 032 | professor 004
+student 499 -> placement 320 | company 034 | professor 001
+student 500 -> placement 484 | company 052 | professor 000
+student 501 -> placement 015 | company 001 | professor 000
+student 502 -> placement 425 | company 046 | professor 007
+student 503 -> placement 438 | company 047 | professor 007
+student 504 -> placement 597 | company 065 | professor 003
+student 505 -> placement 014 | company 001 | professor 002
+student 506 -> placement 371 | company 040 | professor 005
+student 507 -> placement 072 | company 007 | professor 004
+student 508 -> placement 550 | company 060 | professor 005
+student 509 -> placement 061 | company 006 | professor 006
+student 510 -> placement 105 | company 011 | professor 002
+student 511 -> placement 128 | company 013 | professor 003
+student 512 -> placement 235 | company 025 | professor 002
+student 513 -> placement 554 | company 060 | professor 003
+student 514 -> placement 192 | company 020 | professor 005
+student 515 -> placement 361 | company 039 | professor 005
+student 516 -> placement 512 | company 056 | professor 002
+student 517 -> placement 098 | company 010 | professor 006
+student 518 -> placement 332 | company 036 | professor 003
+student 519 -> placement 166 | company 018 | professor 000
+student 520 -> placement 448 | company 049 | professor 005
+student 521 -> placement 071 | company 007 | professor 007
+student 522 -> placement 669 | company 073 | professor 005
+student 523 -> placement 006 | company 000 | professor 000
+student 524 -> placement 364 | company 039 | professor 004
+student 525 -> placement 429 | company 046 | professor 005
+student 526 -> placement 224 | company 024 | professor 004
+student 527 -> placement 345 | company 037 | professor 001
+student 528 -> placement 065 | company 007 | professor 000
+student 529 -> placement 449 | company 049 | professor 004
+student 530 -> placement 063 | company 006 | professor 007
+student 531 -> placement 353 | company 038 | professor 005
+student 532 -> placement 201 | company 021 | professor 001
+student 533 -> placement 344 | company 037 | professor 004
+student 534 -> placement 652 | company 071 | professor 000
+student 535 -> placement 605 | company 066 | professor 003
+student 536 -> placement 205 | company 022 | professor 002
+student 537 -> placement 177 | company 019 | professor 007
+student 538 -> placement 642 | company 070 | professor 004
+student 539 -> placement 582 | company 063 | professor 003
+student 540 -> placement 421 | company 046 | professor 002
+student 541 -> placement 622 | company 068 | professor 005
+student 542 -> placement 343 | company 037 | professor 005
+student 543 -> placement 258 | company 028 | professor 003
+student 544 -> placement 137 | company 014 | professor 002
+student 545 -> placement 606 | company 066 | professor 004
+student 546 -> placement 699 | company 076 | professor 001
+student 547 -> placement 457 | company 050 | professor 003
+student 548 -> placement 290 | company 031 | professor 000
+student 549 -> placement 057 | company 006 | professor 002
+student 550 -> placement 653 | company 071 | professor 005
+student 551 -> placement 705 | company 077 | professor 001
+student 552 -> placement 594 | company 065 | professor 001
+student 553 -> placement 426 | company 046 | professor 000
+student 554 -> placement 406 | company 044 | professor 007
+student 555 -> placement 181 | company 019 | professor 000
+student 556 -> placement 627 | company 068 | professor 006
+student 557 -> placement 588 | company 064 | professor 004
+student 558 -> placement 651 | company 071 | professor 004
+student 559 -> placement 497 | company 054 | professor 007
+student 560 -> placement 252 | company 027 | professor 007
+student 561 -> placement 176 | company 019 | professor 005
+student 562 -> placement 427 | company 046 | professor 002
+student 563 -> placement 116 | company 012 | professor 003
+student 564 -> placement 196 | company 021 | professor 004
+student 565 -> placement 225 | company 024 | professor 003
+student 566 -> placement 013 | company 001 | professor 002
+student 567 -> placement 062 | company 006 | professor 002
+student 568 -> placement 645 | company 070 | professor 001
+student 569 -> placement 330 | company 035 | professor 000
+student 570 -> placement 304 | company 033 | professor 006
+student 571 -> placement 534 | company 058 | professor 005
+student 572 -> placement 370 | company 040 | professor 000
+student 573 -> placement 019 | company 002 | professor 003
+student 574 -> placement 704 | company 077 | professor 003
+student 575 -> placement 396 | company 043 | professor 006
+student 576 -> placement 169 | company 018 | professor 005
+student 577 -> placement 678 | company 074 | professor 002
+student 578 -> placement 183 | company 019 | professor 005
+student 579 -> placement 638 | company 070 | professor 001
+student 580 -> placement 496 | company 054 | professor 000
+student 581 -> placement 641 | company 070 | professor 003
+student 582 -> placement 589 | company 064 | professor 001
+student 583 -> placement 602 | company 066 | professor 006
+student 584 -> placement 552 | company 060 | professor 004
+student 585 -> placement 039 | company 004 | professor 003
+student 586 -> placement 292 | company 031 | professor 006
+student 587 -> placement 302 | company 032 | professor 005
+student 588 -> placement 624 | company 068 | professor 004
+student 589 -> placement 261 | company 028 | professor 006
+student 590 -> placement 447 | company 048 | professor 004
+student 591 -> placement 635 | company 069 | professor 004
+student 592 -> placement 222 | company 024 | professor 003
+student 593 -> placement 064 | company 006 | professor 000
+student 594 -> placement 150 | company 016 | professor 002
+student 595 -> placement 667 | company 073 | professor 003
+student 596 -> placement 294 | company 032 | professor 006
+student 597 -> placement 247 | company 026 | professor 002
+student 598 -> placement 341 | company 037 | professor 007
+student 599 -> placement 164 | company 017 | professor 006
+
+---- PROFESSOR -> PLACEMENTS ----
+professor 000 | load=82 | placements: 6, 15, 33, 40, 41, 42, 55, 59, 60, 64, 65, 75, 80, 83, 110, 118, 133, 138, 142, 158, 166, 168, 171, 181, 190, 199, 204, 216, 228, 230, 241, 266, 277, 285, 290, 301, 305, 330, 339, 340, 370, 379, 382, 390, 413, 415, 422, 426, 441, 445, 446, 467, 469, 477, 484, 493, 496, 505, 537, 538, 541, 566, 568, 583, 585, 600, 607, 613, 619, 623, 644, 652, 654, 668, 677, 681, 689, 691, 693, 702, 717, 718
+professor 001 | load=74 | placements: 11, 12, 26, 30, 31, 52, 69, 109, 114, 119, 127, 157, 159, 165, 170, 174, 185, 193, 194, 201, 211, 217, 242, 245, 260, 264, 272, 279, 280, 282, 307, 316, 320, 345, 350, 375, 377, 385, 386, 392, 399, 455, 463, 466, 481, 487, 488, 504, 511, 514, 525, 533, 536, 556, 557, 558, 589, 594, 596, 638, 645, 647, 650, 662, 665, 670, 673, 679, 686, 697, 699, 705, 708, 709
+professor 002 | load=80 | placements: 13, 14, 17, 29, 37, 44, 50, 57, 62, 78, 79, 81, 94, 95, 105, 106, 112, 113, 121, 129, 137, 141, 150, 197, 205, 208, 210, 212, 214, 227, 235, 239, 247, 256, 259, 263, 271, 295, 342, 347, 358, 365, 387, 391, 395, 401, 421, 427, 435, 440, 453, 471, 475, 486, 499, 502, 506, 510, 512, 530, 546, 547, 548, 555, 564, 571, 575, 593, 603, 611, 639, 646, 659, 664, 666, 674, 678, 680, 695, 698
+professor 003 | load=79 | placements: 1, 19, 24, 28, 39, 56, 70, 74, 92, 104, 116, 123, 128, 134, 135, 139, 144, 153, 161, 162, 167, 175, 186, 188, 195, 200, 209, 213, 220, 222, 225, 240, 244, 249, 258, 276, 296, 298, 299, 308, 323, 332, 351, 356, 363, 409, 418, 431, 433, 436, 439, 457, 462, 478, 485, 500, 501, 508, 516, 522, 532, 539, 554, 565, 576, 579, 580, 582, 597, 601, 605, 616, 620, 641, 655, 667, 671, 676, 704
+professor 004 | load=74 | placements: 32, 46, 54, 72, 77, 87, 126, 130, 163, 191, 196, 198, 206, 224, 231, 233, 234, 246, 269, 281, 288, 300, 303, 306, 311, 315, 334, 337, 344, 354, 359, 364, 376, 384, 388, 408, 420, 428, 434, 447, 449, 452, 473, 474, 476, 494, 495, 507, 542, 543, 552, 560, 561, 563, 567, 570, 578, 588, 595, 606, 618, 621, 624, 635, 642, 643, 649, 651, 660, 675, 687, 690, 701, 703
+professor 005 | load=67 | placements: 2, 35, 36, 45, 47, 76, 84, 100, 115, 117, 169, 176, 180, 182, 183, 189, 192, 223, 226, 253, 278, 284, 286, 293, 302, 321, 343, 352, 353, 357, 361, 371, 378, 380, 383, 398, 416, 429, 437, 448, 450, 459, 465, 483, 492, 517, 518, 526, 527, 534, 535, 545, 550, 562, 569, 587, 598, 604, 612, 614, 615, 622, 653, 669, 672, 682, 684
+professor 006 | load=71 | placements: 34, 48, 61, 73, 82, 91, 98, 107, 125, 131, 136, 143, 147, 148, 149, 151, 160, 164, 172, 173, 178, 215, 221, 229, 232, 237, 250, 257, 261, 265, 283, 289, 291, 292, 294, 304, 313, 314, 317, 318, 319, 326, 349, 389, 393, 396, 407, 411, 412, 423, 424, 443, 468, 503, 509, 513, 515, 531, 549, 553, 577, 599, 602, 608, 627, 648, 657, 696, 706, 707, 710
+professor 007 | load=73 | placements: 9, 20, 49, 58, 63, 71, 96, 97, 102, 103, 120, 122, 124, 132, 140, 152, 156, 177, 179, 184, 187, 202, 218, 219, 251, 252, 262, 287, 297, 322, 324, 328, 329, 331, 335, 336, 341, 346, 348, 355, 360, 367, 369, 381, 404, 406, 419, 425, 438, 442, 444, 454, 458, 461, 470, 472, 491, 497, 498, 551, 559, 572, 581, 590, 591, 592, 617, 626, 630, 640, 656, 683, 685
+
+---- COMPANY LOAD ----
+company 000 | load=3 | min=2 | max=9
+company 001 | load=7 | min=1 | max=9
+company 002 | load=4 | min=3 | max=10
+company 003 | load=10 | min=6 | max=10
+company 004 | load=7 | min=2 | max=9
+company 005 | load=7 | min=1 | max=9
+company 006 | load=9 | min=2 | max=9
+company 007 | load=8 | min=5 | max=11
+company 008 | load=9 | min=3 | max=9
+company 009 | load=3 | min=1 | max=9
+company 010 | load=7 | min=1 | max=9
+company 011 | load=7 | min=4 | max=9
+company 012 | load=9 | min=1 | max=9
+company 013 | load=9 | min=5 | max=9
+company 014 | load=9 | min=3 | max=9
+company 015 | load=7 | min=3 | max=9
+company 016 | load=7 | min=3 | max=9
+company 017 | load=9 | min=4 | max=9
+company 018 | load=9 | min=2 | max=9
+company 019 | load=9 | min=2 | max=9
+company 020 | load=10 | min=4 | max=10
+company 021 | load=9 | min=2 | max=9
+company 022 | load=7 | min=2 | max=9
+company 023 | load=9 | min=4 | max=9
+company 024 | load=10 | min=5 | max=10
+company 025 | load=7 | min=2 | max=9
+company 026 | load=7 | min=3 | max=9
+company 027 | load=7 | min=5 | max=9
+company 028 | load=9 | min=4 | max=9
+company 029 | load=3 | min=2 | max=9
+company 030 | load=9 | min=4 | max=9
+company 031 | load=9 | min=3 | max=9
+company 032 | load=9 | min=1 | max=9
+company 033 | load=7 | min=4 | max=10
+company 034 | load=9 | min=3 | max=9
+company 035 | load=7 | min=1 | max=9
+company 036 | load=7 | min=4 | max=9
+company 037 | load=9 | min=3 | max=9
+company 038 | load=9 | min=2 | max=9
+company 039 | load=7 | min=2 | max=9
+company 040 | load=5 | min=3 | max=9
+company 041 | load=9 | min=6 | max=9
+company 042 | load=9 | min=3 | max=9
+company 043 | load=5 | min=4 | max=9
+company 044 | load=6 | min=4 | max=9
+company 045 | load=7 | min=2 | max=9
+company 046 | load=9 | min=7 | max=9
+company 047 | load=7 | min=2 | max=9
+company 048 | load=9 | min=3 | max=9
+company 049 | load=7 | min=5 | max=9
+company 050 | load=7 | min=1 | max=9
+company 051 | load=9 | min=4 | max=9
+company 052 | load=7 | min=0 | max=10
+company 053 | load=7 | min=2 | max=9
+company 054 | load=9 | min=1 | max=9
+company 055 | load=9 | min=6 | max=9
+company 056 | load=7 | min=1 | max=9
+company 057 | load=4 | min=3 | max=9
+company 058 | load=9 | min=3 | max=9
+company 059 | load=7 | min=2 | max=9
+company 060 | load=9 | min=4 | max=9
+company 061 | load=9 | min=1 | max=9
+company 062 | load=7 | min=3 | max=9
+company 063 | load=9 | min=1 | max=9
+company 064 | load=7 | min=4 | max=9
+company 065 | load=9 | min=4 | max=9
+company 066 | load=7 | min=4 | max=9
+company 067 | load=9 | min=5 | max=9
+company 068 | load=7 | min=6 | max=9
+company 069 | load=2 | min=1 | max=9
+company 070 | load=9 | min=3 | max=9
+company 071 | load=9 | min=3 | max=9
+company 072 | load=7 | min=4 | max=10
+company 073 | load=9 | min=1 | max=9
+company 074 | load=9 | min=3 | max=9
+company 075 | load=7 | min=3 | max=9
+company 076 | load=7 | min=4 | max=9
+company 077 | load=9 | min=2 | max=9
+company 078 | load=2 | min=2 | max=9
+
+---- PROFESSOR LOAD ----
+professor 000 | load=82 | capacity=89
+professor 001 | load=74 | capacity=94
+professor 002 | load=80 | capacity=97
+professor 003 | load=79 | capacity=91
+professor 004 | load=74 | capacity=82
+professor 005 | load=67 | capacity=83
+professor 006 | load=71 | capacity=98
+professor 007 | load=73 | capacity=86
+
+================================================================================
+SOLUTION [4]
+================================================================================
+iteration: 4
+seed: 1237
+objective_value: 55.196969
+tau_sum: 110.317311
+eta_sum: 48.489200
+lbar_sum: 1.905510
+sigma_sum: 0.042084
+
+---- STUDENT -> PLACEMENT / COMPANY / PROFESSOR ----
+student 000 -> placement 632 | company 069 | professor 004
+student 001 -> placement 573 | company 062 | professor 002
+student 002 -> placement 437 | company 047 | professor 005
+student 003 -> placement 039 | company 004 | professor 000
+student 004 -> placement 163 | company 017 | professor 001
+student 005 -> placement 255 | company 027 | professor 004
+student 006 -> placement 023 | company 002 | professor 007
+student 007 -> placement 005 | company 000 | professor 001
+student 008 -> placement 118 | company 012 | professor 000
+student 009 -> placement 536 | company 058 | professor 005
+student 010 -> placement 656 | company 072 | professor 001
+student 011 -> placement 678 | company 074 | professor 007
+student 012 -> placement 046 | company 004 | professor 007
+student 013 -> placement 426 | company 046 | professor 001
+student 014 -> placement 431 | company 047 | professor 005
+student 015 -> placement 077 | company 008 | professor 007
+student 016 -> placement 086 | company 009 | professor 003
+student 017 -> placement 371 | company 040 | professor 000
+student 018 -> placement 130 | company 014 | professor 003
+student 019 -> placement 441 | company 048 | professor 001
+student 020 -> placement 681 | company 074 | professor 002
+student 021 -> placement 056 | company 006 | professor 006
+student 022 -> placement 131 | company 014 | professor 001
+student 023 -> placement 181 | company 019 | professor 000
+student 024 -> placement 137 | company 014 | professor 002
+student 025 -> placement 150 | company 016 | professor 004
+student 026 -> placement 296 | company 032 | professor 001
+student 027 -> placement 166 | company 018 | professor 002
+student 028 -> placement 124 | company 013 | professor 005
+student 029 -> placement 027 | company 002 | professor 003
+student 030 -> placement 532 | company 058 | professor 005
+student 031 -> placement 436 | company 047 | professor 004
+student 032 -> placement 391 | company 042 | professor 000
+student 033 -> placement 642 | company 070 | professor 004
+student 034 -> placement 496 | company 054 | professor 007
+student 035 -> placement 513 | company 056 | professor 006
+student 036 -> placement 311 | company 033 | professor 007
+student 037 -> placement 295 | company 032 | professor 003
+student 038 -> placement 479 | company 052 | professor 006
+student 039 -> placement 472 | company 051 | professor 004
+student 040 -> placement 002 | company 000 | professor 007
+student 041 -> placement 489 | company 053 | professor 001
+student 042 -> placement 630 | company 069 | professor 001
+student 043 -> placement 033 | company 003 | professor 002
+student 044 -> placement 233 | company 025 | professor 007
+student 045 -> placement 318 | company 034 | professor 003
+student 046 -> placement 553 | company 060 | professor 006
+student 047 -> placement 565 | company 061 | professor 003
+student 048 -> placement 653 | company 071 | professor 004
+student 049 -> placement 042 | company 004 | professor 003
+student 050 -> placement 044 | company 004 | professor 003
+student 051 -> placement 669 | company 073 | professor 003
+student 052 -> placement 351 | company 038 | professor 001
+student 053 -> placement 332 | company 036 | professor 003
+student 054 -> placement 139 | company 015 | professor 003
+student 055 -> placement 115 | company 012 | professor 004
+student 056 -> placement 054 | company 005 | professor 003
+student 057 -> placement 636 | company 069 | professor 001
+student 058 -> placement 336 | company 036 | professor 002
+student 059 -> placement 392 | company 042 | professor 007
+student 060 -> placement 443 | company 048 | professor 004
+student 061 -> placement 555 | company 060 | professor 002
+student 062 -> placement 545 | company 059 | professor 004
+student 063 -> placement 010 | company 001 | professor 000
+student 064 -> placement 400 | company 043 | professor 002
+student 065 -> placement 626 | company 068 | professor 006
+student 066 -> placement 524 | company 057 | professor 006
+student 067 -> placement 711 | company 078 | professor 000
+student 068 -> placement 103 | company 011 | professor 006
+student 069 -> placement 123 | company 013 | professor 004
+student 070 -> placement 323 | company 035 | professor 001
+student 071 -> placement 385 | company 042 | professor 005
+student 072 -> placement 689 | company 075 | professor 006
+student 073 -> placement 201 | company 021 | professor 001
+student 074 -> placement 567 | company 062 | professor 000
+student 075 -> placement 446 | company 048 | professor 001
+student 076 -> placement 629 | company 069 | professor 004
+student 077 -> placement 213 | company 023 | professor 003
+student 078 -> placement 483 | company 052 | professor 004
+student 079 -> placement 235 | company 025 | professor 003
+student 080 -> placement 120 | company 012 | professor 000
+student 081 -> placement 050 | company 005 | professor 000
+student 082 -> placement 396 | company 043 | professor 003
+student 083 -> placement 533 | company 058 | professor 007
+student 084 -> placement 316 | company 034 | professor 000
+student 085 -> placement 112 | company 012 | professor 004
+student 086 -> placement 256 | company 027 | professor 002
+student 087 -> placement 515 | company 056 | professor 005
+student 088 -> placement 631 | company 069 | professor 007
+student 089 -> placement 176 | company 019 | professor 001
+student 090 -> placement 141 | company 015 | professor 000
+student 091 -> placement 714 | company 078 | professor 007
+student 092 -> placement 135 | company 014 | professor 006
+student 093 -> placement 598 | company 065 | professor 006
+student 094 -> placement 375 | company 040 | professor 005
+student 095 -> placement 263 | company 028 | professor 006
+student 096 -> placement 314 | company 034 | professor 004
+student 097 -> placement 205 | company 022 | professor 000
+student 098 -> placement 169 | company 018 | professor 000
+student 099 -> placement 264 | company 028 | professor 003
+student 100 -> placement 470 | company 051 | professor 001
+student 101 -> placement 405 | company 044 | professor 005
+student 102 -> placement 064 | company 006 | professor 003
+student 103 -> placement 646 | company 070 | professor 002
+student 104 -> placement 408 | company 044 | professor 007
+student 105 -> placement 589 | company 064 | professor 005
+student 106 -> placement 510 | company 055 | professor 007
+student 107 -> placement 543 | company 059 | professor 000
+student 108 -> placement 416 | company 045 | professor 005
+student 109 -> placement 506 | company 055 | professor 001
+student 110 -> placement 286 | company 031 | professor 002
+student 111 -> placement 526 | company 057 | professor 006
+student 112 -> placement 280 | company 030 | professor 004
+student 113 -> placement 458 | company 050 | professor 002
+student 114 -> placement 390 | company 042 | professor 002
+student 115 -> placement 433 | company 047 | professor 003
+student 116 -> placement 071 | company 007 | professor 003
+student 117 -> placement 165 | company 017 | professor 006
+student 118 -> placement 292 | company 031 | professor 001
+student 119 -> placement 434 | company 047 | professor 006
+student 120 -> placement 548 | company 060 | professor 004
+student 121 -> placement 614 | company 067 | professor 005
+student 122 -> placement 168 | company 018 | professor 007
+student 123 -> placement 491 | company 053 | professor 001
+student 124 -> placement 212 | company 023 | professor 001
+student 125 -> placement 361 | company 039 | professor 006
+student 126 -> placement 204 | company 022 | professor 000
+student 127 -> placement 695 | company 076 | professor 006
+student 128 -> placement 028 | company 003 | professor 006
+student 129 -> placement 535 | company 058 | professor 007
+student 130 -> placement 271 | company 029 | professor 004
+student 131 -> placement 438 | company 047 | professor 004
+student 132 -> placement 595 | company 065 | professor 002
+student 133 -> placement 676 | company 074 | professor 003
+student 134 -> placement 622 | company 068 | professor 006
+student 135 -> placement 214 | company 023 | professor 002
+student 136 -> placement 428 | company 046 | professor 004
+student 137 -> placement 156 | company 016 | professor 005
+student 138 -> placement 315 | company 034 | professor 003
+student 139 -> placement 267 | company 029 | professor 000
+student 140 -> placement 149 | company 016 | professor 001
+student 141 -> placement 342 | company 037 | professor 000
+student 142 -> placement 705 | company 077 | professor 000
+student 143 -> placement 088 | company 009 | professor 000
+student 144 -> placement 344 | company 037 | professor 005
+student 145 -> placement 270 | company 029 | professor 000
+student 146 -> placement 419 | company 045 | professor 001
+student 147 -> placement 127 | company 013 | professor 007
+student 148 -> placement 516 | company 056 | professor 006
+student 149 -> placement 350 | company 038 | professor 007
+student 150 -> placement 261 | company 028 | professor 003
+student 151 -> placement 580 | company 063 | professor 004
+student 152 -> placement 474 | company 051 | professor 003
+student 153 -> placement 081 | company 008 | professor 002
+student 154 -> placement 718 | company 078 | professor 006
+student 155 -> placement 471 | company 051 | professor 000
+student 156 -> placement 091 | company 009 | professor 004
+student 157 -> placement 198 | company 021 | professor 000
+student 158 -> placement 346 | company 037 | professor 005
+student 159 -> placement 641 | company 070 | professor 005
+student 160 -> placement 557 | company 061 | professor 002
+student 161 -> placement 287 | company 031 | professor 007
+student 162 -> placement 607 | company 066 | professor 007
+student 163 -> placement 467 | company 051 | professor 004
+student 164 -> placement 236 | company 025 | professor 005
+student 165 -> placement 559 | company 061 | professor 005
+student 166 -> placement 209 | company 022 | professor 000
+student 167 -> placement 611 | company 067 | professor 001
+student 168 -> placement 047 | company 005 | professor 004
+student 169 -> placement 687 | company 075 | professor 003
+student 170 -> placement 110 | company 011 | professor 003
+student 171 -> placement 272 | company 029 | professor 003
+student 172 -> placement 566 | company 062 | professor 004
+student 173 -> placement 208 | company 022 | professor 000
+student 174 -> placement 602 | company 066 | professor 004
+student 175 -> placement 200 | company 021 | professor 001
+student 176 -> placement 179 | company 019 | professor 004
+student 177 -> placement 268 | company 029 | professor 007
+student 178 -> placement 640 | company 070 | professor 006
+student 179 -> placement 308 | company 033 | professor 004
+student 180 -> placement 482 | company 052 | professor 004
+student 181 -> placement 262 | company 028 | professor 004
+student 182 -> placement 703 | company 077 | professor 006
+student 183 -> placement 690 | company 075 | professor 000
+student 184 -> placement 147 | company 015 | professor 001
+student 185 -> placement 579 | company 063 | professor 002
+student 186 -> placement 537 | company 058 | professor 003
+student 187 -> placement 624 | company 068 | professor 003
+student 188 -> placement 619 | company 067 | professor 004
+student 189 -> placement 275 | company 029 | professor 001
+student 190 -> placement 376 | company 041 | professor 001
+student 191 -> placement 613 | company 067 | professor 006
+student 192 -> placement 113 | company 012 | professor 002
+student 193 -> placement 647 | company 071 | professor 004
+student 194 -> placement 621 | company 068 | professor 007
+student 195 -> placement 596 | company 065 | professor 002
+student 196 -> placement 302 | company 032 | professor 002
+student 197 -> placement 063 | company 006 | professor 004
+student 198 -> placement 698 | company 076 | professor 007
+student 199 -> placement 476 | company 052 | professor 000
+student 200 -> placement 231 | company 025 | professor 001
+student 201 -> placement 664 | company 072 | professor 006
+student 202 -> placement 717 | company 078 | professor 005
+student 203 -> placement 459 | company 050 | professor 002
+student 204 -> placement 648 | company 071 | professor 004
+student 205 -> placement 671 | company 073 | professor 005
+student 206 -> placement 701 | company 076 | professor 003
+student 207 -> placement 394 | company 043 | professor 006
+student 208 -> placement 277 | company 030 | professor 002
+student 209 -> placement 321 | company 034 | professor 005
+student 210 -> placement 273 | company 029 | professor 002
+student 211 -> placement 600 | company 065 | professor 006
+student 212 -> placement 418 | company 045 | professor 002
+student 213 -> placement 460 | company 050 | professor 004
+student 214 -> placement 481 | company 052 | professor 004
+student 215 -> placement 279 | company 030 | professor 006
+student 216 -> placement 093 | company 009 | professor 003
+student 217 -> placement 453 | company 049 | professor 004
+student 218 -> placement 199 | company 021 | professor 006
+student 219 -> placement 427 | company 046 | professor 006
+student 220 -> placement 585 | company 064 | professor 002
+student 221 -> placement 645 | company 070 | professor 004
+student 222 -> placement 542 | company 059 | professor 002
+student 223 -> placement 381 | company 041 | professor 006
+student 224 -> placement 715 | company 078 | professor 006
+student 225 -> placement 246 | company 026 | professor 007
+student 226 -> placement 356 | company 038 | professor 003
+student 227 -> placement 581 | company 063 | professor 005
+student 228 -> placement 577 | company 063 | professor 007
+student 229 -> placement 404 | company 044 | professor 001
+student 230 -> placement 662 | company 072 | professor 000
+student 231 -> placement 238 | company 025 | professor 002
+student 232 -> placement 693 | company 076 | professor 001
+student 233 -> placement 266 | company 028 | professor 007
+student 234 -> placement 393 | company 042 | professor 007
+student 235 -> placement 029 | company 003 | professor 004
+student 236 -> placement 604 | company 066 | professor 003
+student 237 -> placement 142 | company 015 | professor 001
+student 238 -> placement 082 | company 008 | professor 007
+student 239 -> placement 675 | company 074 | professor 006
+student 240 -> placement 096 | company 010 | professor 007
+student 241 -> placement 674 | company 073 | professor 002
+student 242 -> placement 691 | company 075 | professor 006
+student 243 -> placement 571 | company 062 | professor 006
+student 244 -> placement 563 | company 061 | professor 006
+student 245 -> placement 007 | company 000 | professor 004
+student 246 -> placement 527 | company 057 | professor 003
+student 247 -> placement 177 | company 019 | professor 006
+student 248 -> placement 249 | company 027 | professor 007
+student 249 -> placement 679 | company 074 | professor 003
+student 250 -> placement 387 | company 042 | professor 007
+student 251 -> placement 360 | company 039 | professor 002
+student 252 -> placement 534 | company 058 | professor 003
+student 253 -> placement 706 | company 077 | professor 000
+student 254 -> placement 281 | company 030 | professor 005
+student 255 -> placement 590 | company 064 | professor 006
+student 256 -> placement 299 | company 032 | professor 003
+student 257 -> placement 484 | company 052 | professor 002
+student 258 -> placement 085 | company 009 | professor 007
+student 259 -> placement 448 | company 049 | professor 004
+student 260 -> placement 541 | company 059 | professor 004
+student 261 -> placement 618 | company 067 | professor 003
+student 262 -> placement 507 | company 055 | professor 006
+student 263 -> placement 324 | company 035 | professor 001
+student 264 -> placement 136 | company 014 | professor 006
+student 265 -> placement 004 | company 000 | professor 005
+student 266 -> placement 445 | company 048 | professor 001
+student 267 -> placement 558 | company 061 | professor 001
+student 268 -> placement 447 | company 048 | professor 000
+student 269 -> placement 057 | company 006 | professor 002
+student 270 -> placement 667 | company 073 | professor 001
+student 271 -> placement 439 | company 048 | professor 002
+student 272 -> placement 649 | company 071 | professor 001
+student 273 -> placement 475 | company 052 | professor 005
+student 274 -> placement 696 | company 076 | professor 002
+student 275 -> placement 670 | company 073 | professor 005
+student 276 -> placement 406 | company 044 | professor 007
+student 277 -> placement 016 | company 001 | professor 003
+student 278 -> placement 102 | company 010 | professor 003
+student 279 -> placement 374 | company 040 | professor 005
+student 280 -> placement 502 | company 054 | professor 003
+student 281 -> placement 549 | company 060 | professor 005
+student 282 -> placement 464 | company 050 | professor 002
+student 283 -> placement 079 | company 008 | professor 002
+student 284 -> placement 140 | company 015 | professor 004
+student 285 -> placement 407 | company 044 | professor 000
+student 286 -> placement 001 | company 000 | professor 002
+student 287 -> placement 492 | company 053 | professor 002
+student 288 -> placement 025 | company 002 | professor 000
+student 289 -> placement 183 | company 019 | professor 001
+student 290 -> placement 341 | company 037 | professor 004
+student 291 -> placement 685 | company 075 | professor 003
+student 292 -> placement 665 | company 072 | professor 006
+student 293 -> placement 435 | company 047 | professor 001
+student 294 -> placement 206 | company 022 | professor 000
+student 295 -> placement 380 | company 041 | professor 001
+student 296 -> placement 702 | company 077 | professor 001
+student 297 -> placement 354 | company 038 | professor 001
+student 298 -> placement 550 | company 060 | professor 001
+student 299 -> placement 106 | company 011 | professor 000
+student 300 -> placement 100 | company 010 | professor 002
+student 301 -> placement 307 | company 033 | professor 006
+student 302 -> placement 241 | company 026 | professor 007
+student 303 -> placement 498 | company 054 | professor 002
+student 304 -> placement 018 | company 002 | professor 005
+student 305 -> placement 234 | company 025 | professor 002
+student 306 -> placement 413 | company 045 | professor 007
+student 307 -> placement 365 | company 039 | professor 005
+student 308 -> placement 364 | company 039 | professor 004
+student 309 -> placement 022 | company 002 | professor 007
+student 310 -> placement 643 | company 070 | professor 005
+student 311 -> placement 369 | company 040 | professor 006
+student 312 -> placement 284 | company 030 | professor 004
+student 313 -> placement 161 | company 017 | professor 007
+student 314 -> placement 480 | company 052 | professor 005
+student 315 -> placement 121 | company 013 | professor 007
+student 316 -> placement 562 | company 061 | professor 002
+student 317 -> placement 386 | company 042 | professor 003
+student 318 -> placement 259 | company 028 | professor 007
+student 319 -> placement 429 | company 046 | professor 006
+student 320 -> placement 449 | company 049 | professor 001
+student 321 -> placement 297 | company 032 | professor 004
+student 322 -> placement 511 | company 055 | professor 007
+student 323 -> placement 218 | company 023 | professor 007
+student 324 -> placement 328 | company 035 | professor 002
+student 325 -> placement 322 | company 035 | professor 006
+student 326 -> placement 171 | company 018 | professor 006
+student 327 -> placement 152 | company 016 | professor 004
+student 328 -> placement 195 | company 021 | professor 000
+student 329 -> placement 251 | company 027 | professor 005
+student 330 -> placement 666 | company 073 | professor 004
+student 331 -> placement 290 | company 031 | professor 006
+student 332 -> placement 237 | company 025 | professor 005
+student 333 -> placement 242 | company 026 | professor 007
+student 334 -> placement 012 | company 001 | professor 003
+student 335 -> placement 069 | company 007 | professor 007
+student 336 -> placement 574 | company 062 | professor 002
+student 337 -> placement 379 | company 041 | professor 006
+student 338 -> placement 623 | company 068 | professor 003
+student 339 -> placement 138 | company 014 | professor 005
+student 340 -> placement 175 | company 019 | professor 006
+student 341 -> placement 578 | company 063 | professor 005
+student 342 -> placement 334 | company 036 | professor 007
+student 343 -> placement 597 | company 065 | professor 002
+student 344 -> placement 098 | company 010 | professor 003
+student 345 -> placement 247 | company 026 | professor 006
+student 346 -> placement 442 | company 048 | professor 001
+student 347 -> placement 076 | company 008 | professor 000
+student 348 -> placement 092 | company 009 | professor 002
+student 349 -> placement 477 | company 052 | professor 003
+student 350 -> placement 686 | company 075 | professor 001
+student 351 -> placement 538 | company 058 | professor 000
+student 352 -> placement 340 | company 037 | professor 001
+student 353 -> placement 514 | company 056 | professor 001
+student 354 -> placement 317 | company 034 | professor 000
+student 355 -> placement 055 | company 005 | professor 005
+student 356 -> placement 239 | company 025 | professor 003
+student 357 -> placement 440 | company 048 | professor 006
+student 358 -> placement 620 | company 068 | professor 001
+student 359 -> placement 561 | company 061 | professor 006
+student 360 -> placement 546 | company 059 | professor 002
+student 361 -> placement 278 | company 030 | professor 000
+student 362 -> placement 363 | company 039 | professor 002
+student 363 -> placement 052 | company 005 | professor 001
+student 364 -> placement 378 | company 041 | professor 003
+student 365 -> placement 552 | company 060 | professor 005
+student 366 -> placement 348 | company 037 | professor 001
+student 367 -> placement 616 | company 067 | professor 007
+student 368 -> placement 601 | company 065 | professor 006
+student 369 -> placement 232 | company 025 | professor 002
+student 370 -> placement 367 | company 040 | professor 000
+student 371 -> placement 486 | company 053 | professor 003
+student 372 -> placement 488 | company 053 | professor 000
+student 373 -> placement 301 | company 032 | professor 000
+student 374 -> placement 452 | company 049 | professor 007
+student 375 -> placement 049 | company 005 | professor 000
+student 376 -> placement 639 | company 070 | professor 000
+student 377 -> placement 352 | company 038 | professor 003
+student 378 -> placement 353 | company 038 | professor 005
+student 379 -> placement 320 | company 034 | professor 005
+student 380 -> placement 503 | company 055 | professor 005
+student 381 -> placement 399 | company 043 | professor 007
+student 382 -> placement 294 | company 032 | professor 006
+student 383 -> placement 274 | company 029 | professor 001
+student 384 -> placement 490 | company 053 | professor 007
+student 385 -> placement 035 | company 003 | professor 000
+student 386 -> placement 014 | company 001 | professor 004
+student 387 -> placement 415 | company 045 | professor 000
+student 388 -> placement 269 | company 029 | professor 000
+student 389 -> placement 599 | company 065 | professor 001
+student 390 -> placement 397 | company 043 | professor 001
+student 391 -> placement 339 | company 036 | professor 006
+student 392 -> placement 551 | company 060 | professor 005
+student 393 -> placement 189 | company 020 | professor 005
+student 394 -> placement 245 | company 026 | professor 002
+student 395 -> placement 627 | company 068 | professor 003
+student 396 -> placement 517 | company 056 | professor 001
+student 397 -> placement 326 | company 035 | professor 002
+student 398 -> placement 709 | company 077 | professor 007
+student 399 -> placement 425 | company 046 | professor 006
+student 400 -> placement 605 | company 066 | professor 003
+student 401 -> placement 222 | company 024 | professor 006
+student 402 -> placement 219 | company 023 | professor 001
+student 403 -> placement 148 | company 016 | professor 003
+student 404 -> placement 260 | company 028 | professor 007
+student 405 -> placement 143 | company 015 | professor 005
+student 406 -> placement 026 | company 002 | professor 006
+student 407 -> placement 591 | company 064 | professor 006
+student 408 -> placement 058 | company 006 | professor 002
+student 409 -> placement 300 | company 032 | professor 003
+student 410 -> placement 104 | company 011 | professor 000
+student 411 -> placement 129 | company 013 | professor 006
+student 412 -> placement 638 | company 070 | professor 003
+student 413 -> placement 633 | company 069 | professor 003
+student 414 -> placement 009 | company 001 | professor 004
+student 415 -> placement 500 | company 054 | professor 004
+student 416 -> placement 505 | company 055 | professor 005
+student 417 -> placement 193 | company 020 | professor 002
+student 418 -> placement 582 | company 063 | professor 003
+student 419 -> placement 244 | company 026 | professor 000
+student 420 -> placement 359 | company 039 | professor 006
+student 421 -> placement 313 | company 034 | professor 000
+student 422 -> placement 345 | company 037 | professor 002
+student 423 -> placement 531 | company 058 | professor 000
+student 424 -> placement 230 | company 024 | professor 003
+student 425 -> placement 252 | company 027 | professor 001
+student 426 -> placement 162 | company 017 | professor 000
+student 427 -> placement 220 | company 023 | professor 001
+student 428 -> placement 157 | company 017 | professor 000
+student 429 -> placement 097 | company 010 | professor 001
+student 430 -> placement 240 | company 026 | professor 005
+student 431 -> placement 128 | company 013 | professor 001
+student 432 -> placement 568 | company 062 | professor 002
+student 433 -> placement 677 | company 074 | professor 007
+student 434 -> placement 167 | company 018 | professor 001
+student 435 -> placement 084 | company 008 | professor 003
+student 436 -> placement 036 | company 003 | professor 000
+student 437 -> placement 203 | company 022 | professor 003
+student 438 -> placement 048 | company 005 | professor 007
+student 439 -> placement 160 | company 017 | professor 005
+student 440 -> placement 153 | company 016 | professor 006
+student 441 -> placement 329 | company 035 | professor 002
+student 442 -> placement 660 | company 072 | professor 000
+student 443 -> placement 382 | company 041 | professor 004
+student 444 -> placement 008 | company 000 | professor 000
+student 445 -> placement 683 | company 074 | professor 000
+student 446 -> placement 065 | company 007 | professor 002
+student 447 -> placement 368 | company 040 | professor 006
+student 448 -> placement 608 | company 066 | professor 003
+student 449 -> placement 424 | company 046 | professor 005
+student 450 -> placement 319 | company 034 | professor 002
+student 451 -> placement 072 | company 007 | professor 001
+student 452 -> placement 015 | company 001 | professor 007
+student 453 -> placement 412 | company 045 | professor 004
+student 454 -> placement 257 | company 027 | professor 000
+student 455 -> placement 207 | company 022 | professor 000
+student 456 -> placement 107 | company 011 | professor 007
+student 457 -> placement 258 | company 028 | professor 002
+student 458 -> placement 497 | company 054 | professor 006
+student 459 -> placement 485 | company 053 | professor 006
+student 460 -> placement 539 | company 059 | professor 001
+student 461 -> placement 293 | company 031 | professor 003
+student 462 -> placement 495 | company 054 | professor 004
+student 463 -> placement 062 | company 006 | professor 003
+student 464 -> placement 188 | company 020 | professor 001
+student 465 -> placement 668 | company 073 | professor 000
+student 466 -> placement 031 | company 003 | professor 007
+student 467 -> placement 172 | company 018 | professor 002
+student 468 -> placement 210 | company 022 | professor 000
+student 469 -> placement 707 | company 077 | professor 007
+student 470 -> placement 306 | company 033 | professor 002
+student 471 -> placement 186 | company 020 | professor 006
+student 472 -> placement 078 | company 008 | professor 001
+student 473 -> placement 530 | company 058 | professor 005
+student 474 -> placement 422 | company 046 | professor 007
+student 475 -> placement 184 | company 020 | professor 001
+student 476 -> placement 265 | company 028 | professor 006
+student 477 -> placement 556 | company 060 | professor 005
+student 478 -> placement 454 | company 049 | professor 007
+student 479 -> placement 651 | company 071 | professor 003
+student 480 -> placement 680 | company 074 | professor 002
+student 481 -> placement 253 | company 027 | professor 005
+student 482 -> placement 603 | company 066 | professor 004
+student 483 -> placement 122 | company 013 | professor 004
+student 484 -> placement 654 | company 071 | professor 002
+student 485 -> placement 283 | company 030 | professor 007
+student 486 -> placement 170 | company 018 | professor 006
+student 487 -> placement 421 | company 046 | professor 002
+student 488 -> placement 719 | company 078 | professor 005
+student 489 -> placement 576 | company 063 | professor 000
+student 490 -> placement 216 | company 023 | professor 006
+student 491 -> placement 032 | company 003 | professor 001
+student 492 -> placement 704 | company 077 | professor 006
+student 493 -> placement 473 | company 051 | professor 005
+student 494 -> placement 609 | company 066 | professor 003
+student 495 -> placement 114 | company 012 | professor 003
+student 496 -> placement 469 | company 051 | professor 000
+student 497 -> placement 657 | company 072 | professor 007
+student 498 -> placement 655 | company 071 | professor 007
+student 499 -> placement 466 | company 051 | professor 007
+student 500 -> placement 672 | company 073 | professor 005
+student 501 -> placement 197 | company 021 | professor 003
+student 502 -> placement 108 | company 011 | professor 006
+student 503 -> placement 370 | company 040 | professor 002
+student 504 -> placement 111 | company 011 | professor 000
+student 505 -> placement 158 | company 017 | professor 001
+student 506 -> placement 588 | company 064 | professor 003
+student 507 -> placement 572 | company 062 | professor 000
+student 508 -> placement 644 | company 070 | professor 007
+student 509 -> placement 518 | company 056 | professor 003
+student 510 -> placement 450 | company 049 | professor 002
+student 511 -> placement 673 | company 073 | professor 007
+student 512 -> placement 059 | company 006 | professor 006
+student 513 -> placement 468 | company 051 | professor 001
+student 514 -> placement 223 | company 024 | professor 005
+student 515 -> placement 095 | company 010 | professor 003
+student 516 -> placement 560 | company 061 | professor 002
+student 517 -> placement 570 | company 062 | professor 007
+student 518 -> placement 697 | company 076 | professor 007
+student 519 -> placement 298 | company 032 | professor 001
+student 520 -> placement 305 | company 033 | professor 005
+student 521 -> placement 508 | company 055 | professor 003
+student 522 -> placement 228 | company 024 | professor 007
+student 523 -> placement 547 | company 059 | professor 001
+student 524 -> placement 117 | company 012 | professor 007
+student 525 -> placement 185 | company 020 | professor 005
+student 526 -> placement 682 | company 074 | professor 002
+student 527 -> placement 194 | company 021 | professor 002
+student 528 -> placement 478 | company 052 | professor 006
+student 529 -> placement 116 | company 012 | professor 003
+student 530 -> placement 512 | company 056 | professor 003
+student 531 -> placement 409 | company 044 | professor 001
+student 532 -> placement 105 | company 011 | professor 004
+student 533 -> placement 061 | company 006 | professor 002
+student 534 -> placement 011 | company 001 | professor 003
+student 535 -> placement 227 | company 024 | professor 004
+student 536 -> placement 504 | company 055 | professor 004
+student 537 -> placement 288 | company 031 | professor 000
+student 538 -> placement 119 | company 012 | professor 000
+student 539 -> placement 133 | company 014 | professor 006
+student 540 -> placement 211 | company 022 | professor 000
+student 541 -> placement 304 | company 033 | professor 004
+student 542 -> placement 635 | company 069 | professor 002
+student 543 -> placement 073 | company 007 | professor 004
+student 544 -> placement 125 | company 013 | professor 002
+student 545 -> placement 710 | company 077 | professor 000
+student 546 -> placement 501 | company 054 | professor 005
+student 547 -> placement 713 | company 078 | professor 004
+student 548 -> placement 045 | company 004 | professor 006
+student 549 -> placement 554 | company 060 | professor 001
+student 550 -> placement 094 | company 010 | professor 003
+student 551 -> placement 087 | company 009 | professor 007
+student 552 -> placement 250 | company 027 | professor 002
+student 553 -> placement 564 | company 061 | professor 006
+student 554 -> placement 610 | company 066 | professor 002
+student 555 -> placement 225 | company 024 | professor 004
+student 556 -> placement 254 | company 027 | professor 001
+student 557 -> placement 509 | company 055 | professor 002
+student 558 -> placement 289 | company 031 | professor 005
+student 559 -> placement 040 | company 004 | professor 004
+student 560 -> placement 444 | company 048 | professor 000
+student 561 -> placement 041 | company 004 | professor 002
+student 562 -> placement 395 | company 043 | professor 003
+student 563 -> placement 060 | company 006 | professor 006
+student 564 -> placement 411 | company 044 | professor 001
+student 565 -> placement 134 | company 014 | professor 001
+student 566 -> placement 493 | company 053 | professor 002
+student 567 -> placement 187 | company 020 | professor 000
+student 568 -> placement 423 | company 046 | professor 007
+student 569 -> placement 420 | company 045 | professor 001
+student 570 -> placement 144 | company 015 | professor 007
+student 571 -> placement 569 | company 062 | professor 004
+student 572 -> placement 089 | company 009 | professor 000
+student 573 -> placement 109 | company 011 | professor 004
+student 574 -> placement 592 | company 064 | professor 000
+student 575 -> placement 132 | company 014 | professor 004
+student 576 -> placement 455 | company 049 | professor 005
+student 577 -> placement 226 | company 024 | professor 004
+student 578 -> placement 684 | company 075 | professor 007
+student 579 -> placement 090 | company 009 | professor 001
+student 580 -> placement 525 | company 057 | professor 003
+student 581 -> placement 126 | company 013 | professor 002
+student 582 -> placement 303 | company 033 | professor 003
+student 583 -> placement 151 | company 016 | professor 000
+student 584 -> placement 377 | company 041 | professor 000
+student 585 -> placement 006 | company 000 | professor 000
+student 586 -> placement 659 | company 072 | professor 005
+student 587 -> placement 699 | company 076 | professor 007
+student 588 -> placement 017 | company 001 | professor 001
+student 589 -> placement 330 | company 035 | professor 006
+student 590 -> placement 358 | company 039 | professor 003
+student 591 -> placement 021 | company 002 | professor 001
+student 592 -> placement 606 | company 066 | professor 005
+student 593 -> placement 487 | company 053 | professor 007
+student 594 -> placement 402 | company 043 | professor 005
+student 595 -> placement 180 | company 019 | professor 006
+student 596 -> placement 708 | company 077 | professor 000
+student 597 -> placement 357 | company 038 | professor 003
+student 598 -> placement 612 | company 067 | professor 005
+student 599 -> placement 587 | company 064 | professor 006
+
+---- PROFESSOR -> PLACEMENTS ----
+professor 000 | load=77 | placements: 6, 8, 10, 25, 35, 36, 39, 49, 50, 76, 88, 89, 104, 106, 111, 118, 119, 120, 141, 151, 157, 162, 169, 181, 187, 195, 198, 204, 205, 206, 207, 208, 209, 210, 211, 244, 257, 267, 269, 270, 278, 288, 301, 313, 316, 317, 342, 367, 371, 377, 391, 407, 415, 444, 447, 469, 471, 476, 488, 531, 538, 543, 567, 572, 576, 592, 639, 660, 662, 668, 683, 690, 705, 706, 708, 710, 711
+professor 001 | load=79 | placements: 5, 17, 21, 32, 52, 72, 78, 90, 97, 128, 131, 134, 142, 147, 149, 158, 163, 167, 176, 183, 184, 188, 200, 201, 212, 219, 220, 231, 252, 254, 274, 275, 292, 296, 298, 323, 324, 340, 348, 351, 354, 376, 380, 397, 404, 409, 411, 419, 420, 426, 435, 441, 442, 445, 446, 449, 468, 470, 489, 491, 506, 514, 517, 539, 547, 550, 554, 558, 599, 611, 620, 630, 636, 649, 656, 667, 686, 693, 702
+professor 002 | load=78 | placements: 1, 33, 41, 57, 58, 61, 65, 79, 81, 92, 100, 113, 125, 126, 137, 166, 172, 193, 194, 214, 232, 234, 238, 245, 250, 256, 258, 273, 277, 286, 302, 306, 319, 326, 328, 329, 336, 345, 360, 363, 370, 390, 400, 418, 421, 439, 450, 458, 459, 464, 484, 492, 493, 498, 509, 542, 546, 555, 557, 560, 562, 568, 573, 574, 579, 585, 595, 596, 597, 610, 635, 646, 654, 674, 680, 681, 682, 696
+professor 003 | load=80 | placements: 11, 12, 16, 27, 42, 44, 54, 62, 64, 71, 84, 86, 93, 94, 95, 98, 102, 110, 114, 116, 130, 139, 148, 197, 203, 213, 230, 235, 239, 261, 264, 272, 293, 295, 299, 300, 303, 315, 318, 332, 352, 356, 357, 358, 378, 386, 395, 396, 433, 474, 477, 486, 502, 508, 512, 518, 525, 527, 534, 537, 565, 582, 588, 604, 605, 608, 609, 618, 623, 624, 627, 633, 638, 651, 669, 676, 679, 685, 687, 701
+professor 004 | load=69 | placements: 7, 9, 14, 29, 40, 47, 63, 73, 91, 105, 109, 112, 115, 122, 123, 132, 140, 150, 152, 179, 225, 226, 227, 255, 262, 271, 280, 284, 297, 304, 308, 314, 341, 364, 382, 412, 428, 436, 438, 443, 448, 453, 460, 467, 472, 481, 482, 483, 495, 500, 504, 541, 545, 548, 566, 569, 580, 602, 603, 619, 629, 632, 642, 645, 647, 648, 653, 666, 713
+professor 005 | load=64 | placements: 4, 18, 55, 124, 138, 143, 156, 160, 185, 189, 223, 236, 237, 240, 251, 253, 281, 289, 305, 320, 321, 344, 346, 353, 365, 374, 375, 385, 402, 405, 416, 424, 431, 437, 455, 473, 475, 480, 501, 503, 505, 515, 530, 532, 536, 549, 551, 552, 556, 559, 578, 581, 589, 606, 612, 614, 641, 643, 659, 670, 671, 672, 717, 719
+professor 006 | load=79 | placements: 26, 28, 45, 56, 59, 60, 103, 108, 129, 133, 135, 136, 153, 165, 170, 171, 175, 177, 180, 186, 199, 216, 222, 247, 263, 265, 279, 290, 294, 307, 322, 330, 339, 359, 361, 368, 369, 379, 381, 394, 425, 427, 429, 434, 440, 478, 479, 485, 497, 507, 513, 516, 524, 526, 553, 561, 563, 564, 571, 587, 590, 591, 598, 600, 601, 613, 622, 626, 640, 664, 665, 675, 689, 691, 695, 703, 704, 715, 718
+professor 007 | load=74 | placements: 2, 15, 22, 23, 31, 46, 48, 69, 77, 82, 85, 87, 96, 107, 117, 121, 127, 144, 161, 168, 218, 228, 233, 241, 242, 246, 249, 259, 260, 266, 268, 283, 287, 311, 334, 350, 387, 392, 393, 399, 406, 408, 413, 422, 423, 452, 454, 466, 487, 490, 496, 510, 511, 533, 535, 570, 577, 607, 616, 621, 631, 644, 655, 657, 673, 677, 678, 684, 697, 698, 699, 707, 709, 714
+
+---- COMPANY LOAD ----
+company 000 | load=7 | min=2 | max=9
+company 001 | load=8 | min=1 | max=9
+company 002 | load=7 | min=3 | max=10
+company 003 | load=7 | min=6 | max=10
+company 004 | load=7 | min=2 | max=9
+company 005 | load=7 | min=1 | max=9
+company 006 | load=9 | min=2 | max=9
+company 007 | load=5 | min=5 | max=11
+company 008 | load=7 | min=3 | max=9
+company 009 | load=9 | min=1 | max=9
+company 010 | load=7 | min=1 | max=9
+company 011 | load=9 | min=4 | max=9
+company 012 | load=9 | min=1 | max=9
+company 013 | load=9 | min=5 | max=9
+company 014 | load=9 | min=3 | max=9
+company 015 | load=7 | min=3 | max=9
+company 016 | load=7 | min=3 | max=9
+company 017 | load=7 | min=4 | max=9
+company 018 | load=7 | min=2 | max=9
+company 019 | load=7 | min=2 | max=9
+company 020 | load=7 | min=4 | max=10
+company 021 | load=7 | min=2 | max=9
+company 022 | load=9 | min=2 | max=9
+company 023 | load=7 | min=4 | max=9
+company 024 | load=7 | min=5 | max=10
+company 025 | load=9 | min=2 | max=9
+company 026 | load=7 | min=3 | max=9
+company 027 | load=9 | min=5 | max=9
+company 028 | load=9 | min=4 | max=9
+company 029 | load=9 | min=2 | max=9
+company 030 | load=7 | min=4 | max=9
+company 031 | load=7 | min=3 | max=9
+company 032 | load=9 | min=1 | max=9
+company 033 | load=7 | min=4 | max=10
+company 034 | load=9 | min=3 | max=9
+company 035 | load=7 | min=1 | max=9
+company 036 | load=4 | min=4 | max=9
+company 037 | load=7 | min=3 | max=9
+company 038 | load=7 | min=2 | max=9
+company 039 | load=7 | min=2 | max=9
+company 040 | load=7 | min=3 | max=9
+company 041 | load=7 | min=6 | max=9
+company 042 | load=7 | min=3 | max=9
+company 043 | load=7 | min=4 | max=9
+company 044 | load=7 | min=4 | max=9
+company 045 | load=7 | min=2 | max=9
+company 046 | load=9 | min=7 | max=9
+company 047 | load=7 | min=2 | max=9
+company 048 | load=9 | min=3 | max=9
+company 049 | load=7 | min=5 | max=9
+company 050 | load=4 | min=1 | max=9
+company 051 | load=9 | min=4 | max=9
+company 052 | load=10 | min=0 | max=10
+company 053 | load=9 | min=2 | max=9
+company 054 | load=7 | min=1 | max=9
+company 055 | load=9 | min=6 | max=9
+company 056 | load=7 | min=1 | max=9
+company 057 | load=4 | min=3 | max=9
+company 058 | load=9 | min=3 | max=9
+company 059 | load=7 | min=2 | max=9
+company 060 | load=9 | min=4 | max=9
+company 061 | load=9 | min=1 | max=9
+company 062 | load=9 | min=3 | max=9
+company 063 | load=7 | min=1 | max=9
+company 064 | load=7 | min=4 | max=9
+company 065 | load=7 | min=4 | max=9
+company 066 | load=9 | min=4 | max=9
+company 067 | load=7 | min=5 | max=9
+company 068 | load=7 | min=6 | max=9
+company 069 | load=7 | min=1 | max=9
+company 070 | load=9 | min=3 | max=9
+company 071 | load=7 | min=3 | max=9
+company 072 | load=7 | min=4 | max=10
+company 073 | load=9 | min=1 | max=9
+company 074 | load=9 | min=3 | max=9
+company 075 | load=7 | min=3 | max=9
+company 076 | load=7 | min=4 | max=9
+company 077 | load=9 | min=2 | max=9
+company 078 | load=7 | min=2 | max=9
+
+---- PROFESSOR LOAD ----
+professor 000 | load=77 | capacity=89
+professor 001 | load=79 | capacity=94
+professor 002 | load=78 | capacity=97
+professor 003 | load=80 | capacity=91
+professor 004 | load=69 | capacity=82
+professor 005 | load=64 | capacity=83
+professor 006 | load=79 | capacity=98
+professor 007 | load=74 | capacity=86
+
