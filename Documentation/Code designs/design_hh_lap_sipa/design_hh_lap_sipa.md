@@ -1,10 +1,8 @@
-# HH-LAP-SIPA: Heurística Híbrida con LAP para el modelo SIPA extendido
+# Diseño conceptual del HH-LAP-SIPA (Heurística Híbrida con LAP para el modelo SIPA extendido)
 
 ## 1. Objetivo del documento
 
-Este documento define el diseño inicial de la heurística que se implementará para el modelo SIPA extendido con estudiantes, prácticas, empresas, profesores y centros educativos.
-
-La heurística se basa en el esquema conceptual acordado:
+Este documento define el diseño de la heurística híbrida con LAP propuesta, la cual se basa en el siguiente esquema conceptual:
 
 ```text
 Selección aleatoria factible de prácticas P'
@@ -24,57 +22,21 @@ Evaluación multiobjetivo
 Actualización del Pareto externo
 ```
 
-La idea principal es combinar:
-
-- generación aleatoria factible de subconjuntos de prácticas;
-- construcción/repair guiado para asignar profesores;
-- resolución exacta de subproblemas de asignación lineal estudiante-práctica mediante `lapjv`;
-- evaluación multiobjetivo;
-- mantenimiento de una frontera de Pareto.
-
-La heurística no garantiza encontrar el óptimo global del problema completo, pero está diseñada para buscar soluciones de alta calidad manteniendo siempre la factibilidad de las soluciones generadas.
-
 ---
 
-## 2. Nombre de la heurística
+## 2. Objetivo del algoritmo
 
-El nombre propuesto para la heurística es:
+El objetivo del algoritmo es buscar soluciones factibles y de alta calidad para el modelo SIPA extendido, considerando simultáneamente los intereses de estudiantes, empresas, profesores y centros educativos. En particular, aunque la selección inicial de prácticas y la asignación de profesores se abordan mediante procedimientos heurísticos, la asignación estudiante-práctica se resuelve de forma exacta para cada subconjunto factible de prácticas \(P'\). Esto significa que la heurística no garantiza optimalidad global sobre todo el espacio de soluciones del modelo extendido, pero sí incorpora optimalidad local en los subproblemas LAP que resuelve en cada iteración.
 
-```text
-HH-LAP-SIPA
-```
+Para ello, combina:
 
-donde:
+- Selección aleatoria factible de subconjuntos de prácticas.
+- Asignación práctica-profesor mediante construcción y repair guiado.
+- Resolución exacta de subproblemas de asignación estudiante-práctica.
+- Evaluación multiobjetivo.
+- Mantenimiento de una frontera de Pareto con soluciones no dominadas.
 
-- `HH` significa **Heurística Híbrida**.
-- `LAP` hace referencia al uso del **Linear Assignment Problem** como subproblema exacto.
-- `SIPA` hace referencia al problema **Student–Industry Placement Allocation**.
-
-Nombre completo:
-
-```text
-Heurística Híbrida con LAP para el modelo SIPA extendido
-```
-
-Nombre recomendado para el archivo:
-
-```text
-hh_lap_sipa_design.md
-```
-
----
-
-## 3. Idea general de la heurística
-
-La heurística parte de una descomposición del problema completo.
-
-El problema completo contiene tres decisiones principales:
-
-1. qué prácticas se cubren;
-2. qué profesor supervisa cada práctica cubierta;
-3. qué estudiante se asigna a cada práctica cubierta.
-
-La heurística no construye directamente una solución completa `x_ijt` de forma totalmente aleatoria. En su lugar, divide el proceso en tres capas:
+En lugar de construir directamente una solución completa `x_ijt`, la heurística divide el proceso en tres capas:
 
 ```text
 Capa 1: selección de prácticas P'
@@ -82,163 +44,19 @@ Capa 2: asignación práctica-profesor
 Capa 3: asignación estudiante-práctica
 ```
 
-La capa 1 será inicialmente aleatoria, pero siempre factible.
+La primera capa genera un subconjunto `P'` de prácticas de forma aleatoria, pero siempre respetando las restricciones estructurales del problema. La segunda capa asigna profesores a las prácticas seleccionadas mediante una estrategia de construcción y repair guiado (no se resuelve mediante LAP, ya que un profesor puede supervisar varias prácticas y su coste depende del conjunto completo de prácticas asignadas). La tercera capa resuelve la asignación estudiante-práctica mediante dos problemas LAP usando `lapjv`:
 
-La capa 2 se resolverá mediante una construcción/repair guiado, no mediante LAP.
+- Un LAP maximizando `tau`, que genera una solución orientada a estudiantes.
+- Un LAP maximizando `eta`, que genera una solución orientada a empresas.
 
-La capa 3 se resolverá mediante dos problemas LAP usando `lapjv`.
+Para cada subconjunto `P'`, la asignación práctica-profesor se calcula una única vez y se combina con cada una de las asignaciones estudiante-práctica devueltas por `lapjv`. Así se obtienen dos soluciones completas: `Solución_tau` y `Solución_eta`.
 
----
-
-## 4. Elementos del modelo que deben respetarse
-
-La heurística debe generar únicamente soluciones factibles. Para ello, todas las soluciones que se evalúen o se inserten en el Pareto deben cumplir las restricciones del modelo extendido.
-
-El modelo extendido introduce profesores como supervisores académicos para representar criterios organizativos y logísticos que no aparecen en el SIPA original, especialmente costes de supervisión, dispersión geográfica y límites de carga docente.
-
-Además, el modelo define que los profesores tienen una capacidad máxima de supervisión y que la distancia asociada a la supervisión se evalúa como un coste agregado de carácter organizativo.
+Ambas soluciones se validan frente a las restricciones del modelo y se evalúan con los cuatro objetivos. Si son factibles y no están dominadas, se incorporan al Pareto externo.
 
 ---
 
-## 5. Restricciones obligatorias
 
-### R1. Asignación completa de estudiantes
-
-Cada estudiante debe estar asignado exactamente a una práctica y, por extensión, a un profesor que supervisa esa práctica.
-
-Formalmente:
-
-```text
-Cada estudiante i ∈ S debe aparecer exactamente una vez en la solución.
-```
-
-En código:
-
-```text
-student_to_placement[i] != -1 para todo i
-```
-
-y ningún estudiante puede tener más de una práctica.
-
----
-
-### R2. Capacidad de prácticas
-
-Cada práctica puede estar asignada como máximo a un estudiante.
-
-Formalmente:
-
-```text
-Una práctica j ∈ P no puede ser ocupada por más de un estudiante.
-```
-
-En código:
-
-```text
-No puede haber dos estudiantes i1, i2 con student_to_placement[i1] = student_to_placement[i2].
-```
-
-El uso de LAP sobre `S × P'` ayuda a cumplir esta restricción, porque el LAP genera una asignación uno-a-uno.
-
----
-
-### R3. Cuota máxima de empresa
-
-Cada empresa `k` tiene una cuota máxima `Q_k`.
-
-La solución no puede asignar a una empresa más estudiantes de los permitidos.
-
-En código:
-
-```text
-company_load[k] <= company_max[k]
-```
-
----
-
-### R4. Cuota mínima de empresa
-
-Cada empresa `k` tiene una cuota mínima `q_k`.
-
-La solución debe asignar a cada empresa al menos el número mínimo de estudiantes acordado.
-
-En código:
-
-```text
-company_load[k] >= company_min[k]
-```
-
----
-
-### R5 y R6. Dependencias entre prácticas
-
-Algunas prácticas forman grupos de interdependencia.
-
-La regla es:
-
-```text
-Si una práctica de un grupo dependiente se selecciona, entonces deben seleccionarse todas las prácticas del grupo.
-```
-
-Por tanto, un grupo dependiente no puede quedar parcialmente cubierto.
-
-En código:
-
-```text
-Para cada grupo I:
-    o todas las prácticas de I están seleccionadas
-    o ninguna práctica de I está seleccionada
-```
-
----
-
-### R7. Capacidad máxima de profesores
-
-Cada profesor `t` tiene una capacidad máxima `C_t`.
-
-La solución no puede asignar a un profesor más prácticas/estudiantes de los que puede supervisar.
-
-En código:
-
-```text
-professor_load[t] <= prof_capacity[t]
-```
-
-Esta es la restricción específica introducida por la ampliación del modelo con profesores.
-
----
-
-## 6. Objetivos de evaluación
-
-Una vez generada una solución factible, se evalúa mediante cuatro componentes:
-
-```text
-tau_sum    → maximizar utilidad de estudiantes
-eta_sum    → maximizar utilidad de empresas/prácticas
-lbar_sum   → minimizar dispersión/coste de supervisión
-sigma_sum  → minimizar desequilibrio de carga entre profesores/centros
-```
-
-La función objetivo extendida combina utilidad de estudiantes, utilidad de empresas, penalización por dispersión de supervisión y penalización por desequilibrio de carga.
-
-Los pesos asociados son:
-
-```text
-alpha  → peso de tau_sum
-beta   → peso de eta_sum
-gamma  → peso de lbar_sum
-delta  → peso de sigma_sum
-```
-
-con:
-
-```text
-alpha + beta + gamma + delta = 1
-```
-
-En la búsqueda multiobjetivo, estos pesos pueden utilizarse como valor escalar auxiliar para desempates o resúmenes, pero la frontera de Pareto debe mantenerse usando los cuatro objetivos por separado.
-
----
+############################################################
 
 ## 7. Papel de la selección de prácticas P'
 
@@ -632,31 +450,6 @@ HH-LAP-SIPA(problem, time_limit, weights):
             pareto_set ← update_pareto(pareto_set, sol_eta, eval_eta)
 
     return pareto_set
-```
-
----
-
-## 15. Validación obligatoria
-
-Antes de evaluar cualquier solución y antes de insertarla en el Pareto, debe ejecutarse una validación completa.
-
-La validación debe comprobar:
-
-```text
-1. Todos los estudiantes están asignados.
-2. Ningún estudiante está asignado más de una vez.
-3. Ninguna práctica está ocupada más de una vez.
-4. Las cargas de empresa cumplen mínimos.
-5. Las cargas de empresa cumplen máximos.
-6. Las dependencias están completas.
-7. Todas las prácticas ocupadas tienen profesor.
-8. Ningún profesor supera su capacidad.
-```
-
-Regla de diseño:
-
-```text
-Ninguna solución no factible puede entrar al Pareto.
 ```
 
 ---
