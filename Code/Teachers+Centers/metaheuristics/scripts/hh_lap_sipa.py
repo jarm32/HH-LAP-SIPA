@@ -1,98 +1,63 @@
-# Heurística híbrida HH-LAP-SIPA que genera subconjuntos factibles de prácticas, asigna profesores mediante construcción/repair guiado
-# y resuelve de forma exacta dos asignaciones estudiante-práctica mediante LAP, una maximizando tau y otra maximizando eta.
+# Heurística híbrida (HH-LAP-SIPA) que genera subconjuntos factibles de prácticas, asigna profesores mediante construcción/repair guiado
+# y resuelve de forma exacta dos asignaciones estudiante-práctica mediante LAP (una maximizando tau y otra maximizando eta).
 # Cada solución completa generada se valida, se evalúa según los objetivos del modelo y se registra en el Pareto externo.
 
-"""
-HH-LAP-SIPA: Heurística Híbrida con LAP para el modelo SIPA extendido.
-
-La heurística sigue el diseño conceptual acordado:
-1. Genera un subconjunto factible de prácticas P'.
-2. Asigna profesores a P' mediante construcción/repair guiado.
-3. Resuelve dos LAP estudiante-práctica sobre P': max tau y max eta.
-4. Construye dos soluciones completas y las registra en el Pareto externo.
-
-Este módulo contiene la implementación principal del algoritmo. El script de
-lanzamiento debe vivir en un archivo separado, por ejemplo run_hh_lap_sipa.py.
-"""
-
-from __future__ import annotations
-
+# ----------------------------
+# Imports
+# ----------------------------
 import math
 import random
 import time
 from dataclasses import dataclass
+import numpy as np
 from typing import Dict, List, Optional, Sequence, Tuple
 
-import numpy as np
+from tools.solution import Solution
+from tools.multiobjective_search import register_solution_in_pareto
+from metaheuristics.scripts.random_feasible_fixing import _preprocess, _choose_final_placements
 
-# Imports esperados dentro del proyecto.
-# Los fallbacks permiten ejecutar/comprobar el archivo en un entorno plano.
-try:
-    from tools.solution import Solution
-    from tools.multiobjective_search import register_solution_in_pareto
-except ModuleNotFoundError:  # pragma: no cover - fallback para pruebas locales
-    from tools.solution import Solution
-    from tools.multiobjective_search import register_solution_in_pareto
-
-try:
-    from metaheuristics.scripts.random_feasible_fixing import _preprocess, _choose_final_placements
-except ModuleNotFoundError:  # pragma: no cover - fallback para pruebas locales
-    try:
-        from random_feasible_fixing import _preprocess, _choose_final_placements
-    except ModuleNotFoundError:  # pragma: no cover
-        _preprocess = None
-        _choose_final_placements = None
-
-
-@dataclass
-class _SupervisionCostContext:
-    """Distancias usadas para estimar costes incrementales profesor-práctica."""
-
-    center_company: np.ndarray
-    company_company: np.ndarray
-
+from lapjv import lapjv
+from scipy.optimize import linear_sum_assignment
 
 # -----------------------------------------------------------------------------
-# Selección inicial de prácticas P'
+# Selección inicial factible de prácticas P'
 # -----------------------------------------------------------------------------
 
-def generate_random_feasible_placements(problem, seed: Optional[int] = None, max_attempts: int = 50) -> List[int]:
+def generate_random_feasible_placements(problem, seed = None, max_attempts = 50):
+                                       # instancia del problema, semilla, nº máximo de intentos para generar P' válido 
     """
-    Genera un subconjunto P' de prácticas factible estructuralmente.
-
-    Factibilidad estructural:
-    - |P'| = n_students
-    - cuotas mínimas y máximas por empresa
-    - dependencias completas
-
-    Esta función reutiliza la lógica ya existente en random_feasible_fixing para
-    seleccionar prácticas con dependencias y cuotas, pero devuelve únicamente P'.
+    Genera un subconjunto P' aleatorio y factible (|P'| = n_students, cuotas por empresa y dependencias completas). 
+    Reutiliza funciones ya existentes de random_feasible_fixing (heurística aleatoria), pero en lugar de construir
+    una solución completa, devuelve solo las prácticas seleccionadas
     """
-    if _preprocess is None or _choose_final_placements is None:
-        raise ImportError(
-            "No se ha podido importar _preprocess/_choose_final_placements desde "
-            "random_feasible_fixing. Revisa la ubicación del módulo en el proyecto."
-        )
-
+    # Inicialización
     rng = random.Random(seed)
     pre = _preprocess(problem)
 
+    # Intentos de generación
     for _ in range(max_attempts):
         try:
-            selected = list(_choose_final_placements(problem, pre, rng))
+            selected = list(_choose_final_placements(problem, pre, rng)) # Lista de índices de prácticas seleccionadas
         except ValueError:
             continue
-
+        
+        # Validación estructural de factibilidad de P' antes de intentar asignar profesores o resolver LAP
         if _selected_placements_are_structurally_feasible(problem, selected):
-            return selected
+            return selected # Lista de índices de prácticas seleccionadas
 
+    # Si no se encuentra un subconjunto factible después de max_attempts, se lanza una excepción
     raise ValueError(f"No feasible placement subset found after {max_attempts} attempts")
 
 
-def _selected_placements_are_structurally_feasible(problem, selected_placements: Sequence[int]) -> bool:
-    """Comprueba la factibilidad estructural de P'."""
+def _selected_placements_are_structurally_feasible(problem, selected_placements):
+                                                  # instancia del problema, lista de índices de prácticas seleccionadas
+    """
+    Comprueba que P' cumple tamaño, unicidad, índices válidos, cuotas de empresa y dependencias completas.
+    Devuelve True si P' es estructuralmente factible, False en caso contrario
+    """
     selected = list(selected_placements)
 
+    # Revisión de tamaño, duplicados e índices
     if len(selected) != problem.n_students:
         return False
     if len(set(selected)) != len(selected):
@@ -102,9 +67,10 @@ def _selected_placements_are_structurally_feasible(problem, selected_placements:
 
     selected_set = set(selected)
 
+    # Revisión de cuotas por empresa
     company_load = [0] * problem.n_companies
     for j in selected:
-        company_load[int(problem.placement_company[j])] += 1
+        company_load[int(problem.placement_company[j])] += 1 # Prácticas por empresa
 
     for k in range(problem.n_companies):
         if company_load[k] < int(problem.company_min[k]):
@@ -112,6 +78,7 @@ def _selected_placements_are_structurally_feasible(problem, selected_placements:
         if company_load[k] > int(problem.company_max[k]):
             return False
 
+    # Revisión de dependencias completas
     for dep in problem.dependencies:
         if not dep:
             continue
@@ -119,12 +86,22 @@ def _selected_placements_are_structurally_feasible(problem, selected_placements:
         if 0 < count < len(dep):
             return False
 
-    return True
+    return True # P' es estructuralmente factible
 
 
 # -----------------------------------------------------------------------------
 # Asignación práctica-profesor mediante construcción/repair guiado
 # -----------------------------------------------------------------------------
+
+@dataclass
+class _SupervisionCostContext:
+    """
+    Matrices de distancias (costes) para poder estimar el coste 
+    incremental de asignar una práctica a un profesor
+    """
+
+    center_company: np.ndarray # Distancia entre el centro educativo del profesor y la empresa
+    company_company: np.ndarray # Distancia entre empresas
 
 def assign_professors_with_guided_repair(
     problem,
@@ -412,8 +389,6 @@ def solve_lapjv_max(benefit_matrix: np.ndarray, solver: str = "lapjv") -> List[i
         raise ValueError(f"Unknown LAP solver: {solver}")
 
     try:
-        from lapjv import lapjv
-
         cost_matrix = -benefits
         row_ind, _, _ = lapjv(cost_matrix)
         row_to_col = [int(c) for c in row_ind]
@@ -426,20 +401,11 @@ def solve_lapjv_max(benefit_matrix: np.ndarray, solver: str = "lapjv") -> List[i
         return row_to_col
 
     except Exception:
-        # Fallback técnico contemplado en el diseño para problemas de instalación,
-        # configuración o compatibilidad de lapjv.
         return _solve_lap_with_scipy(benefits)
 
 
 def _solve_lap_with_scipy(benefits: np.ndarray) -> List[int]:
     """Fallback con scipy.optimize.linear_sum_assignment."""
-    try:
-        from scipy.optimize import linear_sum_assignment
-    except ModuleNotFoundError as exc:  # pragma: no cover
-        raise ImportError(
-            "Neither lapjv nor scipy.optimize.linear_sum_assignment is available"
-        ) from exc
-
     row_ind, col_ind = linear_sum_assignment(benefits, maximize=True)
 
     row_to_col = [-1] * benefits.shape[0]

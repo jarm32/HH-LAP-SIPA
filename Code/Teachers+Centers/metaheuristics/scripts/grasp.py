@@ -5,9 +5,8 @@
 # - Reconstrucción de profesores reutilizando _assign_professors_with_repair.
 # - Registro en Pareto externo de la solución final mejorada.
 
-
 # --------------------------------------------------
-# Librerías
+# Imports
 # --------------------------------------------------
 import random
 import time
