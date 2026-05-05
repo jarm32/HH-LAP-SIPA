@@ -55,360 +55,89 @@ Ambas soluciones se validan frente a las restricciones del modelo y se evalúan 
 
 ---
 
+## 3. Selección inicial de prácticas \(P'\)
 
-############################################################
+La selección inicial de prácticas no busca elegir directamente las "mejores" prácticas, ya que la calidad de una práctica depende del estudiante y del profesor al que se asigne. En particular, las utilidades `tau_ij` y `eta_ij` dependen del par estudiante-práctica, no de la práctica de forma aislada; del mismo modo, los componentes `lbar_sum` y `sigma_sum` dependen de cómo se asignan las prácticas a los profesores.
 
-## 7. Papel de la selección de prácticas P'
+Por tanto, en esta fase no se pretende optimizar directamente la calidad final de las prácticas seleccionadas, sino generar un subconjunto `P'` que sea factible desde el punto de vista estructural.
 
-La selección inicial de prácticas no busca elegir directamente las “mejores prácticas”.
+Además, el subconjunto `P'` debe cumplir que \(|P'| = |S|\), de forma que pueda construirse una asignación uno-a-uno entre estudiantes y prácticas. Asimismo, debe respetar las restricciones estructurales del problema asociadas a cuotas de empresa y dependencias entre prácticas.
 
-Esto es importante porque una práctica no es buena o mala de forma aislada desde el punto de vista de estudiantes o empresas. La utilidad depende del par estudiante-práctica:
-
-```text
-tau_ij = utilidad de asignar la práctica j al estudiante i
-eta_ij = utilidad que aporta el estudiante i a la práctica j
-```
-
-Por tanto, inicialmente se generará un subconjunto `P'` de prácticas que sea factible estructuralmente.
-
-Debe cumplir:
-
-```text
-|P'| = |S|
-```
-
-y además:
-
-```text
-cuotas mínimas de empresa
-cuotas máximas de empresa
-dependencias completas
-```
-
-La calidad real de `P'` se conocerá después de resolver los LAP estudiante-práctica y evaluar las soluciones completas.
+La calidad real de `P'` se determina posteriormente, al combinar dicho subconjunto con una asignación práctica-profesor, resolver los LAP estudiante-práctica y evaluar las soluciones completas resultantes.
 
 ---
 
-## 8. Asignación práctica-profesor
+## 4. Asignación práctica-profesor
 
-La asignación de profesores no se resolverá mediante LAP.
+Una vez seleccionado el subconjunto de prácticas `P'`, se debe asignar un profesor a cada práctica seleccionada. Esta fase no se resolverá mediante LAP, ya que la asignación profesor-práctica no es un problema uno-a-uno (un profesor puede supervisar varias prácticas, tiene una capacidad máxima `C_t`, y el coste de supervisión depende del conjunto completo de prácticas que se le asignan). Por tanto, la asignación práctica-profesor se abordará mediante una estrategia heurística de construcción y repair guiado.
 
-Motivo:
+El aspecto importante de esta fase es que la asignación de profesores no depende del estudiante concreto que ocupe cada práctica, ya que para el profesorado importa qué prácticas están cubiertas, dónde están ubicadas, cuántas prácticas supervisa cada profesor, qué dispersión geográfica tiene su conjunto de prácticas y cómo queda equilibrada la carga entre profesores. En cambio, no importa qué alumno concreto está asignado a cada práctica.
 
-```text
-La asignación profesor-práctica no es un problema 1-1.
-```
+Por este motivo, para un mismo subconjunto `P'`, la asignación práctica-profesor se calcula una única vez y se reutiliza en las dos soluciones generadas posteriormente mediante LAP: `Solución_tau` y `Solución_eta`.
 
-Un profesor puede supervisar varias prácticas, tiene capacidad máxima `C_t`, y su coste depende del conjunto completo de prácticas asignadas, no solo de una pareja profesor-práctica.
+Dado `P'`, la estrategia inicial será:
 
-Por tanto, se usará una estrategia de construcción/repair guiado.
-
-### 8.1. Principio clave
-
-Al profesor le da igual qué estudiante concreto esté en cada práctica.
-
-Para la parte de profesorado importa:
-
-- qué prácticas están cubiertas;
-- dónde están ubicadas;
-- cuántas prácticas supervisa cada profesor;
-- qué dispersión geográfica tiene cada profesor;
-- cómo queda equilibrada la carga entre profesores del mismo centro.
-
-No importa:
-
-```text
-qué alumno concreto está asignado a cada práctica.
-```
-
-Por tanto, para un mismo subconjunto `P'`, la asignación práctica-profesor puede calcularse una única vez y reutilizarse para las dos soluciones generadas por LAP.
-
----
-
-### 8.2. Estrategia propuesta para profesores
-
-La estrategia inicial será una asignación mediante repair guiado.
-
-Esquema:
-
-```text
-Dado P':
-
-1. Inicializar todos los profesores sin prácticas.
+1. Inicializar todos los profesores sin prácticas asignadas.
 2. Recorrer las prácticas seleccionadas.
 3. Para cada práctica:
-      buscar profesores con capacidad disponible;
-      calcular el incremento de coste si se asigna a cada profesor;
-      asignar la práctica al profesor con menor incremento.
-4. Si queda alguna práctica sin profesor:
-      aplicar repair moviendo prácticas entre profesores.
-5. Validar capacidades.
-```
+      - Buscar profesores con capacidad disponible.
+      - Estimar el incremento de coste si se asigna a cada profesor.
+      - Asignar la práctica al profesor con menor incremento.
+4. Si alguna práctica queda sin profesor, aplicar repair moviendo prácticas entre profesores.
+5. Validar que todas las prácticas seleccionadas tengan profesor y que ningún profesor supere su capacidad.
 
-El coste incremental puede tener en cuenta:
-
-```text
-incremento de lbar_sum
-+
-penalización por desequilibrio de carga sigma_sum
-```
-
-La versión inicial puede ser simple, pero debe garantizar siempre que no se supera la capacidad de ningún profesor.
+El coste incremental podrá tener en cuenta el aumento de `lbar_sum` y una penalización asociada al desequilibrio de carga `sigma_sum`. En cualquier caso, la asignación resultante deberá garantizar siempre la factibilidad respecto a la capacidad máxima de supervisión de los profesores.
 
 ---
 
-## 9. Asignación estudiante-práctica mediante LAP
+## 5. Asignación estudiante-práctica mediante LAP
 
-Una vez fijado `P'`, el problema estudiante-práctica se convierte en un problema de asignación lineal 1-1.
+Una vez fijado el subconjunto de prácticas `P'`, la asignación estudiante-práctica se convierte en un problema de asignación lineal uno-a-uno. Esto es posible porque la selección inicial de prácticas fuerza que `|P'| = |S|`, de modo que existe el mismo número de prácticas seleccionadas que de estudiantes.
 
-Tenemos:
+Sobre este conjunto `P'`, se construyen dos matrices de beneficio: Tau[i][j] = tau_ij, Eta[i][j] = eta_ij; donde `i` representa un estudiante y `j` una práctica perteneciente a `P'`. A partir de estas matrices se resuelven dos problemas LAP independientes mediante `lapjv`:
 
-```text
-|S| estudiantes
-|P'| prácticas seleccionadas
-```
+- Un LAP maximizando `tau`, que obtiene la asignación estudiante-práctica óptima desde el punto de vista de los estudiantes.
+- Un LAP maximizando `eta`, que obtiene la asignación estudiante-práctica óptima desde el punto de vista de las empresas/prácticas.
 
-y se fuerza:
+Cada una de estas asignaciones se combina con la asignación práctica-profesor calculada previamente para `P'`. De este modo, para cada subconjunto `P'` se generan dos soluciones completas:
 
 ```text
-|S| = |P'|
+Solución_tau = P' + asignación práctica-profesor + asignación estudiante-práctica max tau
+Solución_eta = P' + asignación práctica-profesor + asignación estudiante-práctica max eta
 ```
 
-Por tanto, se puede construir una matriz cuadrada de beneficios. Cada solución completa se obtiene combinando la asignación práctica-profesor calculada previamente para \(P'\) con la asignación estudiante-práctica devuelta por `lapjv`. De este modo, `Solución_tau` se construye uniendo la asignación de profesores con el LAP que maximiza `tau`, mientras que `Solución_eta` se construye uniendo la misma asignación de profesores con el LAP que maximiza `eta`.
+Ambas soluciones comparten el mismo subconjunto de prácticas seleccionadas y la misma asignación de profesores, pero difieren en la asignación estudiante-práctica devuelta por `lapjv`.
 
 ---
 
-### 9.1. LAP maximizando tau
+## 6. Uso del LAP en la heurística
 
-Se construye una matriz:
+La heurística utiliza problemas LAP para resolver de forma exacta la asignación estudiante-práctica una vez fijado el subconjunto de prácticas `P'`. El solver principal será `lapjv`, ya que el repositorio `src-d/lapjv` (https://github.com/src-d/lapjv) implementa un solver del Linear Assignment Problem basado en el algoritmo Jonker-Volgenant.
 
-```text
-Tau[i][j] = tau_ij
-```
+Además, el repositorio comparativo `berhane/LAP-solvers` (https://github.com/berhane/LAP-solvers) se utilizará como referencia para justificar la elección de `lapjv`, ya que compara distintas implementaciones para resolver problemas LAP y señala esta alternativa como una de las más eficientes.
 
-donde `j` pertenece a `P'`.
+No obstante, se contempla mantener una alternativa basada en `scipy.optimize.linear_sum_assignment` en caso de que `lapjv` presente problemas de instalación, configuración o compatibilidad en el entorno de ejecución.
 
-Este LAP busca la asignación estudiante-práctica que maximiza la utilidad total de estudiantes.
-
-Resultado:
-
-```text
-Solución_tau
-```
-
-Esta solución usa:
-
-```text
-mismo P'
-misma asignación práctica-profesor
-asignación estudiante-práctica óptima respecto a tau
-```
-
----
-
-### 9.2. LAP maximizando eta
-
-Se construye una matriz:
-
-```text
-Eta[i][j] = eta_ij
-```
-
-donde `j` pertenece a `P'`.
-
-Este LAP busca la asignación estudiante-práctica que maximiza la utilidad total de empresas/prácticas.
-
-Resultado:
-
-```text
-Solución_eta
-```
-
-Esta solución usa:
-
-```text
-mismo P'
-misma asignación práctica-profesor
-asignación estudiante-práctica óptima respecto a eta
-```
-
----
-
-### 9.3. No se usarán combinaciones tau/eta
-
-En esta primera versión no se resolverán LAP con combinaciones ponderadas del tipo:
-
-```text
-lambda * tau + (1 - lambda) * eta
-```
-
-La heurística generará exactamente dos soluciones por cada subconjunto `P'`:
-
-```text
-una solución maximizando tau
-una solución maximizando eta
-```
-
----
-
-## 10. Uso de lapjv
-
-El solver LAP principal será:
-
-```text
-lapjv
-```
-
-El repositorio `src-d/lapjv` implementa un solver del Linear Assignment Problem basado en el algoritmo Jonker-Volgenant:
-
-```text
-https://github.com/src-d/lapjv
-```
-
-### 10.1. Integración conceptual
-
-Muchos solvers LAP están formulados como minimización.
-
-Como nuestros dos LAP son de maximización, se transforman así:
+Desde el punto de vista del algoritmo, los dos LAP que se resuelven son problemas de maximización (de `tau` y `eta`). Sin embargo, muchos solvers LAP están formulados como problemas de minimización. Por ello, la maximización se transforma en minimización cambiando el signo de la matriz de beneficios:
 
 ```python
-cost_tau = -tau_matrix
+cost_tau = -tau_matrix # maximizar tau equivale a minimizar -tau
 row_ind, col_ind, _ = lapjv(cost_tau)
 
-cost_eta = -eta_matrix
+cost_eta = -eta_matrix # maximizar eta equivale a minimizar -eta
 row_ind, col_ind, _ = lapjv(cost_eta)
 ```
 
-Maximizar `tau` equivale a minimizar `-tau`.
-
-Maximizar `eta` equivale a minimizar `-eta`.
+Por tanto, `lapjv` se usará como subrutina exacta para resolver la asignación estudiante-práctica dentro de la heurística, mientras que el resto de decisiones del problema, como la selección de prácticas y la asignación práctica-profesor, se resolverán mediante procedimientos heurísticos.
 
 ---
 
-## 11. Papel de LAP-solvers
+## 7. Flujo completo de la heurística
 
-El repositorio `berhane/LAP-solvers` se usará como referencia comparativa:
-
-```text
-https://github.com/berhane/LAP-solvers
-```
-
-Su papel dentro del diseño de esta heurística es:
+El flujo completo de la heurística se resume en el siguiente pseudocódigo:
 
 ```text
-justificar la elección de lapjv como solver LAP eficiente
-```
-
-Por tanto:
-
-```text
-src-d/lapjv          → implementación que usaremos
-berhane/LAP-solvers → referencia comparativa / estado del arte práctico
-```
-
----
-
-## 12. Qué resuelve lapjv y qué no resuelve
-
-### lapjv sí resuelve
-
-```text
-Dado S y P' con |S| = |P'|,
-encontrar el emparejamiento estudiante-práctica 1-1 óptimo
-según una matriz de costes o beneficios.
-```
-
-En nuestro caso:
-
-```text
-LAP max tau
-LAP max eta
-```
-
----
-
-### lapjv no resuelve
-
-`lapjv` no resuelve:
-
-```text
-selección de prácticas P'
-cuotas mínimas de empresa
-cuotas máximas de empresa
-dependencias entre prácticas
-asignación de profesores
-capacidades de profesores
-dispersión geográfica de supervisión
-equilibrio de carga entre profesores
-mantenimiento de la frontera de Pareto
-```
-
-Por tanto, `lapjv` será una subrutina interna de la heurística, no la heurística completa.
-
----
-
-## 13. Flujo completo de la heurística
-
-```text
-Entrada:
-    problem
-    weights
-    time_limit
-    max_iterations
-    base_seed
-
-Inicializar:
-    pareto_set = []
-
-Mientras no se cumpla criterio de parada:
-
-    1. Generar P' aleatorio factible
-        - |P'| = n_students
-        - cuotas de empresa correctas
-        - dependencias completas
-
-    2. Asignar profesores a P'
-        - construcción/repair guiado
-        - respetar prof_capacity
-        - obtener placement_to_professor
-
-    3. Construir matriz tau sobre S × P'
-
-    4. Resolver LAP con lapjv usando tau
-        - obtener asignación estudiante-práctica
-        - construir Solución_tau
-
-    5. Validar Solución_tau
-        - R1, R2, R3, R4, R5, R6, R7
-
-    6. Si Solución_tau es válida:
-        - evaluar tau_sum, eta_sum, lbar_sum, sigma_sum
-        - actualizar Pareto
-
-    7. Construir matriz eta sobre S × P'
-
-    8. Resolver LAP con lapjv usando eta
-        - obtener asignación estudiante-práctica
-        - construir Solución_eta
-
-    9. Validar Solución_eta
-        - R1, R2, R3, R4, R5, R6, R7
-
-    10. Si Solución_eta es válida:
-        - evaluar tau_sum, eta_sum, lbar_sum, sigma_sum
-        - actualizar Pareto
-
-Salida:
-    pareto_set
-    estadísticas de ejecución
-```
-
----
-
-## 14. Pseudocódigo
-
-```text
-HH-LAP-SIPA(problem, time_limit, weights):
+HH-LAP-SIPA(problem, time_limit, max_iterations, base_seed):
 
     pareto_set ← ∅
 
@@ -417,272 +146,119 @@ HH-LAP-SIPA(problem, time_limit, weights):
         P' ← generate_random_feasible_placements(problem)
 
         professor_assignment ← assign_professors_with_guided_repair(problem, P')
-
         if professor_assignment is not feasible:
             continue
 
         tau_matrix ← build_tau_matrix(problem, P')
         assignment_tau ← solve_lapjv_max(tau_matrix)
-
-        sol_tau ← build_solution(
-            problem,
-            P',
-            professor_assignment,
-            assignment_tau
-        )
-
+        sol_tau ← build_solution(P', professor_assignment, assignment_tau)
         if validate(sol_tau):
-            eval_tau ← evaluate_solution_multi(sol_tau)
-            pareto_set ← update_pareto(pareto_set, sol_tau, eval_tau)
+            evaluate_and_update_pareto(pareto_set, sol_tau)
 
         eta_matrix ← build_eta_matrix(problem, P')
         assignment_eta ← solve_lapjv_max(eta_matrix)
-
-        sol_eta ← build_solution(
-            problem,
-            P',
-            professor_assignment,
-            assignment_eta
-        )
-
+        sol_eta ← build_solution(P', professor_assignment, assignment_eta)
         if validate(sol_eta):
-            eval_eta ← evaluate_solution_multi(sol_eta)
-            pareto_set ← update_pareto(pareto_set, sol_eta, eval_eta)
+            evaluate_and_update_pareto(pareto_set, sol_eta)
 
     return pareto_set
 ```
 
----
+El criterio de parada principal será el tiempo de ejecución, fijado inicialmente en 300 segundos para los experimentos comparativos. Este criterio permite comparar HH-LAP-SIPA con otras heurísticas bajo las mismas condiciones computacionales. Adicionalmente, la implementación podrá contemplar otros criterios, como número máximo de iteraciones, número de subconjuntos generados o número de soluciones factibles evaluadas.
 
-## 16. Relación con el código actual
-
-La heurística puede apoyarse en las estructuras actuales:
-
-```text
-Problem
-Solution
-evaluate_solution_multi
-evaluate_solution_scalar
-update_pareto_set
-register_solution_in_pareto
-```
-
-Sin embargo, habrá que adaptar o crear funciones específicas:
-
-```text
-generate_random_feasible_placements_only(problem)
-assign_professors_guided_repair(problem, selected_placements)
-build_tau_matrix(problem, selected_placements)
-build_eta_matrix(problem, selected_placements)
-solve_lapjv_max(matrix)
-build_solution_from_lap_assignment(...)
-run_hh_lap_sipa(...)
-```
-
-El generador actual de soluciones aleatorias ya contiene parte de la lógica de selección de prácticas y reparación de dependencias/cuotas. La nueva heurística deberá separar esa lógica para que primero genere `P'` y después deje que el LAP decida la asignación estudiante-práctica.
+En cada iteración, el algoritmo genera un subconjunto factible de prácticas, calcula una asignación práctica-profesor y construye dos soluciones candidatas mediante LAP: una optimizando `tau` y otra optimizando `eta`. Cada solución se valida frente a las restricciones del modelo SIPA extendido antes de poder incorporarse al Pareto externo.
 
 ---
 
-## 17. Diferencias respecto a la baseline aleatoria
+## 8. Relación con el código actual
 
-La baseline aleatoria actual hace, conceptualmente:
+La implementación de la heurística se apoyará en las estructuras ya existentes del proyecto. En particular:
 
-```text
-selección de prácticas
-+
-asignación estudiante-práctica aleatoria
-+
-asignación de profesores
-```
+- `Problem`: representación de la instancia del problema.
+- `Solution`: representación de una solución completa.
+- `evaluate_solution_multi`: evaluación multiobjetivo de una solución.
+- `evaluate_solution_scalar`: evaluación escalar auxiliar.
+- `register_solution_in_pareto`: evaluación, validación y registro de soluciones en el Pareto externo.
 
-La nueva heurística hará:
+La principal adaptación será separar la lógica actual de generación de soluciones factibles. En lugar de generar directamente una solución completa, la nueva heurística deberá generar primero un subconjunto factible de prácticas `P'`, asignar profesores a dichas prácticas y, posteriormente, delegar la asignación estudiante-práctica en `lapjv`.
 
-```text
-selección de prácticas aleatoria factible
-+
-asignación de profesores mediante repair guiado
-+
-asignación estudiante-práctica óptima mediante LAP
-```
+Para ello, se prevé incorporar o adaptar los siguientes componentes:
 
-La mejora principal está en que, para cada subconjunto `P'`, no se asignan los estudiantes de forma aleatoria, sino de forma óptima respecto a `tau` y respecto a `eta`.
+- `generate_random_feasible_placements(problem)`: genera un subconjunto factible de prácticas `P'`.
+- `assign_professors_with_guided_repair(problem, selected_placements)`: asigna profesores a las prácticas seleccionadas mediante construcción y repair guiado.
+- `build_tau_matrix(problem, selected_placements)`: construye la matriz de beneficios `tau` para el LAP orientado a estudiantes.
+- `build_eta_matrix(problem, selected_placements)`: construye la matriz de beneficios `eta` para el LAP orientado a empresas.
+- `solve_lapjv_max(matrix)`: resuelve un problema LAP de maximización usando `lapjv`.
+- `build_solution_from_lap_assignment(...)`: construye una solución completa combinando `P'`, la asignación práctica-profesor y la asignación estudiante-práctica devuelta por `lapjv`.
+- `hh_lap_sipa.py`: contiene la implementación principal del algoritmo HH-LAP-SIPA.
+- `run_hh_lap_sipa.py`: script de ejecución encargado de cargar la instancia, configurar parámetros, lanzar la heurística y guardar/mostrar resultados.
 
----
-
-## 18. Criterios de parada
-
-La heurística podrá usar uno o varios criterios de parada:
-
-```text
-límite de tiempo
-número máximo de iteraciones
-número máximo de soluciones generadas
-número máximo de soluciones factibles evaluadas
-```
-
-Para experimentos comparativos, el criterio principal debería ser el tiempo, por ejemplo:
-
-```text
-60 segundos
-300 segundos
-900 segundos
-```
-
-según el tamaño de instancia.
+El objetivo es aprovechar la infraestructura existente, pero modificando el flujo de construcción de soluciones para que el LAP sea quien determine la asignación estudiante-práctica dentro de cada subconjunto `P'`.
 
 ---
 
-## 19. Salidas esperadas
+## 9. Diferencias respecto a la baseline aleatoria
 
-La heurística debe devolver:
+La baseline aleatoria actual construye soluciones generando una selección factible de prácticas y asignando posteriormente estudiantes y profesores mediante procedimientos aleatorios o de reparación. La heurística HH-LAP-SIPA mantiene la selección inicial aleatoria factible de prácticas, pero modifica la forma de construir la solución completa. En concreto:
 
-```text
-pareto_set
-estadísticas de ejecución
-```
-
-Las estadísticas mínimas deberían incluir:
-
-```text
-iterations
-generated_subsets
-professor_assignment_failures
-lap_tau_solutions
-lap_eta_solutions
-feasible_solutions
-inserted_into_pareto
-pareto_size
-elapsed_seconds
-```
-
-También sería útil guardar un resumen del Pareto:
-
-```text
-max_tau
-mean_tau
-max_eta
-mean_eta
-min_lbar
-mean_lbar
-min_sigma
-mean_sigma
-max_objective_value
-mean_objective_value
-```
+- La asignación práctica-profesor se realiza mediante construcción y repair guiado.
+- La asignación estudiante-práctica deja de ser aleatoria y se resuelve de forma exacta mediante LAP.
+- Para cada subconjunto `P'`, se generan dos soluciones candidatas: una maximizando `tau` y otra maximizando `eta`.
 
 ---
 
-## 20. Decisiones de diseño fijadas
+## 10. Salidas esperadas
 
-Quedan fijadas las siguientes decisiones:
+La heurística devolverá como resultado principal el conjunto de soluciones no dominadas encontrado durante la ejecución, junto con estadísticas asociadas:
 
-```text
-1. La selección inicial de prácticas P' será aleatoria factible.
+- `pareto_set` (assignments): conjunto Pareto externo con las soluciones no dominadas.
+- `stats` (statistics): estadísticas de ejecución de la heurística.
 
-2. La asignación práctica-profesor no usará LAP.
+Las estadísticas mínimas que se registrarán serán:
 
-3. La asignación práctica-profesor se hará mediante construcción/repair guiado.
+- `iterations`: número de iteraciones ejecutadas.
+- `generated_subsets`: número de subconjuntos `P'` generados.
+- `professor_assignment_failures`: número de fallos al construir la asignación práctica-profesor.
+- `lap_tau_solutions`: número de soluciones generadas mediante el LAP que maximiza `tau`.
+- `lap_eta_solutions`: número de soluciones generadas mediante el LAP que maximiza `eta`.
+- `feasible_solutions`: número de soluciones factibles evaluadas.
+- `inserted_into_pareto`: número de soluciones incorporadas al Pareto externo.
+- `pareto_size`: tamaño final del Pareto externo.
+- `elapsed_seconds`: tiempo total de ejecución.
 
-4. La asignación estudiante-práctica sí usará LAP.
-
-5. El solver LAP principal será lapjv.
-
-6. Se resolverán exactamente dos LAP por cada P':
-      - max tau
-      - max eta
-
-7. No se usarán combinaciones tau/eta en esta primera versión.
-
-8. Cada \(P'\) genera como máximo dos soluciones completas:
-      - `Solución_tau`: combinación de la asignación práctica-profesor de \(P'\) con la asignación estudiante-práctica devuelta por `lapjv` al maximizar `tau`.
-      - `Solución_eta`: combinación de la asignación práctica-profesor de \(P'\) con la asignación estudiante-práctica devuelta por `lapjv` al maximizar `eta`.
-
-9. Las dos soluciones comparten:
-      - el mismo \(P'\);
-      - la misma asignación práctica-profesor.
-
-10. Las dos soluciones difieren en:
-      - la asignación estudiante-práctica devuelta por `lapjv`.
-
-11. Toda solución debe cumplir R1–R7 antes de evaluarse.
-
-12. El Pareto se actualiza solo con soluciones válidas.
-```
+Además, se podrá guardar un resumen del Pareto final con indicadores agregados de calidad, como máximos o medias de los objetivos considerados.
 
 ---
 
-## 21. Posibles mejoras futuras
+## 11. Decisiones de diseño fijadas
 
-Aunque no forman parte de la primera versión, quedan identificadas posibles extensiones.
+Las decisiones de diseño fijadas para la (primera) definición del algoritmo HH-LAP-SIPA son:
 
-### 21.1. Selección guiada de prácticas
-
-En lugar de seleccionar `P'` de forma puramente aleatoria, se podría sesgar la selección usando una puntuación aproximada de potencial:
-
-```text
-score(j) = λ * max_i tau_ij + (1 - λ) * max_i eta_ij
-```
-
-o usando medias de los mejores `k` estudiantes para cada práctica.
-
-Esta mejora no se implementará en la primera versión.
-
----
-
-### 21.2. Búsqueda local sobre P'
-
-Una vez generado un subconjunto `P'`, se podrían aplicar movimientos:
-
-```text
-eliminar una práctica
-añadir otra práctica
-intercambiar prácticas
-reparar cuotas/dependencias
-resolver LAP de nuevo
-aceptar si mejora el Pareto
-```
-
-Esta mejora tampoco forma parte de la primera versión.
+- La selección inicial de prácticas `P'` será aleatoria factible.
+- La asignación práctica-profesor no se resolverá mediante LAP.
+- La asignación práctica-profesor se realizará mediante construcción y repair guiado.
+- La asignación estudiante-práctica sí se resolverá mediante LAP.
+- El solver LAP principal será `lapjv`.
+- Para cada subconjunto `P'`, se resolverán exactamente dos LAP:
+  - uno maximizando `tau`;
+  - otro maximizando `eta`.
+- No se usarán combinaciones ponderadas de `tau` y `eta`.
+- Cada subconjunto `P'` generará como máximo dos soluciones completas:
+  - `Solución_tau`: combinación de `P'`, la asignación práctica-profesor y la asignación estudiante-práctica devuelta por `lapjv` al maximizar `tau`.
+  - `Solución_eta`: combinación de `P'`, la asignación práctica-profesor y la asignación estudiante-práctica devuelta por `lapjv` al maximizar `eta`.
+- Las dos soluciones comparten el mismo subconjunto `P'` y la misma asignación práctica-profesor.
+- Las dos soluciones difieren en la asignación estudiante-práctica devuelta por `lapjv`.
+- Toda solución debe cumplir las restricciones del modelo SIPA extendido antes de evaluarse.
+- El Pareto externo se actualiza únicamente con soluciones válidas y no dominadas.
 
 ---
 
-### 21.3. Mejora local de profesores
+## 12. Posibles mejoras futuras
 
-Después del repair inicial de profesores, se podrían probar movimientos locales:
+Quedan identificadas varias extensiones posibles:
 
-```text
-mover una práctica de un profesor a otro
-intercambiar prácticas entre profesores
-recalcular lbar_sum y sigma_sum
-aceptar si mejora la supervisión
-```
+- Selección guiada de prácticas: en lugar de seleccionar `P'` de forma aleatoria, se podría sesgar la selección usando una puntuación aproximada del potencial de cada práctica, por ejemplo combinando su mejor ajuste posible respecto a `tau` y `eta`.
 
-Esta mejora puede ser útil especialmente para reducir `lbar_sum` y `sigma_sum`.
+- Búsqueda local sobre `P'`: una vez generado un subconjunto de prácticas, se podrían aplicar movimientos como eliminar una práctica, añadir otra, intercambiar prácticas o reparar cuotas y dependencias. Tras cada modificación, se resolverían de nuevo los LAP y se conservaría la solución si mejora el Pareto.
 
----
-
-## 22. Resumen final
-
-La heurística HH-LAP-SIPA se define como una heurística híbrida para el modelo SIPA extendido.
-
-Su funcionamiento se basa en:
-
-```text
-explorar subconjuntos factibles de prácticas
-+
-optimizar exactamente la asignación estudiante-práctica con LAP
-+
-reparar/guiar la asignación práctica-profesor
-+
-evaluar soluciones en un marco multiobjetivo
-+
-mantener una frontera de Pareto
-```
-
-La selección de prácticas permite explorar diferentes regiones del espacio de soluciones.
-
-El repair de profesores garantiza que la capa de supervisión sea factible y razonable.
-
-El uso de `lapjv` permite que, para cada subconjunto de prácticas, la asignación estudiante-práctica sea óptima respecto a `tau` y respecto a `eta`.
-
-La frontera de Pareto permite conservar soluciones no dominadas considerando simultáneamente estudiantes, empresas, profesores y centros educativos.
+- Mejora local de profesores: después del repair inicial de profesores, se podrían probar movimientos como mover una práctica de un profesor a otro o intercambiar prácticas entre profesores, con el objetivo de reducir `lbar_sum` y `sigma_sum`.
