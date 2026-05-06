@@ -90,7 +90,7 @@ def _selected_placements_are_structurally_feasible(problem, selected_placements)
 
 
 # -----------------------------------------------------------------------------
-# Asignación práctica-profesor mediante construcción/repair guiado
+# Asignación práctica-profesor mediante construcción guiada
 # -----------------------------------------------------------------------------
 
 @dataclass
@@ -103,106 +103,99 @@ class _SupervisionCostContext:
     center_company: np.ndarray # Distancia entre el centro educativo del profesor y la empresa
     company_company: np.ndarray # Distancia entre empresas
 
-def assign_professors_with_guided_repair(
-    problem,
-    selected_placements: Sequence[int],
-    rng: Optional[random.Random] = None,
-    lbar_weight: float = 1.0,
-    sigma_weight: float = 1.0,
-    normalize_supervision_dist: bool = True,
-) -> Optional[Dict[int, int]]:
+def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, sigma_weight = 1.0, normalize_supervision_dist = True):
+                                              # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y sigma (equilibrio), 
+                                              # booleano para saber si se normalizan las distancias de supervisión
     """
-    Asigna un profesor a cada práctica seleccionada de P'.
-
-    No se resuelve mediante LAP: un profesor puede supervisar varias prácticas.
-    La construcción elige, para cada práctica, el profesor con capacidad disponible
-    que menor incremento estimado produce en los objetivos de supervisión.
-
-    Devuelve:
-        dict {placement_j: professor_t} si se logra una asignación factible;
-        None en caso contrario.
+    Recorre las prácticas seleccionadas y asigna cada una al profesor que menor
+    incremento estimado produce en los objetivos de supervisión. Al final,
+    valida que todas las prácticas tengan profesor y que ningún profesor supere su capacidad
     """
+    # Inicialización
     selected = list(selected_placements)
     rng = rng or random.Random()
 
+    # Comprueba que exista capacidad total suficiente para asignar todas las prácticas
     if len(selected) > int(np.sum(problem.prof_capacity)):
         return None
 
+    # Precalcula matrices de costes para supervisión (distancias centro-empresa y empresa-empresa)
     context = _build_supervision_cost_context(problem, normalize_supervision_dist)
 
-    # Orden aleatorio para evitar que la construcción esté totalmente determinada
-    # por el orden de índices de las prácticas.
+    # Orden aleatorio para evitar determinación en la construcción
     order = selected[:]
     rng.shuffle(order)
 
-    professor_assignment: Dict[int, int] = {}
-    placements_by_professor: List[List[int]] = [[] for _ in range(problem.n_professors)]
-    professor_load = [0] * problem.n_professors
-
+    # Estructuras de construcción
+    professor_assignment = {}
+    placements_by_professor = [[] for _ in range(problem.n_professors)]
+    professor_load = [0] * problem.n_professors 
     lbar_by_professor = [0.0] * problem.n_professors
     sigma_sum = _sigma_sum_for_loads(problem, professor_load)
 
+    # Búsqueda de candidatos
     for j in order:
-        candidates = [
-            t
-            for t in range(problem.n_professors)
-            if professor_load[t] < int(problem.prof_capacity[t])
-        ]
+        candidates = [t
+                      for t in range(problem.n_professors)
+                      if professor_load[t] < int(problem.prof_capacity[t])] # Profesores con capacidad para supervisar una práctica más
 
+        # Si no hay candidatos, no se puede completar una asignación factible con la capacidad disponible
         if not candidates:
-            # Con las restricciones actuales no debería ocurrir si la capacidad total
-            # es suficiente, pero se deja como salvaguarda de factibilidad.
+            print("Warning: No professor candidates available for placement", j)
+            print("This should not happen if total capacity is sufficient")
+
             return None
 
+        # Evaluación de candidatos con coste incremental estimado a partir de Lbar y sigma
         best_cost = float("inf")
-        best_candidates: List[Tuple[int, float, float]] = []  # (profesor, nuevo_lbar, nuevo_sigma)
+        best_candidates = []  # (profesor, nuevo_lbar, nuevo_sigma)
 
+        # Para cada profesor candidato, se calcula el nuevo Lbar y el nuevo sigma_sum si se asigna la práctica j a ese profesor
         for t in candidates:
             current_lbar = lbar_by_professor[t]
-            new_lbar = _lbar_for_professor(
-                problem=problem,
-                context=context,
-                professor=t,
-                placements=placements_by_professor[t] + [j],
-            )
+            new_lbar = _lbar_for_professor(problem=problem, context=context, professor=t, placements=placements_by_professor[t] + [j])
 
             new_loads = professor_load[:]
             new_loads[t] += 1
             new_sigma_sum = _sigma_sum_for_loads(problem, new_loads)
 
-            incremental_cost = (
-                lbar_weight * (new_lbar - current_lbar)
-                + sigma_weight * (new_sigma_sum - sigma_sum)
-            )
+            # Coste incremental estimado combinando el aumento de Lbar y sigma_sum
+            incremental_cost = (lbar_weight * (new_lbar - current_lbar) + sigma_weight * (new_sigma_sum - sigma_sum))
 
+            # Elección de los mejores candidatos (menor coste inc. es mejor)
             if incremental_cost < best_cost - 1e-12:
                 best_cost = incremental_cost
                 best_candidates = [(t, new_lbar, new_sigma_sum)]
             elif abs(incremental_cost - best_cost) <= 1e-12:
                 best_candidates.append((t, new_lbar, new_sigma_sum))
 
+        # En caso de empate, se elige aleatoriamente
         chosen_t, chosen_lbar, chosen_sigma = rng.choice(best_candidates)
 
+        # Asignación definitiva de la práctica j al profesor elegido
         professor_assignment[j] = chosen_t
         placements_by_professor[chosen_t].append(j)
         professor_load[chosen_t] += 1
         lbar_by_professor[chosen_t] = chosen_lbar
         sigma_sum = chosen_sigma
 
+    # Validación final de factibilidad de la asignación práctica-profesor (todas las prácticas asignadas, ningún profesor sobrecargado)
     if not _professor_assignment_is_feasible(problem, selected, professor_assignment):
         return None
 
-    return professor_assignment
+    return professor_assignment # Diccionario con clave índice de práctica y valor índice de profesor asignado --> {placement_j: professor_t} 
 
 
-def _professor_assignment_is_feasible(
-    problem,
-    selected_placements: Sequence[int],
-    professor_assignment: Dict[int, int],
-) -> bool:
-    """Valida que toda práctica de P' tenga profesor y que no se supere Ct."""
+def _professor_assignment_is_feasible(problem, selected_placements, professor_assignment):
+                                     # instancia del problema, lista de índices de prácticas seleccionadas, diccionario de asignación práctica-profesor
+    """
+    Valida que toda práctica de P' tenga profesor asignado,
+    y que no se supere Ct
+    """
+    # Inicialización de cargas por profesor
     load = [0] * problem.n_professors
 
+    # Revisión de asignación de cada práctica seleccionada
     for j in selected_placements:
         if j not in professor_assignment:
             return False
@@ -213,14 +206,21 @@ def _professor_assignment_is_feasible(
         if load[t] > int(problem.prof_capacity[t]):
             return False
 
+    # Si se han asignado profesores válidos a todas las prácticas seleccionadas (y ellas son válidas) y no se ha superado la capacidad de ningún profesor, la asignación es factible
     return True
 
 
-def _build_supervision_cost_context(problem, normalize_supervision_dist: bool) -> _SupervisionCostContext:
-    """Prepara matrices de distancia para estimar costes de supervisión."""
+def _build_supervision_cost_context(problem, normalize_supervision_dist = True):
+                                   # instancia del problema, booleano para saber si se normalizan las distancias de supervisión
+    """
+    Prepara las matrices de distancia usadas para calcular costes de supervisión. 
+    Si se activa la normalización, aplica min-max global a las matrices
+    """
+    # Copia de matrices
     center_company = np.asarray(problem.center_company_dist, dtype=np.float64).copy()
     company_company = np.asarray(problem.company_company_dist, dtype=np.float64).copy()
 
+    # Normalización global de distancias de supervisión para que tengan un rango común y evitar dominancia de un objetivo sobre otro por escala
     if normalize_supervision_dist:
         dmin = float(min(center_company.min(), company_company.min()))
         dmax = float(max(center_company.max(), company_company.max()))
@@ -234,23 +234,26 @@ def _build_supervision_cost_context(problem, normalize_supervision_dist: bool) -
     return _SupervisionCostContext(center_company=center_company, company_company=company_company)
 
 
-def _lbar_for_professor(
-    problem,
-    context: _SupervisionCostContext,
-    professor: int,
-    placements: Sequence[int],
-) -> float:
-    """Calcula Lbar_t para un profesor y un conjunto de prácticas."""
+def _lbar_for_professor(problem, context, professor, placements):
+                       # instancia del problema, matrices de distancias, índice de profesor, lista de índices de prácticas supervisadas por ese profesor
+    """
+    Calcula la dispersión media de supervisión de un profesor (L_bar_t) para un conjunto de prácticas.
+    Para ello construye implícitamente un grafo con el centro del profesor y las empresas de las prácticas,
+    calcula el MST y divide por el número de prácticas
+    """
+    # Profesor sin prácticas asignadas
     supervised = list(placements)
     nt = len(supervised)
     if nt == 0:
         return 0.0
 
+    # Identificación del centro del profesor y las empresas de las prácticas supervisadas
     center = int(problem.prof_center[professor])
     companies = [int(problem.placement_company[j]) for j in supervised]
 
-    def dist(a: int, b: int) -> float:
-        # Nodo 0 = centro del profesor; nodos 1..nt = empresas de las prácticas.
+    # Función de distancia para consultar distancias entre nodos
+    # Nodo 0 = centro del profesor / Nodos 1..nt = empresas de las prácticas  
+    def dist(a, b):
         if a == 0 and b == 0:
             return 0.0
         if a == 0:
@@ -259,20 +262,30 @@ def _lbar_for_professor(
             return float(context.center_company[center, companies[a - 1]])
         return float(context.company_company[companies[a - 1], companies[b - 1]])
 
+    # Cálculo de longitud del MST con Prim sobre el grafo completo implícito
     lt = _prim_mst_length(num_nodes=nt + 1, dist_fn=dist)
-    return float(lt / nt)
+    
+    return float(lt / nt) # valor Lbar_t estimado para ese profesor (longitud del árbol de expansión mínimo y la divide por nº de prácticas supervisadas)
 
 
-def _prim_mst_length(num_nodes: int, dist_fn) -> float:
-    """Longitud del MST mediante Prim sobre un grafo completo implícito."""
+def _prim_mst_length(num_nodes, dist_fn):
+                    # número de nodos del grafo, función de distancia entre nodos
+    """
+    Implementa el algoritmo Prim para calcular el árbol de expansión mínimo sobre un grafo completo.
+    No construye la matriz completa, sino que consulta distancias con dist_fn
+    """
+    # Inicialización de estructuras para Prim
     in_mst = [False] * num_nodes
     min_edge = [float("inf")] * num_nodes
     min_edge[0] = 0.0
     total = 0.0
 
+    # Iterativamente, se añade el nodo con menor coste de conexión al MST y se actualizan los costes de conexión de los nodos restantes
     for _ in range(num_nodes):
         u = -1
         best = float("inf")
+
+        # Búsqueda del nodo con menor coste de conexión al MST
         for v in range(num_nodes):
             if not in_mst[v] and min_edge[v] < best:
                 best = min_edge[v]
@@ -284,85 +297,119 @@ def _prim_mst_length(num_nodes: int, dist_fn) -> float:
         in_mst[u] = True
         total += best
 
+        # Actualización de los costes de conexión de los nodos restantes al MST, consultando distancias con dist_fn
         for v in range(num_nodes):
             if not in_mst[v]:
                 w = dist_fn(u, v)
                 if w < min_edge[v]:
                     min_edge[v] = w
 
-    return float(total)
+    return float(total) # Longitud total del árbol de expansión mínimo
 
 
-def _sigma_sum_for_loads(problem, professor_load: Sequence[int]) -> float:
-    """Calcula sum_e sigma_e a partir de cargas de profesores."""
+def _sigma_sum_for_loads(problem, professor_load):
+                        # instancia del problema, lista de cargas por profesor
+    """
+    Calcula el desequilibrio de carga entre profesores dentro de cada centro educativo. 
+    Usa la proporción carga/capacidad para comparar profesores con capacidades diferentes
+    """
+    # Agrupa profesores por centro educativo
     profs_by_center = [[] for _ in range(problem.n_centers)]
     for t in range(problem.n_professors):
         e = int(problem.prof_center[t])
         profs_by_center[e].append(t)
 
+    # Para cada centro, calcula la desviación típica de las proporciones carga/capacidad de sus profesores y suma estas desviaciones para obtener una medida global de desequilibrio de carga entre profesores
     sigma_sum = 0.0
     for profs in profs_by_center:
         if not profs:
             continue
-
+        
+        # Cálculo de proporciones carga/capacidad para los profesores de este centro
         proportions = []
         for t in profs:
             cap = int(problem.prof_capacity[t])
             proportions.append((professor_load[t] / cap) if cap > 0 else 0.0)
-
+        
+        # Cálculo de la desviación estándar de las proporciones para este centro
         mean = sum(proportions) / len(proportions)
         var = sum((x - mean) ** 2 for x in proportions) / len(proportions)
         sigma_sum += math.sqrt(var)
 
-    return float(sigma_sum)
+    return float(sigma_sum) # Suma de desviaciones estándar de carga por centro
 
 
 # -----------------------------------------------------------------------------
 # Matrices de beneficio estudiante-práctica
 # -----------------------------------------------------------------------------
 
-def build_tau_matrix(problem, selected_placements: Sequence[int], normalize_student_dist: bool = True) -> np.ndarray:
-    """Construye la matriz Tau[i][col] = tau_ij para j en selected_placements."""
+def build_tau_matrix(problem, selected_placements, normalize_student_dist = True):
+                    # instancia del problema, lista de índices de prácticas seleccionadas, booleano para saber si se normalizan las distancias entre estudiantes y empresas
+    """
+    Construye la matriz tau, donde cada posición representa la utilidad 
+    de asignar una práctica seleccionada a un estudiante
+    """
+    # Selección y distancias
     selected = list(selected_placements)
     dist = np.asarray(problem.student_company_dist, dtype=np.float64)
     dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
 
+    # Competencias, preferencias y empresas
     phi = np.asarray(problem.placement_comp_needs, dtype=np.float64)[selected]
     theta = np.asarray(problem.student_pref, dtype=np.float64)
     companies = np.asarray(problem.placement_company, dtype=np.int64)[selected]
 
+    # Cálculo de componentes de tau
     pref_match = theta @ phi.T
     dij = dist_norm[:, companies]
 
+    # Conversión de los pesos de los estudiantes a columnas
     w_dist = np.asarray(problem.student_w_distance, dtype=np.float64)[:, None]
     w_dev = np.asarray(problem.student_w_dev, dtype=np.float64)[:, None]
 
+    # Matriz final (CL de la distancia normalizada (dij) y el grado de coincidencia de preferencias (pref_match), ponderada por los pesos individuales de cada estudiante para cada componente) (más es mejor)
     tau_matrix = w_dist * (1.0 - dij) + w_dev * pref_match
-    return np.asarray(tau_matrix, dtype=np.float64)
+
+    return np.asarray(tau_matrix, dtype=np.float64) # Matriz de beneficios Tau para cada estudiante y cada práctica seleccionada, de tamaño n_students x len(P')
 
 
-def build_eta_matrix(problem, selected_placements: Sequence[int]) -> np.ndarray:
-    """Construye la matriz Eta[i][col] = eta_ij para j en selected_placements."""
+def build_eta_matrix(problem, selected_placements):
+                    # instancia del problema, lista de índices de prácticas seleccionadas
+    """
+    Construye la matriz eta, donde cada posición representa la utilidad 
+    para la empresa de asignar cierto estudiante a cierta práctica
+    """
+    # Selección, necesidades competenciales de prácticas y perfil competencial de estudiantes
     selected = list(selected_placements)
     phi = np.asarray(problem.placement_comp_needs, dtype=np.float64)[selected]
     psi = np.asarray(problem.student_dev, dtype=np.float64)
 
+    # Matriz final (CL del grado de coincidencia entre las necesidades competenciales de la práctica y el perfil competencial del estudiante) (más es mejor)
     eta_matrix = psi @ phi.T
-    return np.asarray(eta_matrix, dtype=np.float64)
+
+    return np.asarray(eta_matrix, dtype=np.float64) # Matriz de beneficios Eta para cada estudiante y cada práctica seleccionada, de tamaño n_students x len(P')
 
 
-def _minmax_normalize_rows(a: np.ndarray) -> np.ndarray:
-    """Normalización min-max por fila. Si una fila es constante, devuelve 0."""
+def _minmax_normalize_rows(a):
+                          # Matriz a normalizar
+    """
+    Normaliza cada fila usando min-max. Si una fila es constante, devuelve ceros para esa fila
+    """
+    # Mínimos, máximos y denominador
     a = np.asarray(a, dtype=np.float64)
     mins = a.min(axis=1, keepdims=True)
     maxs = a.max(axis=1, keepdims=True)
     denom = maxs - mins
 
+    # Normalización con cuidado de filas constantes para evitar división por cero
     out = np.zeros_like(a, dtype=np.float64)
     mask = denom[:, 0] > 1e-12
     out[mask] = (a[mask] - mins[mask]) / denom[mask]
-    return out
 
+    return out # Matriz normalizada por filas, con el mismo tamaño que la matriz de entrada
+
+
+############################################################
 
 # -----------------------------------------------------------------------------
 # Resolución LAP
@@ -535,7 +582,7 @@ def run_hh_lap_sipa(
             generation_failures += 1
             continue
 
-        professor_assignment = assign_professors_with_guided_repair(
+        professor_assignment = assign_professors_with_guided_construction(
             problem=problem,
             selected_placements=selected_placements,
             rng=rng,

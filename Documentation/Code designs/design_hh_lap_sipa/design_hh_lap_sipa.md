@@ -7,7 +7,7 @@ Este documento define el diseño de la heurística híbrida con LAP propuesta, l
 ```text
 Selección aleatoria factible de prácticas P'
         ↓
-Asignación práctica-profesor mediante repair guiado
+Asignación práctica-profesor mediante construcción guiada
         ↓
 Resolución LAP estudiante-práctica maximizando tau
         ↓
@@ -31,7 +31,7 @@ El objetivo del algoritmo es buscar soluciones factibles y de alta calidad para 
 Para ello, combina:
 
 - Selección aleatoria factible de subconjuntos de prácticas.
-- Asignación práctica-profesor mediante construcción y repair guiado.
+- Asignación práctica-profesor mediante construcción guiada.
 - Resolución exacta de subproblemas de asignación estudiante-práctica.
 - Evaluación multiobjetivo.
 - Mantenimiento de una frontera de Pareto con soluciones no dominadas.
@@ -44,7 +44,7 @@ Capa 2: asignación práctica-profesor
 Capa 3: asignación estudiante-práctica
 ```
 
-La primera capa genera un subconjunto `P'` de prácticas de forma aleatoria, pero siempre respetando las restricciones estructurales del problema. La segunda capa asigna profesores a las prácticas seleccionadas mediante una estrategia de construcción y repair guiado (no se resuelve mediante LAP, ya que un profesor puede supervisar varias prácticas y su coste depende del conjunto completo de prácticas asignadas). La tercera capa resuelve la asignación estudiante-práctica mediante dos problemas LAP usando `lapjv`:
+La primera capa genera un subconjunto `P'` de prácticas de forma aleatoria, pero siempre respetando las restricciones estructurales del problema. La segunda capa asigna profesores a las prácticas seleccionadas mediante una estrategia de construcción guiada (no se resuelve mediante LAP, ya que un profesor puede supervisar varias prácticas y su coste depende del conjunto completo de prácticas asignadas). La tercera capa resuelve la asignación estudiante-práctica mediante dos problemas LAP usando `lapjv`:
 
 - Un LAP maximizando `tau`, que genera una solución orientada a estudiantes.
 - Un LAP maximizando `eta`, que genera una solución orientada a empresas.
@@ -69,7 +69,7 @@ La calidad real de `P'` se determina posteriormente, al combinar dicho subconjun
 
 ## 4. Asignación práctica-profesor
 
-Una vez seleccionado el subconjunto de prácticas `P'`, se debe asignar un profesor a cada práctica seleccionada. Esta fase no se resolverá mediante LAP, ya que la asignación profesor-práctica no es un problema uno-a-uno (un profesor puede supervisar varias prácticas, tiene una capacidad máxima `C_t`, y el coste de supervisión depende del conjunto completo de prácticas que se le asignan). Por tanto, la asignación práctica-profesor se abordará mediante una estrategia heurística de construcción y repair guiado.
+Una vez seleccionado el subconjunto de prácticas `P'`, se debe asignar un profesor a cada práctica seleccionada. Esta fase no se resolverá mediante LAP, ya que la asignación profesor-práctica no es un problema uno-a-uno (un profesor puede supervisar varias prácticas, tiene una capacidad máxima `C_t`, y el coste de supervisión depende del conjunto completo de prácticas que se le asignan). Por tanto, la asignación práctica-profesor se abordará mediante una estrategia heurística de construcción guiada.
 
 El aspecto importante de esta fase es que la asignación de profesores no depende del estudiante concreto que ocupe cada práctica, ya que para el profesorado importa qué prácticas están cubiertas, dónde están ubicadas, cuántas prácticas supervisa cada profesor, qué dispersión geográfica tiene su conjunto de prácticas y cómo queda equilibrada la carga entre profesores. En cambio, no importa qué alumno concreto está asignado a cada práctica.
 
@@ -83,7 +83,7 @@ Dado `P'`, la estrategia inicial será:
       - Buscar profesores con capacidad disponible.
       - Estimar el incremento de coste si se asigna a cada profesor.
       - Asignar la práctica al profesor con menor incremento.
-4. Si alguna práctica queda sin profesor, aplicar repair moviendo prácticas entre profesores.
+4. Si no se puede completar una asignación factible, descartar el subconjunto `P'` y continuar con la siguiente iteración.
 5. Validar que todas las prácticas seleccionadas tengan profesor y que ningún profesor supere su capacidad.
 
 El coste incremental podrá tener en cuenta el aumento de `lbar_sum` y una penalización asociada al desequilibrio de carga `sigma_sum`. En cualquier caso, la asignación resultante deberá garantizar siempre la factibilidad respecto a la capacidad máxima de supervisión de los profesores.
@@ -145,7 +145,7 @@ HH-LAP-SIPA(problem, time_limit, max_iterations, base_seed):
 
         P' ← generate_random_feasible_placements(problem)
 
-        professor_assignment ← assign_professors_with_guided_repair(problem, P')
+        professor_assignment ← assign_professors_with_guided_construction(problem, P')
         if professor_assignment is not feasible:
             continue
 
@@ -185,7 +185,7 @@ La principal adaptación será separar la lógica actual de generación de soluc
 Para ello, se prevé incorporar o adaptar los siguientes componentes:
 
 - `generate_random_feasible_placements(problem)`: genera un subconjunto factible de prácticas `P'`.
-- `assign_professors_with_guided_repair(problem, selected_placements)`: asigna profesores a las prácticas seleccionadas mediante construcción y repair guiado.
+- `assign_professors_with_guided_construction(problem, selected_placements)`: asigna profesores a las prácticas seleccionadas mediante construcción guiada.
 - `build_tau_matrix(problem, selected_placements)`: construye la matriz de beneficios `tau` para el LAP orientado a estudiantes.
 - `build_eta_matrix(problem, selected_placements)`: construye la matriz de beneficios `eta` para el LAP orientado a empresas.
 - `solve_lapjv_max(matrix)`: resuelve un problema LAP de maximización usando `lapjv`.
@@ -201,7 +201,7 @@ El objetivo es aprovechar la infraestructura existente, pero modificando el fluj
 
 La baseline aleatoria actual construye soluciones generando una selección factible de prácticas y asignando posteriormente estudiantes y profesores mediante procedimientos aleatorios o de reparación. La heurística HH-LAP-SIPA mantiene la selección inicial aleatoria factible de prácticas, pero modifica la forma de construir la solución completa. En concreto:
 
-- La asignación práctica-profesor se realiza mediante construcción y repair guiado.
+- La asignación práctica-profesor se realiza mediante construcción guiada.
 - La asignación estudiante-práctica deja de ser aleatoria y se resuelve de forma exacta mediante LAP.
 - Para cada subconjunto `P'`, se generan dos soluciones candidatas: una maximizando `tau` y otra maximizando `eta`.
 
@@ -236,7 +236,7 @@ Las decisiones de diseño fijadas para la (primera) definición del algoritmo HH
 
 - La selección inicial de prácticas `P'` será aleatoria factible.
 - La asignación práctica-profesor no se resolverá mediante LAP.
-- La asignación práctica-profesor se realizará mediante construcción y repair guiado.
+- La asignación práctica-profesor se realizará mediante construcción guiada.
 - La asignación estudiante-práctica sí se resolverá mediante LAP.
 - El solver LAP principal será `lapjv`.
 - Para cada subconjunto `P'`, se resolverán exactamente dos LAP:
@@ -261,4 +261,6 @@ Quedan identificadas varias extensiones posibles:
 
 - Búsqueda local sobre `P'`: una vez generado un subconjunto de prácticas, se podrían aplicar movimientos como eliminar una práctica, añadir otra, intercambiar prácticas o reparar cuotas y dependencias. Tras cada modificación, se resolverían de nuevo los LAP y se conservaría la solución si mejora el Pareto.
 
-- Mejora local de profesores: después del repair inicial de profesores, se podrían probar movimientos como mover una práctica de un profesor a otro o intercambiar prácticas entre profesores, con el objetivo de reducir `lbar_sum` y `sigma_sum`.
+- Repair de la asignación práctica-profesor: si en versiones futuras se incorporan restricciones adicionales sobre qué profesores pueden supervisar determinadas prácticas, o si la construcción guiada empieza a descartar demasiados subconjuntos `P'`, se podría añadir una fase de repair que intente recolocar prácticas entre profesores para completar una asignación factible antes de descartar el subconjunto.
+
+- Mejora local de profesores: después de la construcción inicial de profesores, se podrían probar movimientos como mover una práctica de un profesor a otro o intercambiar prácticas entre profesores, con el objetivo de reducir `lbar_sum` y `sigma_sum`.
