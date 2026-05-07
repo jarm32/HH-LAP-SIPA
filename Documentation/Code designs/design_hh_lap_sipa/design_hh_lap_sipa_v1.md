@@ -128,7 +128,7 @@ m_k <= A_k <= M_k, para todo k en T
 
 A_k + N_k - P_k = (M_k · |S|) / sum(M_h), con h en T y para todo k en T
 
-sum(A_k) = |S|, para todo k en T
+sum(A_k) = |S|, sumando para todo k en T
 ```
 
 Donde:
@@ -155,60 +155,76 @@ La finalidad de estas cargas objetivo es guiar la asignación profesor-práctica
 
 ## 5. Preclusterización espacial y extracción de clústeres activos
 
+Antes del bucle principal, la versión v1 realiza una preclusterización espacial de las prácticas disponibles. Posteriormente, en cada iteración, una vez seleccionado el subconjunto factible de prácticas `P'`, se extraen los clústeres activos correspondientes a las prácticas seleccionadas. El objetivo de esta fase es favorecer que un mismo profesor supervise prácticas geográficamente cercanas, reduciendo así la dispersión de supervisión medida mediante `lbar_sum`.
 
+Como las instancias actuales asocian cada práctica a una empresa y disponen de matrices de distancia entre empresas, la primera versión de clustering se basará en agrupar prácticas por empresa (densidad): cada clúster contendrá las prácticas pertenecientes a una misma empresa.
 
+Después, para cada subconjunto `P'`, se filtran esos clústeres globales y se conservan únicamente las prácticas seleccionadas. Los clústeres activos se ordenarán por tamaño descendente. Por ejemplo:
 
+```text
+P' = [3, 7, 8, 10, 15]
 
+Empresa 0: prácticas seleccionadas [3, 8]
+Empresa 1: prácticas seleccionadas [7]
+Empresa 2: prácticas seleccionadas [10, 15]
 
+Clústeres activos:
+C1 = [3, 8]
+C2 = [10, 15]
+C3 = [7]
 
+Ordenados de forma que:
+|C1| >= |C2| >= ... >= |Cr|
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 4. Asignación práctica-profesor
-
-Una vez seleccionado el subconjunto de prácticas `P'`, se debe asignar un profesor a cada práctica seleccionada. Esta fase no se resolverá mediante LAP, ya que la asignación profesor-práctica no es un problema uno-a-uno (un profesor puede supervisar varias prácticas, tiene una capacidad máxima `C_t`, y el coste de supervisión depende del conjunto completo de prácticas que se le asignan). Por tanto, la asignación práctica-profesor se abordará mediante una estrategia heurística de construcción guiada.
-
-El aspecto importante de esta fase es que la asignación de profesores no depende del estudiante concreto que ocupe cada práctica, ya que para el profesorado importa qué prácticas están cubiertas, dónde están ubicadas, cuántas prácticas supervisa cada profesor, qué dispersión geográfica tiene su conjunto de prácticas y cómo queda equilibrada la carga entre profesores. En cambio, no importa qué alumno concreto está asignado a cada práctica.
-
-Por este motivo, para un mismo subconjunto `P'`, la asignación práctica-profesor se calcula una única vez y se reutiliza en las dos soluciones generadas posteriormente mediante LAP: `Solución_tau` y `Solución_eta`.
-
-Dado `P'`, la estrategia inicial será:
-
-1. Inicializar todos los profesores sin prácticas asignadas.
-2. Recorrer las prácticas seleccionadas.
-3. Para cada práctica:
-      - Buscar profesores con capacidad disponible.
-      - Estimar el incremento de coste si se asigna a cada profesor.
-      - Asignar la práctica al profesor con menor incremento.
-4. Si no se puede completar una asignación factible, descartar el subconjunto `P'` y continuar con la siguiente iteración.
-5. Validar que todas las prácticas seleccionadas tengan profesor y que ningún profesor supere su capacidad.
-
-El coste incremental podrá tener en cuenta el aumento de `lbar_sum` y una penalización asociada al desequilibrio de carga `sigma_sum`. En cualquier caso, la asignación resultante deberá garantizar siempre la factibilidad respecto a la capacidad máxima de supervisión de los profesores.
+Asignar primero los clústeres más grandes ayuda a controlar mejor la capacidad de los profesores y favorece configuraciones más compactas.
 
 ---
+
+## 6. Asignación práctica-profesor en v1 --> ORDEN??? LO DEJO AQUÍ??????????????????????????????????????????????
+
+Una vez seleccionado el subconjunto de prácticas `P'`, se debe asignar un profesor a cada práctica seleccionada. Esta fase no se resuelve mediante LAP, ya que la asignación profesor-práctica no es un problema uno-a-uno: un profesor puede supervisar varias prácticas, tiene una capacidad máxima `C_t`, y el coste de supervisión depende del conjunto completo de prácticas que se le asignan.
+
+El aspecto importante de esta fase es que la asignación de profesores no depende del estudiante concreto que ocupe cada práctica. Para el profesorado importa qué prácticas están cubiertas, dónde están ubicadas, cuántas prácticas supervisa cada profesor, qué dispersión geográfica tiene su conjunto de prácticas y cómo queda equilibrada la carga entre profesores. En cambio, no importa qué alumno concreto está asignado a cada práctica.
+
+En la versión v1, en lugar de construir una única asignación mediante una decisión práctica a práctica, para cada subconjunto `P'` se generan varias asignaciones profesor-práctica:
+
+- Una asignación inicial construida por clústeres, orientada a favorecer la proximidad geográfica de las prácticas supervisadas por cada profesor.
+- Una asignación guía orientada a las cargas objetivo, cuyo propósito es aproximar la carga de cada profesor a la distribución proporcional calculada previamente.
+- Varias asignaciones intermedias generadas mediante path relinking entre la asignación inicial y la asignación guía.
+
+Todas las asignaciones profesor-práctica generadas deben respetar la capacidad máxima de los profesores y asignar exactamente un profesor a cada práctica seleccionada en `P'`. Posteriormente, cada una de estas asignaciones se combina con las dos asignaciones estudiante-práctica obtenidas mediante LAP.
+
+---
+
+## 7. Construcción inicial profesor-práctica por clústeres
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 5. Asignación estudiante-práctica mediante LAP
 
