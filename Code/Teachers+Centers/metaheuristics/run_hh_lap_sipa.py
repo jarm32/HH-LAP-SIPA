@@ -19,61 +19,60 @@ from tools.problem import load_instance
 
 def main():
     """
-    Carga una o varias instancias, ejecuta HH-LAP-SIPA y muestra/guarda resultados.
+    Carga una instancia, ejecuta HH-LAP-SIPA y muestra/guarda resultados.
     """
-    # Algoritmo empleado
+    # Algoritmo empleado, instancia sobre la que se trabaja y carga del problema
     modelo = "hh_lap_sipa"
 
-    # Instancias a evaluar
     for i in [5,20,40,60]:
-        instance_path = f"inst_creator/output/problem_instance_ext_{i}0_2.txt"
-        instance_name = instance_path.split("/")[-1]
-        problem = load_instance(instance_path)
+        for j in range(4):
+            instance_path = f"inst_creator/output/problem_instance_ext_{i}0_{j}.txt"
+            instance_name = instance_path.split("/")[-1]
+            problem = load_instance(instance_path)
 
-        # Pesos para la evaluación escalar auxiliar.
-        # Se usan para objective_value y posibles podas/resúmenes, no para la dominancia Pareto.
-        weights = ObjectiveWeights(alpha=0.35, beta=0.35, gamma=0.20, delta=0.10)
+            # Pesos para la evaluación auxiliar
+            weights = ObjectiveWeights(alpha=0.35, beta=0.35, gamma=0.20, delta=0.10)
 
-        # Ejecución HH-LAP-SIPA
-        result = run_hh_lap_sipa(
-            problem=problem,
-            weights=weights,
-            time_limit_seconds=300,
-            max_iterations=None,
-            max_pareto_size=None,
-            base_seed=1234,
-            placement_max_attempts=50,
-            lap_solver="lapjv",
-            normalize_student_dist=True,
-            normalize_supervision_dist=True,
-            professor_lbar_weight=1.0,
-            professor_sigma_weight=1.0,
-            verbose=True,
-        )
+            # Ejecución HH-LAP-SIPA
+            result = run_hh_lap_sipa(
+                problem=problem,
+                weights=weights,
+                time_limit_seconds=300,
+                max_iterations=None,
+                max_pareto_size=None,
+                base_seed=1234,
+                placement_max_attempts=50,
+                lap_solver="lapjv",
+                normalize_student_dist=True,
+                normalize_supervision_dist=True,
+                professor_lbar_weight=1.0,
+                professor_sigma_weight=1.0,
+                verbose=True,
+            )
 
-        # Mostrar estadísticas
-        print("\n=== STATS ===")
-        for k, v in result["stats"].items():
-            print(k, v)
+            # Mostrar estadísticas
+            print("\n=== STATS ===")
+            for k, v in result["stats"].items():
+                print(k, v)
 
-        # Mostrar Pareto
-        print_pareto_set(result["pareto_set"])
+            # Mostrar Pareto
+            print_pareto_set(result["pareto_set"])
 
-        # Guardar resultados
-        statistics_file = f"results/statistics_{modelo}_{instance_name}.txt"
-        assignments_file = f"results/assignments_{modelo}_{instance_name}.txt"
+            # Guardar resultados
+            statistics_file = f"results/statistics_{modelo}_{instance_name}.txt"
+            assignments_file = f"results/assignments_{modelo}_{instance_name}.txt"
 
-        save_results_to_txt(
-            statistics_filepath=statistics_file,
-            assignments_filepath=assignments_file,
-            instance_name=instance_name,
-            stats=result["stats"],
-            pareto_set=result["pareto_set"],
-            model=modelo,
-        )
+            save_results_to_txt(
+                statistics_filepath=statistics_file,
+                assignments_filepath=assignments_file,
+                instance_name=instance_name,
+                stats=result["stats"],
+                pareto_set=result["pareto_set"],
+                model=modelo,
+            )
 
-        print(f"\nStatistics saved in: {statistics_file}")
-        print(f"Assignments saved in: {assignments_file}")
+            print(f"\nStatistics saved in: {statistics_file}")
+            print(f"Assignments saved in: {assignments_file}")
 
 
 if __name__ == "__main__":
