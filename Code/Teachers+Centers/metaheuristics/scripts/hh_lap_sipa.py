@@ -1,4 +1,4 @@
-# Heurística híbrida (HH-LAP-SIPA) que genera subconjuntos factibles de prácticas, asigna profesores mediante construcción/repair guiado
+# Heurística híbrida (HH-LAP-SIPA) que genera subconjuntos factibles de prácticas, asigna profesores mediante construcción guiada
 # y resuelve de forma exacta dos asignaciones estudiante-práctica mediante LAP (una maximizando tau y otra maximizando eta).
 # Cada solución completa generada se valida, se evalúa según los objetivos del modelo y se registra en el Pareto externo.
 
@@ -409,19 +409,17 @@ def _minmax_normalize_rows(a):
     return out # Matriz normalizada por filas, con el mismo tamaño que la matriz de entrada
 
 
-############################################################
-
 # -----------------------------------------------------------------------------
-# Resolución LAP
+# Resolución LAP estudiante-práctica
 # -----------------------------------------------------------------------------
 
-def solve_lapjv_max(benefit_matrix: np.ndarray, solver: str = "lapjv") -> List[int]:
+def solve_lapjv_max(benefit_matrix, solver = "lapjv"):
+                   # Matriz de beneficios para el LAP (tau o eta), elección del solver ("lapjv" o "scipy")
     """
-    Resuelve un LAP de maximización.
-
-    Devuelve una lista row_to_col donde row_to_col[i] es la columna asignada al
-    estudiante i.
+    Resuelve un LAP de maximización. Usa lapjv como solver principal y, si se indica "scipy" o si lapjv falla,
+    usa scipy.optimize.linear_sum_assignment como alternativa
     """
+    # Conversión y validación de la matriz
     benefits = np.asarray(benefit_matrix, dtype=np.float64)
 
     if benefits.ndim != 2 or benefits.shape[0] != benefits.shape[1]:
@@ -429,58 +427,72 @@ def solve_lapjv_max(benefit_matrix: np.ndarray, solver: str = "lapjv") -> List[i
     if not np.all(np.isfinite(benefits)):
         raise ValueError("LAP benefit matrix contains non-finite values")
 
+    # Si se ha indicado explícitamente usar scipy, se salta lapjv y se va directamente a scipy
     if solver == "scipy":
         return _solve_lap_with_scipy(benefits)
 
+    # Validación del solver indicado
     if solver != "lapjv":
         raise ValueError(f"Unknown LAP solver: {solver}")
 
+    # Intento de resolución con lapjv, que es más rápido pero puede fallar en casos numéricos difíciles. 
     try:
+        # Se convierte el problema de maximización en uno de minimización para resolverlo con lapjv
         cost_matrix = -benefits
+
+        # lapjv devuelve row_ind, col_ind (_ para obviarlo) y el coste total (_ para obviarlo). row_ind[i] es la práctica (columna) asignada a la fila i
         row_ind, _, _ = lapjv(cost_matrix)
         row_to_col = [int(c) for c in row_ind]
 
+        # Validación de la solución devuelta por lapjv (asignación completa y bijectiva)
         if len(row_to_col) != benefits.shape[0]:
             raise ValueError("lapjv returned an assignment with unexpected length")
         if len(set(row_to_col)) != len(row_to_col):
             raise ValueError("lapjv returned a non-bijective assignment")
 
-        return row_to_col
+        return row_to_col # Lista donde row_to_col[i] indica la práctica (columna) seleccionada asignada al estudiante i
 
+    # Si lapjv falla, se intenta resolver con scipy como alternativa más robusta pero lenta
     except Exception:
         return _solve_lap_with_scipy(benefits)
 
 
-def _solve_lap_with_scipy(benefits: np.ndarray) -> List[int]:
-    """Fallback con scipy.optimize.linear_sum_assignment."""
+def _solve_lap_with_scipy(benefits):
+                         # Matriz de beneficios para el LAP (tau o eta)
+    """
+    Resuelve el LAP de maximización usando SciPy. 
+    Se usa como fallback o cuando se seleccione explícitamente
+    """
+    # SciPy permite resolver directamente el LAP de maximización usando maximize=True
     row_ind, col_ind = linear_sum_assignment(benefits, maximize=True)
 
+    # Convierte la salida de SciPy a una lista indexada por estudiante donde el valor es la práctica asignada
     row_to_col = [-1] * benefits.shape[0]
     for r, c in zip(row_ind, col_ind):
         row_to_col[int(r)] = int(c)
 
+    # Comprueba que todos los estudiantes tengan asignación
     if any(c == -1 for c in row_to_col):
         raise ValueError("scipy returned an incomplete LAP assignment")
 
-    return row_to_col
+    return row_to_col # Lista donde row_to_col[i] indica la práctica (columna) seleccionada asignada al estudiante i
 
 
 # -----------------------------------------------------------------------------
 # Construcción de Solution a partir de P', profesores y LAP
 # -----------------------------------------------------------------------------
 
-def build_solution_from_lap_assignment(
-    problem,
-    selected_placements: Sequence[int],
-    professor_assignment: Dict[int, int],
-    lap_assignment: Sequence[int],
-) -> Optional[Solution]:
+def build_solution_from_lap_assignment(problem, selected_placements, professor_assignment, lap_assignment):
+                                      # instancia del problema, lista de índices de prácticas seleccionadas, diccionario de asignación práctica-profesor,
+                                      # lista de asignación estudiante-práctica devuelta por el LAP (cada valor es una columna de selected_placements)
     """
-    Construye una Solution completa combinando:
-    - P'
-    - asignación práctica-profesor
-    - asignación estudiante-práctica devuelta por LAP
+    Construye una solución completa estudiante-práctica-profesor. Para cada estudiante, toma la 
+    práctica indicada por el LAP y el profesor previamente asignado a esa práctica.
+
+    Devuelve None si la asignación devuelta por LAP no es válida (tamaño incorrecto, índices fuera de rango, 
+    asignación no bijectiva) o si la solución construida no es factible
     """
+    # Validación de la asignación devuelta por el LAP (tamaño, índices válidos, asignación completa y bijectiva)
     selected = list(selected_placements)
     assignment = list(lap_assignment)
 
@@ -493,9 +505,11 @@ def build_solution_from_lap_assignment(
     if any(c < 0 or c >= len(selected) for c in assignment):
         return None
 
+    # Construcción de la solución completa a partir de la asignación del LAP y la asignación de profesores
     sol = Solution(problem)
 
     try:
+        # Para cada estudiante, se asigna la práctica seleccionada por el LAP y el profesor asignado a esa práctica.
         for student, col in enumerate(assignment):
             placement = selected[col]
             professor = professor_assignment[placement]
@@ -503,53 +517,38 @@ def build_solution_from_lap_assignment(
     except (KeyError, ValueError):
         return None
 
+    # Validación de la solución construida (factibilidad completa)
     if not sol.validate():
         return None
 
-    return sol
+    return sol # objeto Solution completo
 
 
 # -----------------------------------------------------------------------------
 # Ejecución HH-LAP-SIPA
 # -----------------------------------------------------------------------------
 
-def run_hh_lap_sipa(
-    problem,
-    weights,
-    time_limit_seconds: float = 300.0,
-    max_iterations: Optional[int] = None,
-    max_pareto_size: Optional[int] = None,
-    base_seed: Optional[int] = None,
-    placement_max_attempts: int = 50,
-    lap_solver: str = "lapjv",
-    normalize_student_dist: bool = True,
-    normalize_supervision_dist: bool = True,
-    professor_lbar_weight: float = 1.0,
-    professor_sigma_weight: float = 1.0,
-    verbose: bool = True,
-) -> Dict[str, object]:
+def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations = None, max_pareto_size = None, base_seed = None, placement_max_attempts = 50, 
+                    # instancia del problema, pesos para evaluación escalar auxiliar, límite de tiempo (s), máximo de iteraciones, máximo tamaño del Pareto externo, semilla, nº máximo de intentos para generar P',
+                    lap_solver = "lapjv", normalize_student_dist = True, normalize_supervision_dist = True, professor_lbar_weight = 1.0, 
+                    # solver LAP (normalmente "lapjv"), normalización de distancias estudiante-empresa, normalización de distancias de supervisión, peso del coste incremental lbar,
+                    professor_sigma_weight = 1.0, verbose = True):
+                    # peso del coste incremental sigma, booleano para activar mensajes de progreso
     """
-    Ejecuta la heurística HH-LAP-SIPA.
-
-    Devuelve:
-        {
-            "pareto_set": [...],
-            "stats": {...}
-        }
+    Ejecuta iterativamente la heurística hasta que se cumple el criterio de parada.
+    En cada iteración genera hasta dos soluciones completas (una maximizando tau y otra maximizando eta)
     """
+    # Validación de parámetros de entrada
     if time_limit_seconds <= 0:
         raise ValueError("time_limit_seconds must be > 0")
     if max_iterations is not None and max_iterations <= 0:
         raise ValueError("max_iterations must be > 0 when provided")
-
-    # La evaluación escalar auxiliar valida los pesos dentro de register_solution_in_pareto,
-    # pero validarlos aquí permite fallar pronto.
     if hasattr(weights, "validate"):
         weights.validate()
 
+    # Inicialización de estructuras y estadísticas
     start = time.time()
     pareto_set = []
-
     iteration = 0
     generated_subsets = 0
     professor_assignment_failures = 0
@@ -560,69 +559,55 @@ def run_hh_lap_sipa(
     invalid_solutions = 0
     generation_failures = 0
 
+    # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
+        # Comprobación de criterios de parada
         elapsed = time.time() - start
         if elapsed >= time_limit_seconds:
             break
         if max_iterations is not None and iteration >= max_iterations:
             break
-
+        
+        # Se usan semillas diferentes en cada iteración para diversificar la búsqueda, pero de forma reproducible si se proporciona una base_seed
         seed = None if base_seed is None else base_seed + iteration
         rng = random.Random(seed)
         iteration += 1
-
+        
+        # Generación de subconjunto factible P'
         try:
-            selected_placements = generate_random_feasible_placements(
-                problem=problem,
-                seed=seed,
-                max_attempts=placement_max_attempts,
-            )
+            selected_placements = generate_random_feasible_placements(problem=problem, seed=seed, max_attempts=placement_max_attempts)
             generated_subsets += 1
-        except Exception:
+        except Exception as exc:
             generation_failures += 1
+            if verbose:
+                print(f"[it={iteration}] Placement subset generation failed: {exc}")
             continue
+                
+        # Asignación práctica-profesor mediante construcción guiada
+        professor_assignment = assign_professors_with_guided_construction(problem=problem, selected_placements=selected_placements, rng=rng, lbar_weight=professor_lbar_weight, 
+                                                                          sigma_weight=professor_sigma_weight, normalize_supervision_dist=normalize_supervision_dist)
 
-        professor_assignment = assign_professors_with_guided_construction(
-            problem=problem,
-            selected_placements=selected_placements,
-            rng=rng,
-            lbar_weight=professor_lbar_weight,
-            sigma_weight=professor_sigma_weight,
-            normalize_supervision_dist=normalize_supervision_dist,
-        )
-
+        # Si no se ha podido asignar profesores de forma factible, se descarta este subconjunto y se continúa con la siguiente iteración
         if professor_assignment is None:
             professor_assignment_failures += 1
             continue
 
-        # -------------------- Solución tau --------------------
+        # Construcción de la solución tau
         try:
-            tau_matrix = build_tau_matrix(
-                problem=problem,
-                selected_placements=selected_placements,
-                normalize_student_dist=normalize_student_dist,
-            )
+            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, normalize_student_dist=normalize_student_dist)
             assignment_tau = solve_lapjv_max(tau_matrix, solver=lap_solver)
-            sol_tau = build_solution_from_lap_assignment(
-                problem=problem,
-                selected_placements=selected_placements,
-                professor_assignment=professor_assignment,
-                lap_assignment=assignment_tau,
-            )
-        except Exception:
+            sol_tau = build_solution_from_lap_assignment(problem=problem, selected_placements=selected_placements, professor_assignment=professor_assignment, lap_assignment=assignment_tau)
+        except Exception as exc:
             sol_tau = None
+            if verbose:
+                print(f"[it={iteration}] Tau solution failed: {exc}")
 
+        # Validación y registro de la solución tau en el Pareto externo si es factible
         if sol_tau is not None and sol_tau.validate():
-            reg = register_solution_in_pareto(
-                sol=sol_tau,
-                pareto_set=pareto_set,
-                iteration=iteration,
-                seed=seed,
-                weights=weights,
-                max_pareto_size=max_pareto_size,
-                normalize_student_dist=normalize_student_dist,
-                normalize_supervision_dist=normalize_supervision_dist,
-            )
+            reg = register_solution_in_pareto(sol=sol_tau, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
+                                              normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+            
+            # Actualización del Pareto externo y estadísticas si la solución es válida
             if reg["valid"]:
                 feasible_solutions += 1
                 lap_tau_solutions += 1
@@ -634,33 +619,22 @@ def run_hh_lap_sipa(
         else:
             invalid_solutions += 1
 
-        # -------------------- Solución eta --------------------
+        # Construcción de la solución eta
         try:
-            eta_matrix = build_eta_matrix(
-                problem=problem,
-                selected_placements=selected_placements,
-            )
+            eta_matrix = build_eta_matrix(problem=problem, selected_placements=selected_placements)
             assignment_eta = solve_lapjv_max(eta_matrix, solver=lap_solver)
-            sol_eta = build_solution_from_lap_assignment(
-                problem=problem,
-                selected_placements=selected_placements,
-                professor_assignment=professor_assignment,
-                lap_assignment=assignment_eta,
-            )
-        except Exception:
+            sol_eta = build_solution_from_lap_assignment(problem=problem, selected_placements=selected_placements, professor_assignment=professor_assignment, lap_assignment=assignment_eta)
+        except Exception as exc:
             sol_eta = None
+            if verbose:
+                print(f"[it={iteration}] Eta solution failed: {exc}")
 
+        # Validación y registro de la solución eta en el Pareto externo si es factible
         if sol_eta is not None and sol_eta.validate():
-            reg = register_solution_in_pareto(
-                sol=sol_eta,
-                pareto_set=pareto_set,
-                iteration=iteration,
-                seed=seed,
-                weights=weights,
-                max_pareto_size=max_pareto_size,
-                normalize_student_dist=normalize_student_dist,
-                normalize_supervision_dist=normalize_supervision_dist,
-            )
+            reg = register_solution_in_pareto(sol=sol_eta, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
+                                              normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+            
+            # Actualización del Pareto externo y estadísticas si la solución es válida
             if reg["valid"]:
                 feasible_solutions += 1
                 lap_eta_solutions += 1
@@ -672,6 +646,7 @@ def run_hh_lap_sipa(
         else:
             invalid_solutions += 1
 
+        # Mensajes de progreso cada 10 iteraciones
         if verbose and iteration % 10 == 0:
             print(
                 f"[it={iteration}] "
@@ -679,6 +654,7 @@ def run_hh_lap_sipa(
                 f"prof_fail={professor_assignment_failures} pareto_size={len(pareto_set)}"
             )
 
+    # Cálculo del tiempo total transcurrido
     total_time = time.time() - start
 
     return {
@@ -699,4 +675,4 @@ def run_hh_lap_sipa(
             "time_limit_seconds": time_limit_seconds,
             "max_iterations": max_iterations,
         },
-    }
+    } # Diccionario con el conjunto Pareto encontrado y estadísticas de la ejecución
