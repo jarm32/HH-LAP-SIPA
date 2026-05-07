@@ -59,8 +59,8 @@ def main():
             print_pareto_set(result["pareto_set"])
 
             # Guardar resultados
-            statistics_file = f"results/statistics/statistics_{modelo}_{instance_name}.txt"
-            assignments_file = f"results/assignments/assignments_{modelo}_{instance_name}.txt"
+            statistics_file = f"results/statistics/statistics_{modelo}_{instance_name}"
+            assignments_file = f"results/assignments/assignments_{modelo}_{instance_name}"
 
             save_results_to_txt(
                 statistics_filepath=statistics_file,

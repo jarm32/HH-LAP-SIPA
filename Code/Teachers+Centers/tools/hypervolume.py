@@ -56,14 +56,34 @@ def normalize_for_hypervolume(points, mins, maxs):
     Normaliza los puntos a [0,1] usando las cotas globales y convierte lbar_sum y 
     sigma_sum para que valores bajos pasen a ser valores altos (para que todo se pueda maximizar)
     """
-    # Normalización min-max: norm[i] = (points[i] - mins) / (maxs - mins)
-    denom = maxs - mins
-    denom[denom == 0.0] = 1.0
-    norm = (points - mins) / denom
+    # Conversión a arrays NumPy para asegurar operaciones numéricas correctas
+    points = np.asarray(points, dtype=float)
+    mins = np.asarray(mins, dtype=float)
+    maxs = np.asarray(maxs, dtype=float)
 
-    # lbar_sum y sigma_sum son de minimización, y se intervienen para buscar lo mismo en todo
-    norm[:, 2] = 1.0 - norm[:, 2]
-    norm[:, 3] = 1.0 - norm[:, 3]
+    # Rango global de cada objetivo: max - min
+    denom = maxs - mins
+    norm = np.zeros_like(points, dtype=float)
+
+    # Normalización min-max por objetivo
+    for col in range(points.shape[1]):
+        if denom[col] > 1e-12:
+            norm[:, col] = (points[:, col] - mins[col]) / denom[col]
+        else:
+            # Si un objetivo no varía entre algoritmos, no debe afectar a la comparación
+            norm[:, col] = 1.0
+
+    # lbar_sum y sigma_sum son de minimización, por eso se invierten
+    # Si alguno no varía, se deja a 1.0 para que no penalice el hipervolumen
+    if denom[2] > 1e-12:
+        norm[:, 2] = 1.0 - norm[:, 2]
+    else:
+        norm[:, 2] = 1.0
+
+    if denom[3] > 1e-12:
+        norm[:, 3] = 1.0 - norm[:, 3]
+    else:
+        norm[:, 3] = 1.0
 
     return np.clip(norm, 0.0, 1.0) # Asegura que no haya valores fuera de [0,1] debido a redondeos
 

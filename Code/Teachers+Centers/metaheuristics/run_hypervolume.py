@@ -88,26 +88,56 @@ def compute_hv_from_result_files(files_by_algorithm):
 
 
 def main():
-    for i in [5,20,40,60]:
-        for j in range(4):
-            instance = f"problem_instance_ext_{i}0_{j}.txt"
 
-            files_by_algorithm = {
-                "random": f"results/statistics/statistics_random_{instance}",
-                "nsga3": f"results/statistics/statistics_nsga3_{instance}",
-                "grasp":f"results/statistics/statistics_random_{instance}",
-                "hh_lap":f"results/statistics/statistics_hh_lap_sipa_{instance}"
-            }
+    def format_array(values, decimals=6):
+        """
+        Formatea un array NumPy sin notación científica.
+        """
+        return "[" + " ".join(f"{v:.{decimals}f}" for v in values) + "]"
 
-            hv_by_algorithm, mins, maxs = compute_hv_from_result_files(files_by_algorithm)
 
-            print("\n=== HYPERVOLUME COMPARISON ===")
-            print(f"Instance: {instance}")
-            print(f"Global mins: {mins}")
-            print(f"Global maxs: {maxs}")
+    # Archivo donde se guardará la comparación completa de hipervolumen
+    output_file = "results/hypervolume_comparison.txt"
+    
+    with open(output_file, "w", encoding="utf-8") as f:
+        for i in [5,20,40,60]:
+            for j in range(4):
+                instance = f"problem_instance_ext_{i}0_{j}.txt"
 
-            for alg, hv in sorted(hv_by_algorithm.items(), key=lambda x: x[1], reverse=True):
-                print(f"{alg}: HV = {hv:.6f}")
+                files_by_algorithm = {
+                    "random": f"results/statistics/statistics_randomsearch_{instance}",
+                    "nsga3": f"results/statistics/statistics_nsga3_{instance}",
+                    "grasp":f"results/statistics/statistics_grasp_{instance}",
+                    "hh_lap":f"results/statistics/statistics_hh_lap_sipa_{instance}"
+                }
+
+                hv_by_algorithm, mins, maxs = compute_hv_from_result_files(files_by_algorithm)
+
+                # --- Cabecera de la instancia ---
+                # Mejor algoritmo para la instancia actual
+                best_alg, best_hv = max(hv_by_algorithm.items(), key=lambda x: x[1])
+
+                # Formatear mins y maxs sin notación científica
+                mins_str = format_array(mins)
+                maxs_str = format_array(maxs)
+
+                header = (
+                    "\n=== HYPERVOLUME COMPARISON ===\n"
+                    f"Instance: {instance}\n"
+                    f"Best algorithm: {best_alg} ({best_hv:.6f})\n\n"
+                    f"Global mins: {mins_str}\n"
+                    f"Global maxs: {maxs_str}\n"
+                )
+
+                print(header, end="")
+                f.write(header)
+
+                # Escribe siempre los algoritmos en el mismo orden para facilitar la comparación entre instancias
+                for alg in ["random", "nsga3", "grasp", "hh_lap"]:
+                    hv = hv_by_algorithm.get(alg, 0.0)
+                    line = f"{alg}: HV = {hv:.6f}\n"
+                    print(line, end="")
+                    f.write(line)
 
 
 if __name__ == "__main__":
