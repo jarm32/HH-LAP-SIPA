@@ -1,0 +1,38 @@
+===== SIPA hh_lap_sipa RESULTS =====
+
+Instance: problem_instance_ext_600_0.txt
+
+---- STATS ----
+iterations: 74
+generated_subsets: 74
+professor_assignment_failures: 0
+lap_tau_solutions: 74
+lap_eta_solutions: 74
+feasible_solutions: 148
+inserted_into_pareto: 26
+pareto_size: 5
+elapsed_seconds: 302.55043148994446
+generation_failures: 0
+invalid_solutions: 0
+lap_solver: lapjv
+time_limit_seconds: 300
+max_iterations: None
+
+---- SUMMARY ----
+max_tau: 469.852696
+mean_tau: 333.166030
+max_eta: 357.519600
+mean_eta: 299.706540
+max_lbar: 0.372782
+mean_lbar: 0.369355
+max_sigma: 0.000000
+mean_sigma: 0.000000
+max_objective_value: 240.408372
+mean_objective_value: 221.431528
+
+---- PARETO SET ----
+[1] iter=1 seed=1234 obj=238.607067 | tau=469.852696, eta=212.094800, lbar=0.372782, sigma=0.000000
+[2] iter=28 seed=1261 obj=240.408372 | tau=469.630203, eta=217.460200, lbar=0.366345, sigma=0.000000
+[3] iter=28 seed=1261 obj=209.215032 | tau=240.446975, eta=357.519600, lbar=0.366345, sigma=0.000000
+[4] iter=36 seed=1269 obj=209.868303 | tau=242.591274, eta=357.244300, lbar=0.370739, sigma=0.000000
+[5] iter=59 seed=1292 obj=209.058867 | tau=243.308999, eta=354.213800, lbar=0.370565, sigma=0.000000
