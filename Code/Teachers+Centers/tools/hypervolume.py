@@ -88,8 +88,8 @@ def normalize_for_hypervolume(points, mins, maxs):
     return np.clip(norm, 0.0, 1.0) # Asegura que no haya valores fuera de [0,1] debido a redondeos
 
 
-def compute_hypervolume_deap(normalized_points):
-                            # Matriz de puntos normalizados para un frente Pareto concreto
+def compute_hypervolume_deap(normalized_points, reference_margin = 0.1):
+                            # Matriz de puntos normalizados para un frente Pareto concreto, margen de referencia
     """
     Calcula el hipervolumen de un frente Pareto usando DEAP
     """
@@ -100,10 +100,16 @@ def compute_hypervolume_deap(normalized_points):
     # DEAP calcula hipervolumen en minimización, por eso se cambia el signo de los puntos --> punto ideal actual [-1, -1, -1, -1]
     minimization_points = -np.asarray(normalized_points, dtype=float)
     
-    # Punto de referencia = [0, 0, 0, 0]
-    reference_point = np.zeros(normalized_points.shape[1])
+    # Punto de referencia ligeramente peor que el peor punto normalizado
+    reference_point = np.full(normalized_points.shape[1], reference_margin)
+    
+    # Hipervolumen bruto
+    raw_hv = float(hv.hypervolume(minimization_points, reference_point))
 
-    return float(hv.hypervolume(minimization_points, reference_point)) # Valor del hipervolumen
+    # Máximo volumen posible con puntos normalizados en [0,1] y margen reference_margin
+    max_possible_hv = (1.0 + reference_margin) ** normalized_points.shape[1]
+
+    return raw_hv / max_possible_hv # Hipervolumen reescalado a [0,1]
 
 
 def compare_hypervolumes(results_by_algorithm):
