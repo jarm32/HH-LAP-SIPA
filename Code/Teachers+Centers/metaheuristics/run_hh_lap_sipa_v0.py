@@ -1,13 +1,13 @@
 # Script de ejecución de HH-LAP-SIPA --> carga una instancia, ejecuta la heurística híbrida con LAP y muestra/guarda el conjunto de Pareto + estadísticas.
 
 # cd C:\Code\VRAIN-practicas\Code\Teachers+Centers
-# python -m metaheuristics.run_hh_lap_sipa
+# python -m metaheuristics.run_hh_lap_sipa_v0
 
 # --------------------------------------------------
 # Librerías
 # --------------------------------------------------
 
-from metaheuristics.scripts.hh_lap_sipa import run_hh_lap_sipa
+from metaheuristics.scripts.hh_lap_sipa_v0 import run_hh_lap_sipa
 from tools.multiobjective_search import print_pareto_set, save_results_to_txt
 from tools.evaluator import ObjectiveWeights
 from tools.problem import load_instance

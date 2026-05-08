@@ -108,7 +108,8 @@ def main():
                     "random": f"results/statistics/statistics_randomsearch_{instance}",
                     "nsga3": f"results/statistics/statistics_nsga3_{instance}",
                     "grasp":f"results/statistics/statistics_grasp_{instance}",
-                    "hh_lap":f"results/statistics/statistics_hh_lap_sipa_{instance}"
+                    "hh_lap_v0":f"results/statistics/statistics_hh_lap_sipa_v0_{instance}",
+                    "hh_lap_v1":f"results/statistics/statistics_hh_lap_sipa_v1_{instance}"
                 }
 
                 hv_by_algorithm, mins, maxs = compute_hv_from_result_files(files_by_algorithm)
@@ -133,7 +134,7 @@ def main():
                 f.write(header)
 
                 # Escribe siempre los algoritmos en el mismo orden para facilitar la comparación entre instancias
-                for alg in ["random", "nsga3", "grasp", "hh_lap"]:
+                for alg in ["random", "nsga3", "grasp", "hh_lap_v0", "hh_lap_v1"]:
                     hv = hv_by_algorithm.get(alg, 0.0)
                     line = f"{alg}: HV = {hv:.6f}\n"
                     print(line, end="")

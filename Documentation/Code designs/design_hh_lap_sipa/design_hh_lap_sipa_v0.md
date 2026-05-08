@@ -1,4 +1,4 @@
-# Diseño conceptual del HH-LAP-SIPA (Heurística Híbrida con LAP para el modelo SIPA extendido)
+# Diseño conceptual del HH-LAP-SIPA v0 (Heurística Híbrida con LAP para el modelo SIPA extendido)
 
 ## 1. Objetivo del documento
 
