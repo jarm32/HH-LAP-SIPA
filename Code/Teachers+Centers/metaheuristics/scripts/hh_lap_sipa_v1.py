@@ -1,6 +1,5 @@
-# Heurística híbrida HH-LAP-SIPA v1 que genera subconjuntos factibles de prácticas, calcula cargas objetivo,
-# agrupa prácticas en clústeres, construye varias asignaciones profesor-práctica mediante clústeres + path relinking
-# y resuelve de forma exacta dos asignaciones estudiante-práctica mediante LAP (una maximizando tau y otra maximizando eta).
+# Heurística híbrida HH-LAP-SIPA v1 que genera subconjuntos factibles de prácticas, calcula cargas objetivo, agrupa prácticas en clústeres, construye varias asignaciones profesor-práctica 
+# mediante clústeres + path relinking y resuelve de forma exacta dos asignaciones estudiante-práctica mediante LAP (una maximizando tau y otra maximizando eta).
 # Cada solución completa generada se valida, se evalúa según los objetivos del modelo y se registra en el Pareto externo.
 
 # ----------------------------
@@ -10,7 +9,6 @@ import math
 import random
 import time
 from dataclasses import dataclass
-
 import numpy as np
 
 from tools.solution import Solution
@@ -98,8 +96,7 @@ def _selected_placements_are_structurally_feasible(problem, selected_placements)
 def compute_target_professor_loads(problem):
                                    # instancia del problema
     """
-    Calcula una carga objetivo entera para cada profesor, proporcional a su capacidad máxima.
-    Devuelve una lista target_loads tal que sum(target_loads) = n_students y 0 <= target_loads[t] <= prof_capacity[t]
+    Calcula una carga objetivo entera para cada profesor, proporcional a su capacidad máxima
     """
     # Capacidades y validación de capacidad total
     capacities = [int(c) for c in problem.prof_capacity]
@@ -108,7 +105,6 @@ def compute_target_professor_loads(problem):
 
     if total_capacity < n_required:
         raise ValueError("Total professor capacity is lower than the number of students")
-
     if n_required == 0:
         return [0] * problem.n_professors
 
@@ -118,11 +114,7 @@ def compute_target_professor_loads(problem):
 
     # Reparto de las prácticas restantes según mayor parte decimal pendiente, sin superar capacidades
     remaining = n_required - sum(target_loads)
-    fractional_order = sorted(
-        range(problem.n_professors),
-        key=lambda t: (ideal_loads[t] - math.floor(ideal_loads[t]), capacities[t] - target_loads[t]),
-        reverse=True
-    )
+    fractional_order = sorted(range(problem.n_professors), key=lambda t: (ideal_loads[t] - math.floor(ideal_loads[t]), capacities[t] - target_loads[t]), reverse=True)
 
     # Bucle de reparto controlado. Se itera tantas veces como haga falta por si algunos profesores ya están llenos.
     while remaining > 0:
@@ -138,7 +130,7 @@ def compute_target_professor_loads(problem):
         if not progressed:
             raise ValueError("Could not build target professor loads within professor capacities")
 
-    return target_loads # Lista de cargas objetivo por profesor
+    return target_loads # Lista de cargas objetivo por profesor tal que sum(target_loads) = n_students y 0 <= target_loads[t] <= prof_capacity[t]
 
 
 # -----------------------------------------------------------------------------
@@ -149,7 +141,7 @@ def build_global_company_clusters(problem):
                                   # instancia del problema
     """
     Construye clústeres globales agrupando prácticas por empresa.
-    Devuelve una lista de clústeres, donde cada clúster es una lista de prácticas de la misma empresa
+    Se descartan empresas sin prácticas
     """
     # Agrupación de todas las prácticas por empresa
     clusters_by_company = [[] for _ in range(problem.n_companies)]
@@ -157,15 +149,14 @@ def build_global_company_clusters(problem):
         k = int(problem.placement_company[j])
         clusters_by_company[k].append(j)
 
-    # Se descartan empresas sin prácticas
-    return [cluster for cluster in clusters_by_company if cluster]
+    return [cluster for cluster in clusters_by_company if cluster] # lista de clústeres, donde cada clúster es una lista de prácticas de la misma empresa
 
 
 def build_selected_placement_clusters(problem, selected_placements, global_clusters = None):
                                      # instancia del problema, lista de prácticas seleccionadas, clústeres globales opcionales
     """
-    Extrae los clústeres activos de P'. En la primera versión de v1, cada clúster activo contiene
-    las prácticas seleccionadas de P' que pertenecen a una misma empresa. Los clústeres se ordenan por tamaño descendente
+    Extrae los clústeres activos de P'. Cada clúster activo contiene las prácticas seleccionadas
+    de P' que pertenecen a una misma empresa. Los clústeres se ordenan por tamaño descendente
     """
     # Si no se reciben clústeres globales ya precalculados, se construyen en este momento
     if global_clusters is None:
@@ -193,7 +184,8 @@ def build_selected_placement_clusters(problem, selected_placements, global_clust
 @dataclass
 class _SupervisionCostContext:
     """
-    Matrices de distancias (costes) para poder estimar costes de supervisión
+    Matrices de distancias (costes) para poder estimar el coste 
+    incremental de asignar una práctica a un profesor
     """
 
     center_company: np.ndarray # Distancia entre el centro educativo del profesor y la empresa
@@ -227,26 +219,13 @@ def _professor_assignment_is_feasible(problem, selected_placements, professor_as
 def _loads_from_assignment(problem, selected_placements, professor_assignment):
                           # instancia del problema, prácticas seleccionadas, diccionario placement -> professor
     """
-    Calcula la carga de cada profesor a partir de una asignación práctica-profesor.
-    Devuelve una lista professor_load
+    Calcula la carga de cada profesor a partir de una asignación práctica-profesor
     """
     loads = [0] * problem.n_professors
     for j in selected_placements:
         t = int(professor_assignment[j])
         loads[t] += 1
     return loads # Lista con la carga de cada profesor
-
-
-def _placements_by_professor_from_assignment(problem, selected_placements, professor_assignment):
-                                            # instancia del problema, prácticas seleccionadas, diccionario placement -> professor
-    """
-    Agrupa las prácticas asignadas a cada profesor a partir de un diccionario placement -> professor
-    """
-    placements_by_professor = [[] for _ in range(problem.n_professors)]
-    for j in selected_placements:
-        t = int(professor_assignment[j])
-        placements_by_professor[t].append(j)
-    return placements_by_professor # Lista de listas: prácticas asignadas a cada profesor
 
 
 def _build_supervision_cost_context(problem, normalize_supervision_dist = True):
@@ -270,13 +249,13 @@ def _build_supervision_cost_context(problem, normalize_supervision_dist = True):
             center_company = np.zeros_like(center_company, dtype=np.float64)
             company_company = np.zeros_like(company_company, dtype=np.float64)
 
-    return _SupervisionCostContext(center_company=center_company, company_company=company_company)
+    return _SupervisionCostContext(center_company=center_company, company_company=company_company) # objeto que contiene las matrices
 
 
 def _cluster_representative_company(problem, cluster):
                                     # instancia del problema, lista de prácticas de un clúster
     """
-    Devuelve la empresa representativa de un clúster. En v1 los clústeres se crean por empresa,
+    Devuelve la empresa representativa de un clúster. Los clústeres se crean por empresa,
     por lo que se toma la empresa de la primera práctica
     """
     return int(problem.placement_company[cluster[0]]) # Empresa representativa del clúster
@@ -290,111 +269,6 @@ def _distance_professor_to_cluster(problem, context, professor, cluster):
     center = int(problem.prof_center[professor])
     company = _cluster_representative_company(problem, cluster)
     return float(context.center_company[center, company]) # Distancia centro-profesor -> empresa representativa del clúster
-
-
-def _lbar_for_professor(problem, context, professor, placements):
-                       # instancia del problema, matrices de distancias, índice de profesor, lista de índices de prácticas supervisadas por ese profesor
-    """
-    Calcula la dispersión media de supervisión de un profesor (L_bar_t) para un conjunto de prácticas.
-    Para ello construye implícitamente un grafo con el centro del profesor y las empresas de las prácticas,
-    calcula el MST y divide por el número de prácticas
-    """
-    # Profesor sin prácticas asignadas
-    supervised = list(placements)
-    nt = len(supervised)
-    if nt == 0:
-        return 0.0
-
-    # Identificación del centro del profesor y las empresas de las prácticas supervisadas
-    center = int(problem.prof_center[professor])
-    companies = [int(problem.placement_company[j]) for j in supervised]
-
-    # Función de distancia para consultar distancias entre nodos
-    # Nodo 0 = centro del profesor / Nodos 1..nt = empresas de las prácticas
-    def dist(a, b):
-        if a == 0 and b == 0:
-            return 0.0
-        if a == 0:
-            return float(context.center_company[center, companies[b - 1]])
-        if b == 0:
-            return float(context.center_company[center, companies[a - 1]])
-        return float(context.company_company[companies[a - 1], companies[b - 1]])
-
-    # Cálculo de longitud del MST con Prim sobre el grafo completo implícito
-    lt = _prim_mst_length(num_nodes=nt + 1, dist_fn=dist)
-
-    return float(lt / nt) # valor Lbar_t estimado para ese profesor
-
-
-def _prim_mst_length(num_nodes, dist_fn):
-                    # número de nodos del grafo, función de distancia entre nodos
-    """
-    Implementa el algoritmo Prim para calcular el árbol de expansión mínimo sobre un grafo completo.
-    No construye la matriz completa, sino que consulta distancias con dist_fn
-    """
-    # Inicialización de estructuras para Prim
-    in_mst = [False] * num_nodes
-    min_edge = [float("inf")] * num_nodes
-    min_edge[0] = 0.0
-    total = 0.0
-
-    # Iterativamente, se añade el nodo con menor coste de conexión al MST y se actualizan los costes de conexión de los nodos restantes
-    for _ in range(num_nodes):
-        u = -1
-        best = float("inf")
-
-        # Búsqueda del nodo con menor coste de conexión al MST
-        for v in range(num_nodes):
-            if not in_mst[v] and min_edge[v] < best:
-                best = min_edge[v]
-                u = v
-
-        if u == -1:
-            break
-
-        in_mst[u] = True
-        total += best
-
-        # Actualización de los costes de conexión de los nodos restantes al MST, consultando distancias con dist_fn
-        for v in range(num_nodes):
-            if not in_mst[v]:
-                w = dist_fn(u, v)
-                if w < min_edge[v]:
-                    min_edge[v] = w
-
-    return float(total) # Longitud total del árbol de expansión mínimo
-
-
-def _sigma_sum_for_loads(problem, professor_load):
-                        # instancia del problema, lista de cargas por profesor
-    """
-    Calcula el desequilibrio de carga entre profesores dentro de cada centro educativo.
-    Usa la proporción carga/capacidad para comparar profesores con capacidades diferentes
-    """
-    # Agrupa profesores por centro educativo
-    profs_by_center = [[] for _ in range(problem.n_centers)]
-    for t in range(problem.n_professors):
-        e = int(problem.prof_center[t])
-        profs_by_center[e].append(t)
-
-    # Para cada centro, calcula la desviación típica de las proporciones carga/capacidad de sus profesores y suma estas desviaciones
-    sigma_sum = 0.0
-    for profs in profs_by_center:
-        if not profs:
-            continue
-
-        # Cálculo de proporciones carga/capacidad para los profesores de este centro
-        proportions = []
-        for t in profs:
-            cap = int(problem.prof_capacity[t])
-            proportions.append((professor_load[t] / cap) if cap > 0 else 0.0)
-
-        # Cálculo de la desviación estándar de las proporciones para este centro
-        mean = sum(proportions) / len(proportions)
-        var = sum((x - mean) ** 2 for x in proportions) / len(proportions)
-        sigma_sum += math.sqrt(var)
-
-    return float(sigma_sum) # Suma de desviaciones estándar de carga por centro
 
 
 # -----------------------------------------------------------------------------
@@ -1064,7 +938,3 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
             "max_path_relinking_steps": max_path_relinking_steps,
         },
     } # Diccionario con el conjunto Pareto encontrado y estadísticas de la ejecución
-
-
-# Alias opcional para mantener una llamada uniforme si se importa el módulo sin sufijo v1
-run_hh_lap_sipa = run_hh_lap_sipa_v1
