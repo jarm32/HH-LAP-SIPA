@@ -10,7 +10,6 @@ import random
 import time
 from dataclasses import dataclass
 import numpy as np
-from typing import Dict, List, Optional, Sequence, Tuple
 
 from tools.solution import Solution
 from tools.multiobjective_search import register_solution_in_pareto
