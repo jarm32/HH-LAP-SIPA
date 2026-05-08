@@ -25,7 +25,7 @@ def main():
     # Algoritmo empleado, instancia sobre la que se trabaja y carga del problema
     modelo = "hh_lap_sipa_v1"
 
-    for i in [5, 20, 40, 60]:
+    for i in [5,20,40,60]:
         for j in range(4):
             instance_path = f"inst_creator/output/problem_instance_ext_{i}0_{j}.txt"
             instance_name = instance_path.split("/")[-1]

@@ -108,7 +108,8 @@ def main():
                     "random": f"results/statistics/statistics_randomsearch_{instance}",
                     "nsga3": f"results/statistics/statistics_nsga3_{instance}",
                     "grasp":f"results/statistics/statistics_grasp_{instance}",
-                    "hh_lap":f"results/statistics/statistics_hh_lap_sipa_{instance}"
+                    "hh_lap_v0":f"results/statistics/statistics_hh_lap_sipa_v0_{instance}",
+                    "hh_lap_v1":f"results/statistics/statistics_hh_lap_sipa_v1_{instance}"
                 }
 
                 hv_by_algorithm, mins, maxs = compute_hv_from_result_files(files_by_algorithm)
