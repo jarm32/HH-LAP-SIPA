@@ -181,7 +181,7 @@ Asignar primero los clústeres más grandes ayuda a controlar mejor la capacidad
 
 ---
 
-## 6. Asignación práctica-profesor en v1 --> ORDEN??? LO DEJO AQUÍ??????????????????????????????????????????????
+## 6. Asignación práctica-profesor en v1
 
 Una vez seleccionado el subconjunto de prácticas `P'`, se debe asignar un profesor a cada práctica seleccionada. Esta fase no se resuelve mediante LAP, ya que la asignación profesor-práctica no es un problema uno-a-uno: un profesor puede supervisar varias prácticas, tiene una capacidad máxima `C_t`, y el coste de supervisión depende del conjunto completo de prácticas que se le asignan.
 
@@ -199,34 +199,106 @@ Todas las asignaciones profesor-práctica generadas deben respetar la capacidad 
 
 ## 7. Construcción inicial profesor-práctica por clústeres
 
+La primera asignación profesor-práctica de v1 se construye usando los clústeres activos de prácticas seleccionadas para el subconjunto `P'`. Esta asignación inicial no es necesariamente la asignación definitiva de profesores, sino el punto de partida del path relinking. Su objetivo es generar una configuración factible y geográficamente compacta, procurando además acercarse de forma aproximada a las cargas objetivo de los profesores.
 
+La idea principal es asignar tantas prácticas como sea posible de un mismo clúster a un mismo profesor, siempre que:
 
+- El profesor tenga capacidad disponible.
+- Se intente respetar su carga objetivo.
+- Se favorezca la proximidad geográfica.
+- La asignación siga siendo factible.
 
+El procedimiento conceptual es:
 
+```text
+Ordenar C = {C1, C2, ..., Cr} de acuerdo con |C_l| descendente
+Ordenar profesores de acuerdo con carga objetivo restante descendente
 
+while existan prácticas por asignar:
+    Seleccionar siguiente clúster C_l
+    Seleccionar siguiente profesor k
+    Asignar tantas prácticas de C_l como sea posible al profesor k
+    Actualizar carga del profesor k
+    Actualizar prácticas pendientes en C_l
+    Actualizar orden de profesores
+    Actualizar orden de clústeres
+```
 
+El resultado de esta fase es start_professor_assignment (placement -> professor).
 
+La carga objetivo restante de un profesor se define como: `R_k = A_k - load_k`, donde `A_k` es la carga objetivo del profesor `k`, y `load_k` es el número de prácticas ya asignadas al profesor `k`.
 
+Se priorizan profesores con mayor carga objetivo restante. En caso de empate, se puede usar como criterio secundario la distancia entre el centro educativo del profesor y la empresa asociada al clúster. Si un clúster contiene más prácticas de las que caben en el profesor seleccionado, se asigna solo una parte del clúster y el resto queda pendiente. Si un profesor alcanza su capacidad máxima, deja de ser candidato.
 
+Esta asignación inicial está orientada principalmente a la proximidad espacial y al respeto aproximado de las cargas objetivo. Posteriormente, se utilizará como asignación de partida en el path relinking frente a una asignación guía orientada al equilibrio de carga.
 
+---
 
+## 8. Construcción de asignación guía orientada a cargas objetivo
 
+Además de la asignación inicial por clústeres, HH-LAP-SIPA v1 construye una segunda asignación profesor-práctica que actúa como asignación guía para el path relinking. Esta tiene como objetivo aproximarse al vector de cargas objetivo `A_k`. A diferencia de la asignación inicial por clústeres, que prioriza la proximidad espacial de las prácticas asignadas a cada profesor, la asignación guía prioriza que cada profesor termine con un número de prácticas cercano a su carga objetivo.
 
+El procedimiento conceptual es:
 
+```text
+Inicializar todos los profesores sin prácticas asignadas
+Ordenar profesores según A_k descendente
+Ordenar prácticas seleccionadas usando un criterio espacial o aleatorio controlado
 
+Para cada profesor k:
+    asignar prácticas pendientes hasta alcanzar A_k o hasta agotar prácticas
 
+Si quedan prácticas pendientes:
+    asignarlas a profesores con capacidad disponible
+```
 
+El resultado de esta fase es guide_professor_assignment (placement -> professor)
 
+Esta asignación debe cumplir:
 
+- Toda práctica seleccionada en `P'` tiene exactamente un profesor asignado.
+- Ningún profesor supera su capacidad máxima.
+- La suma total de cargas coincide con el número de prácticas seleccionadas.
 
+La asignación guía no sustituye directamente a la asignación inicial. Su función es proporcionar un destino hacia el que mover gradualmente la asignación inicial mediante path relinking. Por tanto, esta fase está orientada principalmente a mejorar el equilibrio de carga entre profesores y a reducir el componente `sigma_sum`.
 
+---
 
+## 9. Path relinking entre asignaciones profesor-práctica
 
+Dado un mismo subconjunto `P'`, se dispone de dos asignaciones profesor-práctica: start_professor_assignment y guide_professor_assignment. La primera procede de la construcción por clústeres y está más orientada a la proximidad espacial. La segunda está más orientada a cumplir las cargas objetivo de los profesores.
 
+El path relinking genera una secuencia de asignaciones intermedias que transforman progresivamente la asignación inicial en la asignación guía.
 
+El procedimiento conceptual es:
 
+```text
+current_assignment <- start_professor_assignment
+Guardar current_assignment
 
-## 5. Asignación estudiante-práctica mediante LAP
+while current_assignment != guide_professor_assignment and steps < max_steps:
+
+    Identificar prácticas cuyo profesor actual difiere del profesor guía
+
+    Seleccionar un movimiento candidato:
+        mover una práctica j desde su profesor actual al profesor guía
+
+    Aceptar el movimiento si:
+        no supera la capacidad del profesor destino
+        mantiene todas las prácticas asignadas
+        produce una asignación válida
+
+    Actualizar current_assignment
+    Guardar current_assignment
+```
+
+De esta forma, cada asignación intermedia genera una nueva configuración profesor-práctica para el mismo subconjunto `P'`. Si un movimiento directo hacia la guía no es factible porque el profesor destino está lleno, se podrá saltar ese movimiento y probar otro. Si no quedan movimientos factibles, el path relinking termina.
+
+La utilidad de esta fase es explorar soluciones que representan diferentes compromisos entre la proximidad geográfica y el equilibrio de carga, pero siempre asegurando la factibilidad respecto a capacidades y la calidad final tras combinarse con los LAP estudiante-práctica.
+
+---
+
+## 10. Asignación estudiante-práctica y generación de soluciones completas
 
 Una vez fijado el subconjunto de prácticas `P'`, la asignación estudiante-práctica se convierte en un problema de asignación lineal uno-a-uno. Esto es posible porque la selección inicial de prácticas fuerza que `|P'| = |S|`, de modo que existe el mismo número de prácticas seleccionadas que de estudiantes.
 
@@ -235,78 +307,120 @@ Sobre este conjunto `P'`, se construyen dos matrices de beneficio: Tau[i][j] = t
 - Un LAP maximizando `tau`, que obtiene la asignación estudiante-práctica óptima desde el punto de vista de los estudiantes.
 - Un LAP maximizando `eta`, que obtiene la asignación estudiante-práctica óptima desde el punto de vista de las empresas/prácticas.
 
-Cada una de estas asignaciones se combina con la asignación práctica-profesor calculada previamente para `P'`. De este modo, para cada subconjunto `P'` se generan dos soluciones completas:
+Para cada subconjunto `P'`, estos dos LAP se resuelven una sola vez (assignment_tau = LAP max tau y assignment_eta = LAP max eta).
+
+Estos LAP dependen únicamente de:
+
+- El conjunto de estudiantes.
+- El subconjunto de prácticas seleccionadas `P'`.
+- Las matrices `tau` y `eta`.
+
+No dependen de la asignación de profesores, ya que los profesores afectan a `lbar_sum` y `sigma_sum`, pero no modifican las utilidades estudiante-práctica `tau_ij` ni empresa-práctica `eta_ij`. Por tanto, para ahorrar tiempo computacional, v1 reutiliza `assignment_tau` y `assignment_eta` para todas las asignaciones profesor-práctica generadas durante el path relinking.
+
+Para cada asignación profesor-práctica generada (`professor_assignment_m`), se construyen dos soluciones completas:
 
 ```text
-Solución_tau = P' + asignación práctica-profesor + asignación estudiante-práctica max tau
-Solución_eta = P' + asignación práctica-profesor + asignación estudiante-práctica max eta
+Solucion_tau_m = P' + professor_assignment_m + assignment_tau
+Solucion_eta_m = P' + professor_assignment_m + assignment_eta
 ```
 
-Ambas soluciones comparten el mismo subconjunto de prácticas seleccionadas y la misma asignación de profesores, pero difieren en la asignación estudiante-práctica devuelta por `lapjv`.
+Cada solución completa se valida frente a las restricciones del modelo. Si es válida, se evalúa con los cuatro objetivos (tau_sum, eta_sum, lbar_sum, sigma_sum). Después, se intenta insertar en el Pareto externo si no está dominada por soluciones ya existentes.
+
+De este modo, cada iteración puede generar más de dos soluciones candidatas, a diferencia de v0, donde cada subconjunto `P'` generaba como máximo dos soluciones completas. Las soluciones de una misma iteración comparten el mismo subconjunto de prácticas seleccionadas y las mismas asignaciones LAP, pero difieren en la asignación práctica-profesor generada durante el path relinking.
 
 ---
 
-## 6. Uso del LAP en la heurística
+## 11. Uso del LAP en la heurística
 
-La heurística utiliza problemas LAP para resolver de forma exacta la asignación estudiante-práctica una vez fijado el subconjunto de prácticas `P'`. El solver principal será `lapjv`, ya que el repositorio `src-d/lapjv` (https://github.com/src-d/lapjv) implementa un solver del Linear Assignment Problem basado en el algoritmo Jonker-Volgenant.
+La heurística utiliza problemas LAP para resolver de forma exacta la asignación estudiante-práctica una vez fijado el subconjunto de prácticas `P'`. El solver principal será `lapjv`, ya que el repositorio `src-d/lapjv` implementa un solver del Linear Assignment Problem basado en el algoritmo Jonker-Volgenant.
 
-Además, el repositorio comparativo `berhane/LAP-solvers` (https://github.com/berhane/LAP-solvers) se utilizará como referencia para justificar la elección de `lapjv`, ya que compara distintas implementaciones para resolver problemas LAP y señala esta alternativa como una de las más eficientes.
+Además, el repositorio comparativo `berhane/LAP-solvers` se utilizará como referencia para justificar la elección de `lapjv`, ya que compara distintas implementaciones para resolver problemas LAP y señala esta alternativa como una de las más eficientes.
 
 No obstante, se contempla mantener una alternativa basada en `scipy.optimize.linear_sum_assignment` en caso de que `lapjv` presente problemas de instalación, configuración o compatibilidad en el entorno de ejecución.
 
-Desde el punto de vista del algoritmo, los dos LAP que se resuelven son problemas de maximización (de `tau` y `eta`). Sin embargo, muchos solvers LAP están formulados como problemas de minimización. Por ello, la maximización se transforma en minimización cambiando el signo de la matriz de beneficios:
+Desde el punto de vista del algoritmo, los dos LAP que se resuelven son problemas de maximización de `tau` y `eta`. Sin embargo, muchos solvers LAP están formulados como problemas de minimización. Por ello, la maximización se transforma en minimización cambiando el signo de la matriz de beneficios:
 
 ```python
-cost_tau = -tau_matrix # maximizar tau equivale a minimizar -tau
+cost_tau = -tau_matrix  # maximizar tau equivale a minimizar -tau
 row_ind, col_ind, _ = lapjv(cost_tau)
 
-cost_eta = -eta_matrix # maximizar eta equivale a minimizar -eta
+cost_eta = -eta_matrix  # maximizar eta equivale a minimizar -eta
 row_ind, col_ind, _ = lapjv(cost_eta)
 ```
 
 Por tanto, `lapjv` se usará como subrutina exacta para resolver la asignación estudiante-práctica dentro de la heurística, mientras que el resto de decisiones del problema, como la selección de prácticas y la asignación práctica-profesor, se resolverán mediante procedimientos heurísticos.
 
+En esta versión, los LAP se resuelven una sola vez por subconjunto `P'`, y sus resultados se reutilizan para todas las asignaciones profesor-práctica generadas mediante path relinking.
+
 ---
 
-## 7. Flujo completo de la heurística
+## 12. Flujo completo de la heurística
 
 El flujo completo de la heurística se resume en el siguiente pseudocódigo:
 
 ```text
-HH-LAP-SIPA(problem, time_limit, max_iterations, base_seed):
+HH-LAP-SIPA-v1(problem, time_limit, max_iterations, base_seed):
 
     pareto_set ← ∅
+
+    target_loads ← compute_target_professor_loads(problem)
 
     while not stopping_condition:
 
         P' ← generate_random_feasible_placements(problem)
 
-        professor_assignment ← assign_professors_with_guided_construction(problem, P')
-        if professor_assignment is not feasible:
+        clusters ← build_selected_placement_clusters(problem, P')
+
+        start_professor_assignment ← assign_professors_by_clusters(
+            problem,
+            P',
+            clusters,
+            target_loads
+        )
+
+        if start_professor_assignment is not feasible:
             continue
+
+        guide_professor_assignment ← build_load_balanced_professor_assignment(
+            problem,
+            P',
+            target_loads
+        )
+
+        if guide_professor_assignment is not feasible:
+            continue
+
+        professor_assignments ← path_relink_professor_assignments(
+            problem,
+            P',
+            start_professor_assignment,
+            guide_professor_assignment
+        )
 
         tau_matrix ← build_tau_matrix(problem, P')
         assignment_tau ← solve_lapjv_max(tau_matrix)
-        sol_tau ← build_solution(P', professor_assignment, assignment_tau)
-        if validate(sol_tau):
-            evaluate_and_update_pareto(pareto_set, sol_tau)
 
         eta_matrix ← build_eta_matrix(problem, P')
         assignment_eta ← solve_lapjv_max(eta_matrix)
-        sol_eta ← build_solution(P', professor_assignment, assignment_eta)
-        if validate(sol_eta):
-            evaluate_and_update_pareto(pareto_set, sol_eta)
+
+        for professor_assignment in professor_assignments:
+
+            sol_tau ← build_solution(P', professor_assignment, assignment_tau)
+            if validate(sol_tau):
+                evaluate_and_update_pareto(pareto_set, sol_tau)
+
+            sol_eta ← build_solution(P', professor_assignment, assignment_eta)
+            if validate(sol_eta):
+                evaluate_and_update_pareto(pareto_set, sol_eta)
 
     return pareto_set
 ```
 
-El criterio de parada principal será el tiempo de ejecución, fijado inicialmente en 300 segundos para los experimentos comparativos. Este criterio permite comparar HH-LAP-SIPA con otras heurísticas bajo las mismas condiciones computacionales. Adicionalmente, la implementación podrá contemplar otros criterios, como número máximo de iteraciones, número de subconjuntos generados o número de soluciones factibles evaluadas.
+El criterio de parada principal será el tiempo de ejecución, fijado inicialmente en 300 segundos para los experimentos comparativos. Este criterio permite comparar HH-LAP-SIPA v1 con HH-LAP-SIPA v0 y con otras heurísticas bajo las mismas condiciones computacionales. Adicionalmente, la implementación podrá contemplar otros criterios, como número máximo de iteraciones, número de subconjuntos generados o número de soluciones factibles evaluadas.
 
-En cada iteración, el algoritmo genera un subconjunto factible de prácticas, calcula una asignación práctica-profesor y construye dos soluciones candidatas mediante LAP: una optimizando `tau` y otra optimizando `eta`. Cada solución se valida frente a las restricciones del modelo SIPA extendido antes de poder incorporarse al Pareto externo.
+--- 
 
----
-
-## 8. Relación con el código actual
+## 13. Relación con el código actual
 
 La implementación de la heurística se apoyará en las estructuras ya existentes del proyecto. En particular:
 
@@ -316,34 +430,77 @@ La implementación de la heurística se apoyará en las estructuras ya existente
 - `evaluate_solution_scalar`: evaluación escalar auxiliar.
 - `register_solution_in_pareto`: evaluación, validación y registro de soluciones en el Pareto externo.
 
-La principal adaptación será separar la lógica actual de generación de soluciones factibles. En lugar de generar directamente una solución completa, la nueva heurística deberá generar primero un subconjunto factible de prácticas `P'`, asignar profesores a dichas prácticas y, posteriormente, delegar la asignación estudiante-práctica en `lapjv`.
-
-Para ello, se prevé incorporar o adaptar los siguientes componentes:
+La versión v1 reutilizará componentes ya definidos en v0:
 
 - `generate_random_feasible_placements(problem)`: genera un subconjunto factible de prácticas `P'`.
-- `assign_professors_with_guided_construction(problem, selected_placements)`: asigna profesores a las prácticas seleccionadas mediante construcción guiada.
 - `build_tau_matrix(problem, selected_placements)`: construye la matriz de beneficios `tau` para el LAP orientado a estudiantes.
 - `build_eta_matrix(problem, selected_placements)`: construye la matriz de beneficios `eta` para el LAP orientado a empresas.
 - `solve_lapjv_max(matrix)`: resuelve un problema LAP de maximización usando `lapjv`.
 - `build_solution_from_lap_assignment(...)`: construye una solución completa combinando `P'`, la asignación práctica-profesor y la asignación estudiante-práctica devuelta por `lapjv`.
-- `hh_lap_sipa.py`: contiene la implementación principal del algoritmo HH-LAP-SIPA.
-- `run_hh_lap_sipa.py`: script de ejecución encargado de cargar la instancia, configurar parámetros, lanzar la heurística y guardar/mostrar resultados.
 
-El objetivo es aprovechar la infraestructura existente, pero modificando el flujo de construcción de soluciones para que el LAP sea quien determine la asignación estudiante-práctica dentro de cada subconjunto `P'`.
+Además, añadirá los siguientes componentes:
 
----
-
-## 9. Diferencias respecto a la baseline aleatoria
-
-La baseline aleatoria actual construye soluciones generando una selección factible de prácticas y asignando posteriormente estudiantes y profesores mediante procedimientos aleatorios o de reparación. La heurística HH-LAP-SIPA mantiene la selección inicial aleatoria factible de prácticas, pero modifica la forma de construir la solución completa. En concreto:
-
-- La asignación práctica-profesor se realiza mediante construcción guiada.
-- La asignación estudiante-práctica deja de ser aleatoria y se resuelve de forma exacta mediante LAP.
-- Para cada subconjunto `P'`, se generan dos soluciones candidatas: una maximizando `tau` y otra maximizando `eta`.
+- `compute_target_professor_loads(problem)`: calcula las cargas objetivo por profesor.
+- `build_selected_placement_clusters(problem, selected_placements)`: agrupa las prácticas seleccionadas en clústeres.
+- `assign_professors_by_clusters(problem, selected_placements, clusters, target_loads, rng)`: construye la asignación inicial por clústeres.
+- `build_load_balanced_professor_assignment(problem, selected_placements, target_loads, rng)`: construye la asignación guía orientada a cargas objetivo.
+- `path_relink_professor_assignments(problem, selected_placements, start_assignment, guide_assignment, max_steps, rng)`: genera asignaciones intermedias mediante path relinking.
+- `run_hh_lap_sipa_v1(...)`: ejecuta el bucle principal de la versión v1.
 
 ---
 
-## 10. Salidas esperadas
+## 14. Relación con las baselines
+
+HH-LAP-SIPA v1 se comparará principalmente con dos referencias: la baseline aleatoria y HH-LAP-SIPA v0. La baseline aleatoria permite medir si la heurística aporta valor frente a una generación factible sin optimización estructurada, mientras que v0 permite comprobar si las nuevas decisiones de diseño de v1 mejoran, empeoran o mantienen la calidad de la versión predecesora.
+
+Respecto a la baseline aleatoria, v1 mantiene la selección inicial factible de prácticas `P'`, pero modifica la forma de construir la solución completa. La asignación práctica-profesor deja de ser aleatoria o puramente reparadora y pasa a estar guiada por cargas objetivo, clústeres espaciales y path relinking. Además, la asignación estudiante-práctica se resuelve de forma exacta mediante LAP, en lugar de construirse de forma aleatoria.
+
+Respecto a HH-LAP-SIPA v0, la diferencia principal está en la capa de asignación práctica-profesor. En v0, para cada subconjunto `P'`, se construía una única asignación profesor-práctica mediante una decisión guiada práctica a práctica. En v1, para cada `P'`, se construye una asignación inicial por clústeres, una asignación guía orientada a cargas objetivo y varias asignaciones intermedias mediante path relinking.
+
+```text
+Baseline aleatoria:
+    P' factible
+        ↓
+    asignación aleatoria/reparadora de estudiantes y profesores
+        ↓
+    solución factible
+
+HH-LAP-SIPA v0:
+    P' factible
+        ↓
+    asignación profesor-práctica guiada práctica a práctica
+        ↓
+    LAP tau + LAP eta
+        ↓
+    como máximo dos soluciones por iteración
+
+HH-LAP-SIPA v1:
+    cargas objetivo por profesor
+        ↓
+    preclusterización espacial de prácticas
+        ↓
+    P' factible
+        ↓
+    extracción de clústeres activos
+        ↓
+    asignación inicial por clústeres
+        ↓
+    asignación guía por cargas objetivo
+        ↓
+    path relinking
+        ↓
+    LAP tau + LAP eta
+        ↓
+    varias soluciones por iteración
+```
+
+Por tanto, v1 no debe entenderse como una búsqueda aleatoria pura, sino como una heurística híbrida que combina aleatoriedad controlada, conocimiento estructural del problema, construcción guiada por clústeres, equilibrio de carga objetivo, path relinking, optimización exacta mediante LAP y actualización del Pareto externo.
+
+La comparación experimental permitirá comprobar si estas incorporaciones producen una mejora real respecto a la baseline aleatoria y respecto a HH-LAP-SIPA v0. En síntesis, HH-LAP-SIPA v1 se plantea como una evolución de v0, no como una sustitución directa, y v0 se conserva como baseline interna de comparación.
+
+---
+
+## 15. Salidas esperadas
 
 La heurística devolverá como resultado principal el conjunto de soluciones no dominadas encontrado durante la ejecución, junto con estadísticas asociadas:
 
@@ -354,59 +511,71 @@ Las estadísticas mínimas que se registrarán serán:
 
 - `iterations`: número de iteraciones ejecutadas.
 - `generated_subsets`: número de subconjuntos `P'` generados.
-- `professor_assignment_failures`: número de fallos al construir la asignación práctica-profesor.
-- `lap_tau_solutions`: número de soluciones generadas mediante el LAP que maximiza `tau`.
-- `lap_eta_solutions`: número de soluciones generadas mediante el LAP que maximiza `eta`.
-- `feasible_solutions`: número de soluciones factibles evaluadas.
+- `cluster_assignment_failures`: número de fallos al construir la asignación por clústeres.
+- `guide_assignment_failures`: número de fallos al construir la asignación guía.
+- `path_relinking_runs`: número de ejecuciones de path relinking.
+- `path_relinking_assignments`: número total de asignaciones profesor-práctica generadas mediante path relinking.
+- `lap_tau_solutions`: número de soluciones generadas usando el LAP que maximiza `tau`.
+- `lap_eta_solutions`: número de soluciones generadas usando el LAP que maximiza `eta`.
+- `feasible_solutions`: número de soluciones completas factibles evaluadas.
+- `invalid_solutions`: número de soluciones descartadas por no ser válidas.
 - `inserted_into_pareto`: número de soluciones incorporadas al Pareto externo.
 - `pareto_size`: tamaño final del Pareto externo.
 - `elapsed_seconds`: tiempo total de ejecución.
+- `generation_failures`: número de fallos al generar `P'`.
+- `lap_solver`: solver usado para resolver los LAP.
+- `time_limit_seconds`: límite de tiempo usado.
+- `max_iterations`: límite de iteraciones, si se proporciona.
+- `max_path_relinking_steps`: número máximo de pasos permitido en el path relinking.
 
 Además, se podrá guardar un resumen del Pareto final con indicadores agregados de calidad, como máximos o medias de los objetivos considerados.
 
 ---
 
-## 11. Decisiones de diseño fijadas
+## 16. Decisiones de diseño fijadas
 
-Las decisiones de diseño fijadas para la (primera) definición del algoritmo HH-LAP-SIPA son:
+Las decisiones de diseño fijadas para HH-LAP-SIPA v1 son:
 
-- La selección inicial de prácticas `P'` será aleatoria factible.
-- La asignación práctica-profesor no se resolverá mediante LAP.
-- La asignación práctica-profesor se realizará mediante construcción guiada.
-- La asignación estudiante-práctica sí se resolverá mediante LAP.
-- El solver LAP principal será `lapjv`.
-- Para cada subconjunto `P'`, se resolverán exactamente dos LAP:
-  - uno maximizando `tau`;
-  - otro maximizando `eta`.
-- No se usarán combinaciones ponderadas de `tau` y `eta`.
-- Cada subconjunto `P'` generará como máximo dos soluciones completas:
-  - `Solución_tau`: combinación de `P'`, la asignación práctica-profesor y la asignación estudiante-práctica devuelta por `lapjv` al maximizar `tau`.
-  - `Solución_eta`: combinación de `P'`, la asignación práctica-profesor y la asignación estudiante-práctica devuelta por `lapjv` al maximizar `eta`.
-- Las dos soluciones comparten el mismo subconjunto `P'` y la misma asignación práctica-profesor.
-- Las dos soluciones difieren en la asignación estudiante-práctica devuelta por `lapjv`.
-- Toda solución debe cumplir las restricciones del modelo SIPA extendido antes de evaluarse.
+- HH-LAP-SIPA v0 se conserva como baseline independiente para comparar resultados.
+- La selección inicial de prácticas `P'` sigue siendo aleatoria factible y debe cumplir `|P'| = |S|`.
+- La asignación práctica-profesor no se resuelve mediante LAP, sino mediante una estrategia heurística basada en cargas objetivo, clústeres y path relinking.
+- Antes del bucle principal se calcula una carga objetivo por profesor, proporcional a su capacidad máxima.
+- En la primera implementación, las cargas objetivo se calculan mediante reparto proporcional entero, sin resolver un ILP auxiliar.
+- Antes del bucle principal se realiza una preclusterización espacial de prácticas. En v1, esta preclusterización se basa en agrupar prácticas por empresa.
+- Para cada subconjunto `P'`, se extraen los clústeres activos correspondientes a las prácticas seleccionadas.
+- Para cada `P'`, se construye una asignación inicial profesor-práctica orientada a clústeres y proximidad geográfica.
+- Para cada `P'`, se construye una asignación guía orientada a aproximar las cargas de los profesores a sus cargas objetivo.
+- Se aplica path relinking entre la asignación inicial y la asignación guía.
+- Solo se aceptan movimientos de path relinking que mantengan factibilidad inmediata.
+- La asignación estudiante-práctica se resuelve mediante LAP usando `lapjv` como solver principal.
+- Para cada subconjunto `P'`, se resuelven exactamente dos LAP: uno maximizando `tau` y otro maximizando `eta`.
+- Los LAP `tau` y `eta` se resuelven una sola vez por subconjunto `P'` y se reutilizan para todas las asignaciones profesor-práctica generadas mediante path relinking.
+- Cada asignación profesor-práctica generada puede producir dos soluciones completas: una combinada con el LAP `tau` y otra combinada con el LAP `eta`.
+- Toda solución completa debe validarse antes de evaluarse.
 - El Pareto externo se actualiza únicamente con soluciones válidas y no dominadas.
 
 ---
 
-## 12. Posibles mejoras futuras
+## 17. Posibles mejoras futuras
 
-Quedan identificadas varias extensiones posibles:
+Quedan identificadas varias extensiones posibles para versiones posteriores:
 
-- Selección guiada de prácticas: en lugar de seleccionar `P'` de forma aleatoria, se podría sesgar la selección usando una puntuación aproximada del potencial de cada práctica, por ejemplo combinando su mejor ajuste posible respecto a `tau` y `eta`.
+- Selección guiada de prácticas: sustituir o complementar la selección aleatoria de `P'` con una puntuación aproximada basada en el potencial de cada práctica respecto a `tau` y `eta`.
 
-- Búsqueda local sobre `P'`: una vez generado un subconjunto de prácticas, se podrían aplicar movimientos como eliminar una práctica, añadir otra, intercambiar prácticas o reparar cuotas y dependencias. Tras cada modificación, se resolverían de nuevo los LAP y se conservaría la solución si mejora el Pareto.
+- Búsqueda local sobre `P'`: aplicar movimientos como eliminar, añadir o intercambiar prácticas, reparando cuotas y dependencias cuando sea necesario.
 
-- Repair de la asignación práctica-profesor: si en versiones futuras se incorporan restricciones adicionales sobre qué profesores pueden supervisar determinadas prácticas, o si la construcción guiada empieza a descartar demasiados subconjuntos `P'`, se podría añadir una fase de repair que intente recolocar prácticas entre profesores para completar una asignación factible antes de descartar el subconjunto.
+- Clustering espacial real: refinar la preclusterización actual usando `company_company_dist`, agrupando empresas cercanas aunque no sean idénticas. Para v1 se mantiene una estrategia simple, interpretable y robusta basada en empresa.
 
-- Mejora local de profesores: después de la construcción inicial de profesores, se podrían probar movimientos como mover una práctica de un profesor a otro o intercambiar prácticas entre profesores, con el objetivo de reducir `lbar_sum` y `sigma_sum`.
+- Ordenación avanzada de clústeres: ordenar clústeres no solo por tamaño, sino también por distancia media, dispersión, dificultad de asignación o cercanía a centros educativos.
 
----
+- Mejora de la asignación guía: incorporar criterios espaciales además de las cargas objetivo, para que la guía no solo favorezca equilibrio de carga, sino también menor dispersión.
 
-## 13. Relación entre HH-LAP-SIPA v0 y v1
+- Repair avanzado durante path relinking: permitir swaps entre profesores o movimientos en dos pasos cuando un movimiento directo hacia la guía no sea factible.
 
-HH-LAP-SIPA v1 se plantea como una evolución de HH-LAP-SIPA v0, no como una sustitución directa. La v0 se conserva como baseline interna para comprobar si las nuevas decisiones de diseño de v1 mejoran, empeoran o mantienen la calidad de los resultados. La diferencia principal está en la capa de asignación práctica-profesor. En v0, esta asignación se construía de forma guiada práctica a práctica. En v1, se refuerza mediante cargas objetivo, clústeres espaciales y path relinking.
+- Path relinking bidireccional: explorar tanto el camino desde la asignación inicial hacia la guía como desde la guía hacia la inicial.
 
-Se mantienen de v0 la selección aleatoria factible de `P'`, la condición \(|P'| = |S|\), las restricciones estructurales, las matrices `tau` y `eta`, los dos LAP, la validación de soluciones, la evaluación multiobjetivo y el Pareto externo.
+- LAP ponderado adicional: resolver un tercer LAP maximizando una combinación `lambda * tau + (1 - lambda) * eta`, o varios LAP con distintos valores de `lambda`, para generar soluciones intermedias entre estudiantes y empresas.
 
-La v1 añade el cálculo de cargas objetivo por profesor, la preclusterización espacial de prácticas, la extracción de clústeres activos para cada `P`', la construcción por clústeres, una asignación guía orientada a equilibrio de carga y el path relinking entre asignaciones profesor-práctica. Como resultado, cada subconjunto `P'` puede generar más de dos soluciones completas, que se validan, evalúan y filtran mediante el Pareto externo.
+- Mejora local de profesores: tras el path relinking, probar movimientos de reasignación o intercambio de prácticas entre profesores para reducir `lbar_sum` y `sigma_sum`.
+
+- Análisis del coste computacional añadido: comprobar experimentalmente si el aumento de soluciones generadas por iteración compensa el coste adicional de clústeres y path relinking.
