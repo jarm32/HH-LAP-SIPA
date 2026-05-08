@@ -10,7 +10,6 @@ import random
 import time
 from dataclasses import dataclass
 import numpy as np
-from typing import Dict, List, Optional, Sequence, Tuple
 
 from tools.solution import Solution
 from tools.multiobjective_search import register_solution_in_pareto
@@ -18,6 +17,7 @@ from metaheuristics.scripts.random_feasible_fixing import _preprocess, _choose_f
 
 from lapjv import lapjv
 from scipy.optimize import linear_sum_assignment
+
 
 # -----------------------------------------------------------------------------
 # Selección inicial factible de prácticas P'
@@ -231,7 +231,7 @@ def _build_supervision_cost_context(problem, normalize_supervision_dist = True):
             center_company = np.zeros_like(center_company, dtype=np.float64)
             company_company = np.zeros_like(company_company, dtype=np.float64)
 
-    return _SupervisionCostContext(center_company=center_company, company_company=company_company)
+    return _SupervisionCostContext(center_company=center_company, company_company=company_company) # objeto que contiene las matrices
 
 
 def _lbar_for_professor(problem, context, professor, placements):

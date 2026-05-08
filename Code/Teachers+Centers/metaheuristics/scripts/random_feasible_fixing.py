@@ -6,7 +6,7 @@
 import random
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List
 
 from tools.solution import Solution
 
