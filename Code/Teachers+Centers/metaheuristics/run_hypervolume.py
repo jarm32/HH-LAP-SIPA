@@ -134,7 +134,7 @@ def main():
                 f.write(header)
 
                 # Escribe siempre los algoritmos en el mismo orden para facilitar la comparación entre instancias
-                for alg in ["random", "nsga3", "grasp", "hh_lap"]:
+                for alg in ["random", "nsga3", "grasp", "hh_lap_v0", "hh_lap_v1"]:
                     hv = hv_by_algorithm.get(alg, 0.0)
                     line = f"{alg}: HV = {hv:.6f}\n"
                     print(line, end="")
