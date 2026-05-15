@@ -38,11 +38,11 @@ def _minmax_normalize_rows(a): # matriz numpy de n filas y m columnas
     return out # matriz inicial normalizada fila a fila (por estudiante) en rango [0,1]
 
 
-def _precompute_greedy_matrix(problem, normalize_student_dist = True): 
-                             # instancia del problema, booleano para normalizar distancias estudiante-empresa
+def _precompute_greedy_matrix(problem, normalize_student_dist = True, tau_weight = 0.5, eta_weight = 0.5): 
+                             # instancia del problema, booleano para normalizar distancias estudiante-empresa, peso tau, peso eta
     """
     Precalcula para cada par (estudiante i, plaza j) las utilidades 
-    (tau_ij, eta_ij, g_ij = 0.5 * tau_ij + 0.5 * eta_ij) para acelerar el constructivo (greedy-randomized)
+    (tau_ij, eta_ij, g_ij = tau_weight * tau_ij + eta_weight * eta_ij) para acelerar el constructivo (greedy-randomized)
     """
     # Extracción de datos (datos del problema a arrays)
     placement_company = np.asarray(problem.placement_company, dtype=np.int64)          # [P]
@@ -64,7 +64,7 @@ def _precompute_greedy_matrix(problem, normalize_student_dist = True):
     # Construcción de objetivos greedy (tau, eta) y su combinación g para cada par (i,j)
     tau_matrix = w_dist * (1.0 - dist_by_placement) + w_dev * pref_match               # [S, P] --> utilidad del estudiante por la plaza según distancia y preferencias
     eta_matrix = comp_match                                                            # [S, P] --> utilidad de la empresa por el estudiante según compatibilidad
-    g_matrix = 0.5 * tau_matrix + 0.5 * eta_matrix                                     # [S, P]
+    g_matrix = tau_weight * tau_matrix + eta_weight * eta_matrix                       # [S, P]
 
     return tau_matrix, eta_matrix, g_matrix # matrices de tamaño [n_students, n_placements] con los valores precalculados (tau, eta, g) para cada par (i,j)
 
@@ -255,9 +255,9 @@ def _balanced_scalar_score(eval_data, problem, weights):
 # Constructivo GRASP
 # --------------------------------------------------
 
-def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_student_dist = True, max_attempts = 50, deadline = None):
+def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_student_dist = True, max_attempts = 50, deadline = None, tau_weight = 0.5, eta_weight = 0.5):
                              # instancia del problema, parámetro de control de la RCL, semilla, booleano para normalizar distancias estudiante-empresa, 
-                             # nº máximo de intentos para construir una solución factible, tiempo límite absoluto (prioritario sobre max_attempts)
+                             # nº máximo de intentos para construir una solución factible, tiempo límite absoluto (prioritario sobre max_attempts), peso tau, peso eta
     """
     Construye una solución factible (estudiantes, plazas, profesores) mediante un proceso greedy-randomized. 
     Si una construcción falla, reintenta desde cero hasta encontrar una solución válida, agotar tiempo o intentos
@@ -267,7 +267,7 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
         raise ValueError(f"alpha_rcl must be in [0,1], got {alpha_rcl}") # Validar rango de alpha_rcl
 
     rng = random.Random(seed) # Generador aleatorio para decisiones del constructivo
-    _, _, g_matrix = _precompute_greedy_matrix(problem, normalize_student_dist=normalize_student_dist) # Precalcular matriz g para acelerar el constructivo
+    _, _, g_matrix = _precompute_greedy_matrix(problem, normalize_student_dist=normalize_student_dist, tau_weight=tau_weight, eta_weight=eta_weight) # Precalcular matriz g para acelerar el constructivo
     dep_data = _preprocess_dependencies(problem) # Preprocesar dependencias
 
     placement_to_block = dep_data["placement_to_block"]
@@ -457,6 +457,15 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
 # Ejecución principal GRASP
 # --------------------------------------------------
 
+def _sample_tau_eta_weights(rng):
+    """
+    Genera pesos aleatorios para combinar tau y eta en el constructivo GRASP.
+    """
+    tau_weight = rng.random()
+    eta_weight = 1.0 - tau_weight
+
+    return tau_weight, eta_weight # pesos finales
+
 def run_grasp(
     problem,                              # Instancia del problema
     weights,                              # Pesos para la evaluación escalar auxiliar
@@ -467,13 +476,14 @@ def run_grasp(
     base_seed = None,                     # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
     normalize_student_dist = True,        # booleano para normalizar distancias estudiante-empresa
     normalize_supervision_dist = True,    # booleano para normalizar distancias profesor-plaza
-    constructive_max_attempts = 5,       # Máximo de intentos del constructivo
+    constructive_max_attempts = 5,        # Máximo de intentos del constructivo
     constructive_time_limit_seconds = 30, # Límite de tiempo para cada intento del constructivo (prioritario sobre constructive_max_attempts)
     use_random_fallback = True,           # booleano para activar un fallback aleatorio que intente generar una solución factible de forma completamente aleatoria si el constructivo falla mucho
     random_fallback_max_attempts = 50,    # Máximo de intentos del fallback aleatorio
     local_max_neighbors_per_pass = 1000,  # Máximo de vecinos evaluados por pasada de búsqueda local
     local_max_improvements = 30,          # Máximo de mejoras aceptadas por búsqueda local
-    verbose = True                        # booleano para imprimir estadísticas durante la ejecución
+    verbose = True,                       # booleano para imprimir estadísticas durante la ejecución
+    randomize_constructive_weights=True   # booleano para randomizar los pesos de la fase constructiva 
 ):
     """
     Ejecuta repetidamente el esquema GRASP completo (constructivo + búsqueda local + registro en Pareto)
@@ -514,6 +524,14 @@ def run_grasp(
         seed = None if base_seed is None else base_seed + iteration
         iteration += 1
         generated += 1
+        
+        # Generación de pesos aleatorios para la fase constructiva
+        iter_rng = random.Random(seed)
+
+        if randomize_constructive_weights:
+            tau_weight, eta_weight = _sample_tau_eta_weights(iter_rng)
+        else:
+            tau_weight, eta_weight = 0.5, 0.5
 
         try:
             # -------- Fase constructiva GRASP con límite local de tiempo --------
@@ -526,7 +544,7 @@ def run_grasp(
             try:
                 # Intento constructivo normal
                 constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist,
-                                                           max_attempts=constructive_max_attempts, deadline=construct_deadline)
+                                                           max_attempts=constructive_max_attempts, deadline=construct_deadline, tau_weight=tau_weight, eta_weight=eta_weight)
             except Exception as e:
                 constructed_sol = None
                 if verbose:
@@ -630,6 +648,7 @@ def run_grasp(
                 "local_max_neighbors_per_pass": local_max_neighbors_per_pass,
                 "local_max_improvements": local_max_improvements,
                 "use_random_fallback": use_random_fallback,
-                "random_fallback_max_attempts": random_fallback_max_attempts
+                "random_fallback_max_attempts": random_fallback_max_attempts,
+                "randomize_constructive_weights": randomize_constructive_weights
             }
         } # Diccionario con el conjunto Pareto final, estadísticas de ejecución y parámetros usados

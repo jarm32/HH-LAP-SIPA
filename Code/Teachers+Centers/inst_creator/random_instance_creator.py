@@ -4,6 +4,7 @@
 # python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
 # python random_instance_creator.py output 200 600 4 20 0.2 30 6 2 1234
 # python random_instance_creator.py output 50 50 4 20 0.2 30 6 2 1246
+# python random_instance_creator.py output 800 1000 4 20 0.2 30 6 2 1250
 
 
 # ----------------------------
