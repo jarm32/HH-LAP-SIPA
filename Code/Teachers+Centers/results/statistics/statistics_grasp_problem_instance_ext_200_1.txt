@@ -3,55 +3,65 @@
 Instance: problem_instance_ext_200_1.txt
 
 ---- STATS ----
-iterations: 33
-generated: 33
-feasible: 33
+iterations: 41
+generated: 41
+feasible: 41
 failures: 0
-inserted_into_pareto: 29
+inserted_into_pareto: 33
 fallback_used: 0
-pareto_size: 22
-elapsed_seconds: 300.00224804878235
+pareto_size: 31
+elapsed_seconds: 300.00239062309265
 alpha_rcl: 0.5
-local_improvements_total: 83
+local_improvements_total: 132
 constructive_max_attempts: 5
 constructive_time_limit_seconds: 30
 local_max_neighbors_per_pass: 1000
 local_max_improvements: 30
 use_random_fallback: True
 random_fallback_max_attempts: 50
+randomize_constructive_weights: True
 
 ---- SUMMARY ----
-max_tau: 123.451857
-mean_tau: 116.255565
-max_eta: 85.987500
-mean_eta: 82.674832
-max_lbar: 3.568902
-mean_lbar: 3.338885
-max_sigma: 0.499434
-mean_sigma: 0.349403
-max_objective_value: 71.620622
-mean_objective_value: 68.922922
+max_tau: 129.109981
+mean_tau: 107.584467
+max_eta: 96.408900
+mean_eta: 84.370545
+max_lbar: 3.495043
+mean_lbar: 3.343866
+max_sigma: 0.543439
+mean_sigma: 0.346917
+max_objective_value: 70.541235
+mean_objective_value: 66.480789
 
 ---- PARETO SET ----
-[1] iter=1 seed=1234 obj=69.802713 | tau=118.201849, eta=83.213600, lbar=3.273423, sigma=0.380093
-[2] iter=3 seed=1236 obj=70.696695 | tau=117.995855, eta=85.987500, lbar=3.291140, sigma=0.392509
-[3] iter=5 seed=1238 obj=66.370883 | tau=108.585202, eta=83.052100, lbar=3.340056, sigma=0.341616
-[4] iter=6 seed=1239 obj=66.583073 | tau=109.570302, eta=82.612800, lbar=3.239832, sigma=0.330460
-[5] iter=7 seed=1240 obj=68.852643 | tau=119.601633, eta=79.102300, lbar=3.254841, sigma=0.427657
-[6] iter=8 seed=1241 obj=68.802653 | tau=115.706661, eta=82.979600, lbar=3.552175, sigma=0.271037
-[7] iter=10 seed=1243 obj=71.425242 | tau=122.642618, eta=83.524300, lbar=3.568902, sigma=0.193992
-[8] iter=13 seed=1246 obj=70.706671 | tau=118.798197, eta=85.242100, lbar=3.314242, sigma=0.445844
-[9] iter=14 seed=1247 obj=68.270105 | tau=111.370345, eta=85.698100, lbar=3.345675, sigma=0.347156
-[10] iter=15 seed=1248 obj=68.373520 | tau=115.251070, eta=82.083900, lbar=3.283486, sigma=0.370218
-[11] iter=16 seed=1249 obj=66.548056 | tau=107.249348, eta=84.908000, lbar=3.285362, sigma=0.499434
-[12] iter=17 seed=1250 obj=68.162093 | tau=117.713335, eta=79.020400, lbar=3.381538, sigma=0.184069
-[13] iter=19 seed=1252 obj=66.820842 | tau=109.006151, eta=83.960000, lbar=3.462340, sigma=0.248428
-[14] iter=20 seed=1253 obj=71.014929 | tau=123.451857, eta=81.467200, lbar=3.331184, sigma=0.405039
-[15] iter=21 seed=1254 obj=69.749594 | tau=119.122640, eta=82.120600, lbar=3.217190, sigma=0.421015
-[16] iter=24 seed=1257 obj=68.166418 | tau=111.097768, eta=85.712800, lbar=3.400054, sigma=0.372702
-[17] iter=27 seed=1260 obj=68.468399 | tau=117.786031, eta=79.838800, lbar=3.322285, sigma=0.358350
-[18] iter=29 seed=1262 obj=67.543169 | tau=114.741786, eta=80.250500, lbar=3.369637, sigma=0.302036
-[19] iter=30 seed=1263 obj=70.068204 | tau=122.990100, eta=79.174700, lbar=3.289618, sigma=0.315522
-[20] iter=31 seed=1264 obj=71.620622 | tau=121.578291, eta=85.059200, lbar=3.375257, sigma=0.274483
-[21] iter=32 seed=1265 obj=69.866880 | tau=120.094870, eta=81.488100, lbar=3.217252, sigma=0.437086
-[22] iter=33 seed=1266 obj=68.390868 | tau=115.066512, eta=82.349700, lbar=3.339975, sigma=0.368110
+[1] iter=2 seed=1235 obj=68.458445 | tau=126.914703, eta=70.666200, lbar=3.297914, sigma=0.352886
+[2] iter=3 seed=1236 obj=69.613149 | tau=119.922752, eta=81.038900, lbar=3.469911, sigma=0.294472
+[3] iter=4 seed=1237 obj=62.685159 | tau=87.368621, eta=93.744200, lbar=3.376360, sigma=0.290560
+[4] iter=5 seed=1238 obj=59.232797 | tau=78.573510, eta=92.646300, lbar=3.198965, sigma=0.543439
+[5] iter=6 seed=1239 obj=63.966374 | tau=89.114433, eta=95.675100, lbar=3.351843, sigma=0.395942
+[6] iter=7 seed=1240 obj=69.628159 | tau=121.770331, eta=79.208400, lbar=3.405867, sigma=0.332237
+[7] iter=8 seed=1241 obj=70.541235 | tau=126.108582, eta=77.375300, lbar=3.241006, sigma=0.299228
+[8] iter=10 seed=1243 obj=68.673240 | tau=124.402992, eta=73.850700, lbar=3.442243, sigma=0.271037
+[9] iter=11 seed=1244 obj=67.017085 | tau=101.753489, eta=91.664600, lbar=3.162976, sigma=0.466509
+[10] iter=12 seed=1245 obj=68.076826 | tau=115.919990, eta=80.621200, lbar=3.341587, sigma=0.442729
+[11] iter=13 seed=1246 obj=64.504671 | tau=93.523560, eta=92.694700, lbar=3.236917, sigma=0.243368
+[12] iter=14 seed=1247 obj=70.082610 | tau=126.837604, eta=75.465200, lbar=3.446835, sigma=0.340039
+[13] iter=15 seed=1248 obj=68.706379 | tau=116.712028, eta=81.619800, lbar=3.437985, sigma=0.221639
+[14] iter=16 seed=1249 obj=67.476448 | tau=115.038669, eta=79.688500, lbar=3.175340, sigma=0.429928
+[15] iter=21 seed=1254 obj=68.359740 | tau=109.775929, eta=87.579400, lbar=3.390486, sigma=0.365281
+[16] iter=22 seed=1255 obj=66.628017 | tau=105.395878, eta=87.003400, lbar=3.384364, sigma=0.348575
+[17] iter=23 seed=1256 obj=69.015335 | tau=118.888425, eta=80.307400, lbar=3.330644, sigma=0.370752
+[18] iter=24 seed=1257 obj=69.482418 | tau=115.733690, eta=84.859400, lbar=3.439464, sigma=0.372702
+[19] iter=25 seed=1258 obj=63.598999 | tau=91.128532, eta=92.614100, lbar=3.446081, sigma=0.217058
+[20] iter=26 seed=1259 obj=64.989023 | tau=105.110153, eta=82.535500, lbar=3.246272, sigma=0.377007
+[21] iter=27 seed=1260 obj=63.805650 | tau=87.869533, eta=96.408900, lbar=3.287916, sigma=0.342184
+[22] iter=29 seed=1262 obj=63.107686 | tau=93.295973, eta=88.931800, lbar=3.209154, sigma=0.302036
+[23] iter=30 seed=1263 obj=68.080993 | tau=127.516215, eta=69.016700, lbar=3.352147, sigma=0.350973
+[24] iter=31 seed=1264 obj=64.507579 | tau=92.037426, eta=94.336500, lbar=3.432106, sigma=0.368736
+[25] iter=33 seed=1266 obj=68.708559 | tau=129.109981, eta=69.265900, lbar=3.450474, sigma=0.329042
+[26] iter=34 seed=1267 obj=63.214826 | tau=88.283000, eta=94.328100, lbar=3.304327, sigma=0.381940
+[27] iter=35 seed=1268 obj=62.588446 | tau=85.960335, eta=94.831700, lbar=3.313881, sigma=0.259896
+[28] iter=36 seed=1269 obj=68.463368 | tau=123.211476, eta=74.476700, lbar=3.495043, sigma=0.284848
+[29] iter=37 seed=1270 obj=69.120952 | tau=121.112878, eta=78.348800, lbar=3.236094, sigma=0.434163
+[30] iter=38 seed=1271 obj=65.648699 | tau=102.468223, eta=87.130800, lbar=3.369954, sigma=0.369686
+[31] iter=39 seed=1272 obj=62.921598 | tau=94.259564, eta=87.552700, lbar=3.385698, sigma=0.355547

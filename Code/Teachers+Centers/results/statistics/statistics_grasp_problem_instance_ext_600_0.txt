@@ -5,20 +5,21 @@ Instance: problem_instance_ext_600_0.txt
 ---- STATS ----
 iterations: 8
 generated: 8
-feasible: 8
-failures: 0
+feasible: 7
+failures: 1
 inserted_into_pareto: 3
-fallback_used: 8
+fallback_used: 7
 pareto_size: 2
-elapsed_seconds: 300.13266587257385
+elapsed_seconds: 300.06833934783936
 alpha_rcl: 0.5
-local_improvements_total: 218
+local_improvements_total: 210
 constructive_max_attempts: 5
 constructive_time_limit_seconds: 30
 local_max_neighbors_per_pass: 1000
 local_max_improvements: 30
 use_random_fallback: True
 random_fallback_max_attempts: 50
+randomize_constructive_weights: True
 
 ---- SUMMARY ----
 max_tau: 112.807193
