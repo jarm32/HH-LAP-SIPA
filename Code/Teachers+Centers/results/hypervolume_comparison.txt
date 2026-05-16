@@ -1,53 +1,5 @@
 
 === HYPERVOLUME COMPARISON ===
-Instance: problem_instance_ext_50_0.txt
-Best algorithm: hh_lap_v0 (0.899168)
-
-Global mins: [8.265756 1.582100 0.462627 0.000000]
-Global maxs: [35.800645 26.646300 6.700035 1.090825]
-random: HV = 0.050786
-nsga3: HV = 0.341198
-grasp: HV = 0.399529
-hh_lap_v0: HV = 0.899168
-hh_lap_v1: HV = 0.447972
-
-=== HYPERVOLUME COMPARISON ===
-Instance: problem_instance_ext_50_1.txt
-Best algorithm: hh_lap_v0 (0.888093)
-
-Global mins: [5.813913 1.209900 0.333330 0.000000]
-Global maxs: [36.131774 25.777800 4.066887 1.379955]
-random: HV = 0.068065
-nsga3: HV = 0.281289
-grasp: HV = 0.465166
-hh_lap_v0: HV = 0.888093
-hh_lap_v1: HV = 0.487106
-
-=== HYPERVOLUME COMPARISON ===
-Instance: problem_instance_ext_50_2.txt
-Best algorithm: hh_lap_v0 (0.893865)
-
-Global mins: [5.197941 1.519800 0.289046 0.000000]
-Global maxs: [36.668036 25.334700 4.177680 0.852580]
-random: HV = 0.087025
-nsga3: HV = 0.516398
-grasp: HV = 0.483032
-hh_lap_v0: HV = 0.893865
-hh_lap_v1: HV = 0.586765
-
-=== HYPERVOLUME COMPARISON ===
-Instance: problem_instance_ext_50_3.txt
-Best algorithm: hh_lap_v0 (0.876307)
-
-Global mins: [6.074901 1.882300 0.554043 0.000000]
-Global maxs: [37.099351 25.729300 5.278852 1.000000]
-random: HV = 0.066278
-nsga3: HV = 0.343076
-grasp: HV = 0.427943
-hh_lap_v0: HV = 0.876307
-hh_lap_v1: HV = 0.402540
-
-=== HYPERVOLUME COMPARISON ===
 Instance: problem_instance_ext_200_0.txt
 Best algorithm: hh_lap_v0 (0.738653)
 
