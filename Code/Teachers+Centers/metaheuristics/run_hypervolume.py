@@ -1,144 +1,315 @@
-# Lee archivos de resultados generados por las heurísticas --> extrae sus frentes Pareto y calcula el hipervolumen para comparar la calidad de los algoritmos
-
-# cd C:\Code\VRAIN-practicas\Code\Teachers+Centers
-# python -m metaheuristics.run_hypervolume
+# -*- coding: utf-8 -*-
+# Lee los frentes Pareto generados por run_general.py en results/pareto/ y calcula el hipervolumen (algoritmo + instancia + run_id)
+# Después genera un resumen (algoritmo + instancia), con archivos de salida results/hypervolume/hypervolume_by_run.csv y results/hypervolume/hypervolume_summary.csv
 
 # Librerías
+import argparse
+import csv
+import glob
+import os
 import re
 import numpy as np
 
 from tools.hypervolume import normalize_for_hypervolume, compute_hypervolume_deap
 
 
-def load_pareto_from_txt(filepath):
-                        # ruta del archivo .txt de resultados generado por save_results_to_txt
-    """
-    Lee un archivo y extrae los puntos Pareto:
-    tau, eta, lbar, sigma
+ALGORITHMS = ["random", "nsga3", "grasp", "hh_lap_v0", "hh_lap_v1"]
 
-    Lee un archivo de resultados y extrae únicamente las líneas que contienen valores de soluciones Pareto
+# Se asegura de que existe el directorio
+def ensure_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+# Lee un CSV generado por run_general.py y extrae tau_sum, eta_sum, lbar_sum, sigma_sum
+def load_pareto_from_csv(filepath):
+    """
+    Lee un CSV generado por run_general.py y extrae:
+    tau_sum, eta_sum, lbar_sum, sigma_sum
     """
     points = []
 
-    # Patrón que busca las líneas de los objetivos
-    pattern = re.compile(
-        r"tau=([0-9eE+\-.]+),\s*"
-        r"eta=([0-9eE+\-.]+),\s*"
-        r"lbar=([0-9eE+\-.]+),\s*"
-        r"sigma=([0-9eE+\-.]+)"
-    )
-
     with open(filepath, "r", encoding="utf-8") as f:
-        
-        # Recorre el archivo línea por línea y comprueba si la línea contiene valores Pareto
-        for line in f:
-            match = pattern.search(line)
-            
-            # Si la línea coincide con el patrón, convierte los cuatro valores objetivo a float
-            if match:
-                tau = float(match.group(1))
-                eta = float(match.group(2))
-                lbar = float(match.group(3))
-                sigma = float(match.group(4))
-                points.append([tau, eta, lbar, sigma])
+        reader = csv.DictReader(f)
 
-    return np.asarray(points, dtype=float) # matriz NumPy donde cada fila es una solución Pareto y las columnas son [tau, eta, lbar, sigma]
+        for row in reader:
+            tau = float(row["tau_sum"])
+            eta = float(row["eta_sum"])
+            lbar = float(row["lbar_sum"])
+            sigma = float(row["sigma_sum"])
+            points.append([tau, eta, lbar, sigma])
 
+    return np.asarray(points, dtype=float)
 
-def compute_hv_from_result_files(files_by_algorithm):
-                                # diccionario que asocia cada algoritmo con su archivo de resultados
+# Extrae algoritmo, instancia y run_id de un nombre de archivo generado por run_general.py
+def parse_pareto_filename(filepath):
     """
-    Carga los frentes Pareto desde varios archivos, calcula cotas globales comunes 
-    y obtiene el hipervolumen de cada algoritmo
+    Espera nombres generados por run_general.py:
+
+    random__problem_instance_ext_200_0__run_00.csv
+    nsga3__problem_instance_ext_1000_3__run_29.csv
+
+    Devuelve:
+    algorithm, instance_name, run_id
     """
-    points_by_algorithm = {}
+    filename = os.path.basename(filepath)
 
-    # Carga el frente Pareto de cada archivo y lo guarda asociado al nombre del algoritmo
-    for alg, filepath in files_by_algorithm.items():
-        points = load_pareto_from_txt(filepath)
-        points_by_algorithm[alg] = points  
+    m = re.match(r"(.+)__(problem_instance_ext_\d+_\d+)__run_(\d+)\.csv$", filename)
 
-    # Filtra los frentes vacíos
-    all_non_empty = [p for p in points_by_algorithm.values() if len(p) > 0]
-    if not all_non_empty:
-        raise ValueError("No se han encontrado puntos Pareto en los archivos.")
+    if not m:
+        return None
 
-    # Une todos los puntos Pareto de todos los algoritmos y calcula los mínimos y máximos globales por objetivo
-    all_points = np.vstack(all_non_empty)
-    mins = all_points.min(axis=0)
-    maxs = all_points.max(axis=0)
+    algorithm = m.group(1)
+    instance_name = m.group(2) + ".txt"
+    run_id = int(m.group(3))
 
-    hv_by_algorithm = {}
-    
-    # Recorre cada algoritmo y su frente Pareto ya cargado
-    for alg, points in points_by_algorithm.items():
+    return algorithm, instance_name, run_id
 
-        # Si un algoritmo no tiene soluciones Pareto, se le asigna hipervolumen 0
-        if len(points) == 0:
-            hv_by_algorithm[alg] = 0.0
+# Extrae el número de estudiantes de un nombre de instancia
+def parse_n_students(instance_name):
+    m = re.search(r"problem_instance_ext_(\d+)_", instance_name)
+    if not m:
+        return None
+    return int(m.group(1))
+
+# Descubre todos los CSV de Pareto generados por run_general.py, filtrando por algoritmo y tamaño si se especifica
+def discover_pareto_files(pareto_dir, algorithms=None, sizes=None):
+    pattern = os.path.join(pareto_dir, "*.csv")
+    files = sorted(glob.glob(pattern))
+
+    records = []
+
+    algorithms_set = set(algorithms) if algorithms else None
+    sizes_set = set(sizes) if sizes else None
+
+    for filepath in files:
+        parsed = parse_pareto_filename(filepath)
+        if parsed is None:
             continue
-        
-        # Normaliza el frente del algoritmo usando las mismas cotas globales que el resto
-        normalized = normalize_for_hypervolume(points, mins, maxs)
 
-        # Calcula el hipervolumen del frente normalizado y lo guarda
-        hv_by_algorithm[alg] = compute_hypervolume_deap(normalized)
+        algorithm, instance_name, run_id = parsed
+        n_students = parse_n_students(instance_name)
 
-    return hv_by_algorithm, mins, maxs # hipervolumen de cada algoritmo, mínimos y máximos globales usados para normalizar
+        if algorithms_set is not None and algorithm not in algorithms_set:
+            continue
 
+        if sizes_set is not None and n_students not in sizes_set:
+            continue
+
+        records.append({
+            "algorithm": algorithm,
+            "instance": instance_name,
+            "n_students": n_students,
+            "run_id": run_id,
+            "filepath": filepath,
+        })
+
+    return records
+
+# Calcula cotas globales por instancia (Para que los hipervolúmenes de los 30 runs sean comparables, usamos las mismas cotas para todos los algoritmos y todos los runs de una misma instancia)
+def compute_instance_bounds(records):
+    bounds_by_instance = {}
+
+    instances = sorted(set(r["instance"] for r in records))
+
+    for instance in instances:
+        all_points = []
+
+        for r in records:
+            if r["instance"] != instance:
+                continue
+
+            points = load_pareto_from_csv(r["filepath"])
+            if len(points) > 0:
+                all_points.append(points)
+
+        if not all_points:
+            continue
+
+        merged = np.vstack(all_points)
+        mins = merged.min(axis=0)
+        maxs = merged.max(axis=0)
+
+        bounds_by_instance[instance] = {
+            "mins": mins,
+            "maxs": maxs,
+        }
+
+    return bounds_by_instance
+
+# Calcula HV para cada archivo: algoritmo + instancia + run_id
+def compute_hypervolume_by_run(records, bounds_by_instance):
+    """
+    Calcula HV para cada archivo:
+    algoritmo + instancia + run_id
+    """
+    rows = []
+
+    for r in records:
+        instance = r["instance"]
+
+        if instance not in bounds_by_instance:
+            hv = 0.0
+            n_points = 0
+            mins = ["", "", "", ""]
+            maxs = ["", "", "", ""]
+        else:
+            points = load_pareto_from_csv(r["filepath"])
+            n_points = len(points)
+
+            mins = bounds_by_instance[instance]["mins"]
+            maxs = bounds_by_instance[instance]["maxs"]
+
+            if n_points == 0:
+                hv = 0.0
+            else:
+                normalized = normalize_for_hypervolume(points, mins, maxs)
+                hv = compute_hypervolume_deap(normalized)
+
+        rows.append({
+            "algorithm": r["algorithm"],
+            "instance": r["instance"],
+            "n_students": r["n_students"],
+            "run_id": r["run_id"],
+            "pareto_points": n_points,
+            "hypervolume": float(hv),
+            "min_tau": float(mins[0]) if not isinstance(mins[0], str) else "",
+            "min_eta": float(mins[1]) if not isinstance(mins[1], str) else "",
+            "min_lbar": float(mins[2]) if not isinstance(mins[2], str) else "",
+            "min_sigma": float(mins[3]) if not isinstance(mins[3], str) else "",
+            "max_tau": float(maxs[0]) if not isinstance(maxs[0], str) else "",
+            "max_eta": float(maxs[1]) if not isinstance(maxs[1], str) else "",
+            "max_lbar": float(maxs[2]) if not isinstance(maxs[2], str) else "",
+            "max_sigma": float(maxs[3]) if not isinstance(maxs[3], str) else "",
+        })
+
+    return rows
+
+# Resume HV por algoritmo + instancia.
+def compute_summary(by_run_rows):
+    """
+    Resume HV por algoritmo + instancia.
+    """
+    groups = {}
+
+    for row in by_run_rows:
+        key = (row["algorithm"], row["instance"], row["n_students"])
+
+        if key not in groups:
+            groups[key] = []
+
+        groups[key].append(float(row["hypervolume"]))
+
+    summary_rows = []
+
+    for key in sorted(groups.keys()):
+        algorithm, instance, n_students = key
+        values = np.asarray(groups[key], dtype=float)
+
+        summary_rows.append({
+            "algorithm": algorithm,
+            "instance": instance,
+            "n_students": n_students,
+            "n_runs": len(values),
+            "mean_hv": float(np.mean(values)),
+            "std_hv": float(np.std(values)),
+            "min_hv": float(np.min(values)),
+            "max_hv": float(np.max(values)),
+        })
+
+    return summary_rows
+
+# Escribe un CSV con los fieldnames y rows dados
+def write_csv(path, fieldnames, rows):
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for row in rows:
+            writer.writerow(row)
 
 def main():
+    # Argumentos de la llamada
+    parser = argparse.ArgumentParser()
 
-    def format_array(values, decimals=6):
-        """
-        Formatea un array NumPy sin notación científica.
-        """
-        return "[" + " ".join(f"{v:.{decimals}f}" for v in values) + "]"
+    parser.add_argument(
+        "--results_dir",
+        default="../results",
+        help="Carpeta results generada por run_general.py",
+    )
 
+    parser.add_argument(
+        "--algorithms",
+        nargs="*",
+        default=ALGORITHMS,
+        help="Algoritmos a incluir",
+    )
 
-    # Archivo donde se guardará la comparación completa de hipervolumen
-    output_file = "results/hypervolume_comparison.txt"
-    
-    with open(output_file, "w", encoding="utf-8") as f:
-        for i in [5,20,40,60]:
-            for j in range(4):
-                instance = f"problem_instance_ext_{i}0_{j}.txt"
+    parser.add_argument(
+        "--sizes",
+        nargs="*",
+        type=int,
+        default=None,
+        help="Tamaños a incluir. Ejemplo: --sizes 200 400 600",
+    )
 
-                files_by_algorithm = {
-                    "random": f"results/statistics/statistics_randomsearch_{instance}",
-                    "nsga3": f"results/statistics/statistics_nsga3_{instance}",
-                    "grasp":f"results/statistics/statistics_grasp_{instance}",
-                    "hh_lap_v0":f"results/statistics/statistics_hh_lap_sipa_v0_{instance}",
-                    "hh_lap_v1":f"results/statistics/statistics_hh_lap_sipa_v1_{instance}"
-                }
+    args = parser.parse_args()
 
-                hv_by_algorithm, mins, maxs = compute_hv_from_result_files(files_by_algorithm)
+    results_dir = args.results_dir
+    pareto_dir = os.path.join(results_dir, "pareto")
+    output_dir = os.path.join(results_dir, "hypervolume")
 
-                # --- Cabecera de la instancia ---
-                # Mejor algoritmo para la instancia actual
-                best_alg, best_hv = max(hv_by_algorithm.items(), key=lambda x: x[1])
+    ensure_dir(output_dir)
 
-                # Formatear mins y maxs sin notación científica
-                mins_str = format_array(mins)
-                maxs_str = format_array(maxs)
+    records = discover_pareto_files(
+        pareto_dir=pareto_dir,
+        algorithms=args.algorithms,
+        sizes=args.sizes,
+    )
 
-                header = (
-                    "\n=== HYPERVOLUME COMPARISON ===\n"
-                    f"Instance: {instance}\n"
-                    f"Best algorithm: {best_alg} ({best_hv:.6f})\n\n"
-                    f"Global mins: {mins_str}\n"
-                    f"Global maxs: {maxs_str}\n"
-                )
+    if not records:
+        raise ValueError("No se encontraron CSV de Pareto en {}".format(pareto_dir))
 
-                print(header, end="")
-                f.write(header)
+    bounds_by_instance = compute_instance_bounds(records)
 
-                # Escribe siempre los algoritmos en el mismo orden para facilitar la comparación entre instancias
-                for alg in ["random", "nsga3", "grasp", "hh_lap_v0", "hh_lap_v1"]:
-                    hv = hv_by_algorithm.get(alg, 0.0)
-                    line = f"{alg}: HV = {hv:.6f}\n"
-                    print(line, end="")
-                    f.write(line)
+    by_run_rows = compute_hypervolume_by_run(records, bounds_by_instance)
+    summary_rows = compute_summary(by_run_rows)
+
+    by_run_path = os.path.join(output_dir, "hypervolume_by_run.csv")
+    summary_path = os.path.join(output_dir, "hypervolume_summary.csv")
+
+    by_run_fields = [
+        "algorithm",
+        "instance",
+        "n_students",
+        "run_id",
+        "pareto_points",
+        "hypervolume",
+        "min_tau",
+        "min_eta",
+        "min_lbar",
+        "min_sigma",
+        "max_tau",
+        "max_eta",
+        "max_lbar",
+        "max_sigma",
+    ]
+
+    summary_fields = [
+        "algorithm",
+        "instance",
+        "n_students",
+        "n_runs",
+        "mean_hv",
+        "std_hv",
+        "min_hv",
+        "max_hv",
+    ]
+
+    write_csv(by_run_path, by_run_fields, by_run_rows)
+    write_csv(summary_path, summary_fields, summary_rows)
+
+    print("Hypervolume by run saved in: {}".format(by_run_path))
+    print("Hypervolume summary saved in: {}".format(summary_path))
 
 
 if __name__ == "__main__":
