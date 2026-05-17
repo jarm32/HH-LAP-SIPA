@@ -634,13 +634,13 @@ def parse_args(argv):
 
     parser.add_argument(
         "--instances_dir",
-        default="../instances",
+        default="instances",
         help="Carpeta con las instancias .txt",
     )
 
     parser.add_argument(
         "--results_dir",
-        default="../results",
+        default="results",
         help="Carpeta donde guardar resultados",
     )
 
