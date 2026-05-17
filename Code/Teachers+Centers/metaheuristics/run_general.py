@@ -1,20 +1,8 @@
 # -*- coding: utf-8 -*-
 # Lanzador general de experimentos SIPA --> Ejecuta los algoritmos sobre varias instancias, con 30 repeticiones, guardando estadísticas, frente de Pareto, asignaciones y logs
+# 30 ejecuciones para cada instancia por algoritmo (30*20*5 = 3000 ejecuciones)
 
-"""
-Tiempos:
-1000 - 20 min por ejecución
-800 - 15 min por ejecución
-600 - 10 min por ejecución
-400 - 7.5 min por ejecución
-200 - 5 min por ejecución
-
-30 ejecuciones para cada instancia por algoritmo (30*20*5 = 3000 ejecuciones)
-"""
-
-
-from __future__ import print_function
-
+# Librerías
 import argparse
 import csv
 import glob
@@ -32,11 +20,14 @@ from tools.multiobjective_search import random_search_pareto
 
 from metaheuristics.scripts.random_feasible_fixing import generate_random_feasible_fixing
 from metaheuristics.scripts.ga_nsga3 import run_nsga3
+from metaheuristics.scripts.grasp import run_grasp
+from metaheuristics.scripts.hh_lap_sipa_v0 import run_hh_lap_sipa as run_hh_lap_sipa_v0
+from metaheuristics.scripts.hh_lap_sipa_v1 import run_hh_lap_sipa_v1
 
 
-# ============================================================
+# ----------------------------------------
 # Configuración general
-# ============================================================
+# ----------------------------------------
 
 TIME_LIMITS_SECONDS = {
     200: 300,     # 5 min
@@ -55,24 +46,24 @@ DEFAULT_WEIGHTS = ObjectiveWeights(
     delta=0.10,
 )
 
-# Semilla base. Cada ejecución tendrá una semilla derivada:
-# seed = BASE_SEED + algo dependiente de algoritmo/instancia/run
+# Semilla base, con cada ejecución --> seed = BASE_SEED + algo dependiente de algoritmo/instancia/run
 BASE_SEED = 1234
 
 
-# ============================================================
+# ----------------------------------------
 # Utilidades generales
-# ============================================================
+# ----------------------------------------
 
+# Devuelve la fecha/hora actual como string formateado, para logs y resultados
 def now_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-
+# Asegura que una carpeta exista, si no existe la crea
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-
+#  Agrega una fila a un CSV, creando el archivo con encabezados si no existe
 def append_csv_row(path, fieldnames, row):
     file_exists = os.path.exists(path)
 
@@ -84,12 +75,12 @@ def append_csv_row(path, fieldnames, row):
 
         writer.writerow(row)
 
-
+# Escribe un diccionario a un archivo JSON con indentación
 def write_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, sort_keys=True)
 
-
+# Escribe una línea en el log, con timestamp, y la imprime por consola
 def log_line(log_path, message):
     line = "[{}] {}".format(now_str(), message)
     print(line)
@@ -97,7 +88,7 @@ def log_line(log_path, message):
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(line + "\n")
 
-
+# Extrae el número de estudiantes desde nombres como:
 def parse_n_students_from_instance_name(instance_name):
     """
     Extrae el número de estudiantes desde nombres como:
@@ -109,7 +100,7 @@ def parse_n_students_from_instance_name(instance_name):
         raise ValueError("No se pudo extraer n_students del nombre: {}".format(instance_name))
     return int(m.group(1))
 
-
+# Construye la semilla
 def build_seed(algorithm_name, instance_name, run_id):
     """
     Semilla reproducible y distinta para cada algoritmo/instancia/run.
@@ -123,7 +114,7 @@ def build_seed(algorithm_name, instance_name, run_id):
 
     return acc
 
-
+# Checkpoint para marcar que una ejecución ya se hizo, con formato --> checkpoints/random__problem_instance_ext_200_0__run_00.done
 def result_done_marker(results_dir, algorithm_name, instance_name, run_id):
     checkpoints_dir = os.path.join(results_dir, "checkpoints")
     ensure_dir(checkpoints_dir)
@@ -133,20 +124,20 @@ def result_done_marker(results_dir, algorithm_name, instance_name, run_id):
 
     return os.path.join(checkpoints_dir, filename)
 
-
+# Verifica si el checkpoint de done existe para esa ejecución
 def is_done(results_dir, algorithm_name, instance_name, run_id):
     return os.path.exists(result_done_marker(results_dir, algorithm_name, instance_name, run_id))
 
-
+# Crea el checkpoint de done para esa ejecución
 def mark_done(results_dir, algorithm_name, instance_name, run_id):
     path = result_done_marker(results_dir, algorithm_name, instance_name, run_id)
     with open(path, "w", encoding="utf-8") as f:
         f.write("done_at={}\n".format(now_str()))
 
 
-# ============================================================
+# ----------------------------------------
 # Guardado de resultados
-# ============================================================
+# ----------------------------------------
 
 STATS_FIELDS = [
     "timestamp",
@@ -187,7 +178,7 @@ PARETO_FIELDS = [
     "sigma_sum",
 ]
 
-
+# Guarda las estadísticas de una ejecución en un CSV acumulativo, con una fila por ejecución
 def save_stats(results_dir, algorithm_name, instance_name, n_students,
                run_id, seed, time_limit_seconds, result, status, error_message):
     statistics_dir = os.path.join(results_dir, "statistics")
@@ -224,7 +215,7 @@ def save_stats(results_dir, algorithm_name, instance_name, n_students,
 
     append_csv_row(stats_path, STATS_FIELDS, row)
 
-
+# Guarda el frente de Pareto de una ejecución en un CSV, con una fila por solución del frente
 def save_pareto(results_dir, algorithm_name, instance_name, n_students,
                 run_id, seed, result):
     pareto_dir = os.path.join(results_dir, "pareto")
@@ -263,7 +254,7 @@ def save_pareto(results_dir, algorithm_name, instance_name, n_students,
 
             writer.writerow(row)
 
-
+# Guarda las asignaciones de cada solución del frente de Pareto en un JSON, con toda la información relevante para análisis posteriores
 def solution_to_assignment_dict(item, solution_id):
     sol = item.sol
 
@@ -279,7 +270,7 @@ def solution_to_assignment_dict(item, solution_id):
         "professor_load": list(sol.professor_load),
     }
 
-
+# Guarda las asignaciones de cada solución del frente de Pareto en un JSON, con toda la información relevante para análisis posteriores
 def save_assignments(results_dir, algorithm_name, instance_name, n_students,
                      run_id, seed, result):
     assignments_dir = os.path.join(results_dir, "assignments")
@@ -309,9 +300,9 @@ def save_assignments(results_dir, algorithm_name, instance_name, n_students,
 
     write_json(assignments_path, data)
 
-
+# Guarda el resultado completo de una ejecución, incluyendo estadísticas, frente de Pareto y asignaciones
 def save_full_result(results_dir, algorithm_name, instance_name, n_students,
-                     run_id, seed, time_limit_seconds, result):
+                     run_id, seed, time_limit_seconds, result, save_assignments_flag=False):
     save_pareto(
         results_dir=results_dir,
         algorithm_name=algorithm_name,
@@ -322,15 +313,16 @@ def save_full_result(results_dir, algorithm_name, instance_name, n_students,
         result=result,
     )
 
-    save_assignments(
-        results_dir=results_dir,
-        algorithm_name=algorithm_name,
-        instance_name=instance_name,
-        n_students=n_students,
-        run_id=run_id,
-        seed=seed,
-        result=result,
-    )
+    if save_assignments_flag:
+        save_assignments(
+            results_dir=results_dir,
+            algorithm_name=algorithm_name,
+            instance_name=instance_name,
+            n_students=n_students,
+            run_id=run_id,
+            seed=seed,
+            result=result,
+        )
 
     save_stats(
         results_dir=results_dir,
@@ -346,10 +338,11 @@ def save_full_result(results_dir, algorithm_name, instance_name, n_students,
     )
 
 
-# ============================================================
+# ----------------------------------------
 # Algoritmos
-# ============================================================
+# ----------------------------------------
 
+# Ejecuta Random Search con parámetros predefinidos, y opciones de normalización para asegurar comparabilidad entre instancias
 def execute_random(problem, time_limit_seconds, seed, verbose):
     return random_search_pareto(
         problem=problem,
@@ -362,10 +355,10 @@ def execute_random(problem, time_limit_seconds, seed, verbose):
         base_seed=seed,
         normalize_student_dist=True,
         normalize_supervision_dist=True,
-        verbose=verbose,
+        verbose=verbose
     )
 
-
+# Ejecuta NSGA-III con parámetros predefinidos, y opciones de normalización y referencia para asegurar diversidad en el frente de Pareto
 def execute_nsga3(problem, time_limit_seconds, seed, verbose):
     return run_nsga3(
         problem=problem,
@@ -381,27 +374,80 @@ def execute_nsga3(problem, time_limit_seconds, seed, verbose):
         normalize_student_dist=True,
         normalize_supervision_dist=True,
         ref_points_p=5,
-        verbose=verbose,
+        verbose=verbose
+    )
+
+# Ejecuta GRASP con parámetros predefinidos
+def execute_grasp(problem, time_limit_seconds, seed, verbose):
+    return run_grasp(
+        problem=problem,
+        weights=DEFAULT_WEIGHTS,
+        alpha_rcl=0.5,
+        time_limit_seconds=time_limit_seconds,
+        max_iterations=None,
+        max_pareto_size=None,
+        base_seed=seed,
+        normalize_student_dist=True,
+        normalize_supervision_dist=True,
+        constructive_max_attempts=5,
+        constructive_time_limit_seconds=30,
+        use_random_fallback=True,
+        random_fallback_max_attempts=50,
+        local_max_neighbors_per_pass=1000,
+        local_max_improvements=30,
+        verbose=verbose
+    )
+
+# Ejecuta HH-LAP-SIPA v0
+def execute_hh_lap_v0(problem, time_limit_seconds, seed, verbose):
+    return run_hh_lap_sipa_v0(
+        problem=problem,
+        weights=DEFAULT_WEIGHTS,
+        time_limit_seconds=time_limit_seconds,
+        max_iterations=None,
+        max_pareto_size=None,
+        base_seed=seed,
+        placement_max_attempts=50,
+        lap_solver="lapjv",
+        normalize_student_dist=True,
+        normalize_supervision_dist=True,
+        professor_lbar_weight=1.0,
+        professor_sigma_weight=1.0,
+        verbose=verbose
+    )
+
+# Ejecuta HH-LAP-SIPA v1
+def execute_hh_lap_v1(problem, time_limit_seconds, seed, verbose):
+    return run_hh_lap_sipa_v1(
+        problem=problem,
+        weights=DEFAULT_WEIGHTS,
+        time_limit_seconds=time_limit_seconds,
+        max_iterations=None,
+        max_pareto_size=None,
+        base_seed=seed,
+        placement_max_attempts=50,
+        lap_solver="lapjv",
+        normalize_student_dist=True,
+        normalize_supervision_dist=True,
+        max_path_relinking_steps=10,
+        verbose=verbose
     )
 
 
 ALGORITHM_REGISTRY = {
     "random": execute_random,
     "nsga3": execute_nsga3,
-
-    # Aquí añadiremos el resto cuando confirmemos sus funciones:
-    # "grasp": execute_grasp,
-    # "hh_lap": execute_hh_lap,
-    # "vns": execute_vns,
-    # "sa": execute_sa,
-    # "ts": execute_ts,
+    "grasp": execute_grasp,
+    "hh_lap_v0": execute_hh_lap_v0,
+    "hh_lap_v1": execute_hh_lap_v1,
 }
 
 
-# ============================================================
+# ----------------------------------------
 # Ejecución principal
-# ============================================================
+# ----------------------------------------
 
+# Obtiene las rutas de las instancias a ejecutar, filtrando por tamaños si se especifican
 def get_instances(instances_dir, selected_sizes):
     pattern = os.path.join(instances_dir, "problem_instance_ext_*.txt")
     paths = sorted(glob.glob(pattern))
@@ -420,7 +466,7 @@ def get_instances(instances_dir, selected_sizes):
 
     return paths
 
-
+# Valida que los algoritmos solicitados estén registrados en ALGORITHM_REGISTRY
 def validate_algorithms(algorithm_names):
     for name in algorithm_names:
         if name not in ALGORITHM_REGISTRY:
@@ -431,7 +477,7 @@ def validate_algorithms(algorithm_names):
                 )
             )
 
-
+# Función principal que ejecuta los experimentos según los argumentos, iterando sobre algoritmos, instancias y repeticiones, con manejo de logs, checkpoints y guardado de resultados
 def run_experiment(args):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -520,7 +566,7 @@ def run_experiment(args):
                         problem=problem,
                         time_limit_seconds=time_limit_seconds,
                         seed=seed,
-                        verbose=args.verbose,
+                        verbose=args.verbose
                     )
 
                     save_full_result(
@@ -532,6 +578,7 @@ def run_experiment(args):
                         seed=seed,
                         time_limit_seconds=time_limit_seconds,
                         result=result,
+                        save_assignments_flag=args.save_assignments
                     )
 
                     mark_done(results_dir, algorithm_name, instance_name, run_id)
@@ -581,7 +628,7 @@ def run_experiment(args):
 
     log_line(log_path, "Fin de run_general.py")
 
-
+# Argumentos de la llamada
 def parse_args(argv):
     parser = argparse.ArgumentParser()
 
@@ -641,6 +688,12 @@ def parse_args(argv):
         "--stop_on_error",
         action="store_true",
         help="Detener todo si una ejecución falla",
+    )
+
+    parser.add_argument(
+        "--save_assignments",
+        action="store_true",
+        help="Guardar asignaciones completas del Pareto en JSON. Por defecto no se guardan.",
     )
 
     return parser.parse_args(argv)
