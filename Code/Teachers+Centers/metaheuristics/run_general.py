@@ -32,9 +32,9 @@ from metaheuristics.scripts.hh_lap_sipa_v1 import run_hh_lap_sipa_v1
 TIME_LIMITS_SECONDS = {
     200: 300,     # 5 min
     400: 450,     # 7.5 min
-    600: 600,     # 10 min
-    800: 900,     # 15 min
-    1000: 1200,   # 20 min
+    600: 450,     # 7.5 min
+    800: 600,     # 10 min
+    1000: 600,    # 10 min
 }
 
 DEFAULT_RUNS = 30
