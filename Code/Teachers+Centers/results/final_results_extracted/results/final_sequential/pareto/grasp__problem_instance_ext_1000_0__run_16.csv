@@ -1,0 +1,2 @@
+timestamp,algorithm,instance,n_students,run_id,solution_id,seed,iteration,objective_value,tau_sum,eta_sum,lbar_sum,sigma_sum
+2026-05-25 13:48:45,grasp,problem_instance_ext_1000_0.txt,1000,16,0,204061871,1,77.99551195188023,170.93625085517135,53.0064,1.9041506551851286,0.03585716392708316
