@@ -1,0 +1,2 @@
+n_instances,lite_mean_hv,intensive_mean_hv,mean_diff_lite_minus_intensive,std_diff_lite_minus_intensive,lite_wins,intensive_wins,mean_relative_diff_pct
+20,0.5710778316893177,0.3608836999771371,0.21019413171218065,0.37950207900001653,15,5,85.79400715132101

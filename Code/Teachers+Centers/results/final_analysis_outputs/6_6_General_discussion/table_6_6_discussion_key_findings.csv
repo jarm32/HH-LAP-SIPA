@@ -1,0 +1,11 @@
+finding,value
+Total algorithms compared,5
+Total instances analyzed,20
+Best overall algorithm by mean hypervolume,HH-LAP-SIPA-Lite
+Best overall mean hypervolume,0.5710778316893177
+Best baseline algorithm by mean hypervolume,GRASP
+Best baseline mean hypervolume,0.09915942071623787
+Instances won by proposed HH-LAP-SIPA variants,20
+Instances won by baselines,0
+Lite wins over Intensive,15
+Intensive wins over Lite,5
