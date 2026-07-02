@@ -1,0 +1,6 @@
+algorithm,algorithm_label,avg_rank,std_rank
+hh_lap_v0,HH-LAP-SIPA-Lite,1.35,0.7451598203705945
+hh_lap_v1,HH-LAP-SIPA-Intensive,1.8,0.523148363780597
+nsga3,NSGA-III,3.15,0.3663475485325232
+random,Random,4.2,0.41039134083406187
+grasp,GRASP,4.5,1.0513149660756937
