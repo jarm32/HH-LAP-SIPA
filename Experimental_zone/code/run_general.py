@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Lanzador general de experimentos SIPA --> Ejecuta los algoritmos sobre varias instancias, con 30 repeticiones, guardando estadísticas, frente de Pareto, asignaciones y logs
-# 30 ejecuciones para cada instancia por algoritmo (30*20*5 = 3000 ejecuciones)
+# 30 ejecuciones para cada instancia por algoritmo (30*20*5 = 3000 ejecuciones) --- Corregido
 
 # Librerías
 import argparse
@@ -114,23 +114,64 @@ def build_seed(algorithm_name, instance_name, run_id):
 
     return acc
 
+def build_run_suffix(run_id, filename_time_limit_seconds=None):
+    """
+    Construye el sufijo común de una ejecución.
+
+    - Modo estándar: run_00
+    - Modo multi-tiempo: t300s__run_00
+
+    El modo estándar mantiene la compatibilidad con los nombres anteriores.
+    """
+    if filename_time_limit_seconds is None:
+        return "run_{:02d}".format(run_id)
+
+    return "t{}s__run_{:02d}".format(filename_time_limit_seconds, run_id)
+
+
+def get_time_limits_for_instance(n_students, custom_time_limits):
+    """
+    Devuelve la lista de límites de tiempo que se deben ejecutar para una instancia.
+
+    - Si custom_time_limits es None, usa TIME_LIMITS_SECONDS[n_students].
+    - Si custom_time_limits no es None, usa esos tiempos para cualquier tamaño seleccionado.
+    """
+    if custom_time_limits is not None:
+        return custom_time_limits
+
+    if n_students not in TIME_LIMITS_SECONDS:
+        raise ValueError(
+            "No hay tiempo definido para n_students={}".format(n_students)
+        )
+
+    return [TIME_LIMITS_SECONDS[n_students]]
+
 # Checkpoint para marcar que una ejecución ya se hizo, con formato --> checkpoints/random__problem_instance_ext_200_0__run_00.done
-def result_done_marker(results_dir, algorithm_name, instance_name, run_id):
+def result_done_marker(results_dir, algorithm_name, instance_name, run_id, filename_time_limit_seconds=None):
     checkpoints_dir = os.path.join(results_dir, "checkpoints")
     ensure_dir(checkpoints_dir)
 
     safe_instance = instance_name.replace(".txt", "")
-    filename = "{}__{}__run_{:02d}.done".format(algorithm_name, safe_instance, run_id)
+    suffix = build_run_suffix(run_id, filename_time_limit_seconds)
+
+    filename = "{}__{}__{}.done".format(
+        algorithm_name,
+        safe_instance,
+        suffix
+    )
 
     return os.path.join(checkpoints_dir, filename)
 
 # Verifica si el checkpoint de done existe para esa ejecución
-def is_done(results_dir, algorithm_name, instance_name, run_id):
-    return os.path.exists(result_done_marker(results_dir, algorithm_name, instance_name, run_id))
+def is_done(results_dir, algorithm_name, instance_name, run_id,
+            filename_time_limit_seconds=None):
+    return os.path.exists(result_done_marker(results_dir, algorithm_name, instance_name, run_id, filename_time_limit_seconds))
 
 # Crea el checkpoint de done para esa ejecución
-def mark_done(results_dir, algorithm_name, instance_name, run_id):
-    path = result_done_marker(results_dir, algorithm_name, instance_name, run_id)
+def mark_done(results_dir, algorithm_name, instance_name, run_id,
+              filename_time_limit_seconds=None):
+    path = result_done_marker(results_dir, algorithm_name, instance_name, run_id, filename_time_limit_seconds)
+
     with open(path, "w", encoding="utf-8") as f:
         f.write("done_at={}\n".format(now_str()))
 
@@ -217,14 +258,17 @@ def save_stats(results_dir, algorithm_name, instance_name, n_students,
 
 # Guarda el frente de Pareto de una ejecución en un CSV, con una fila por solución del frente
 def save_pareto(results_dir, algorithm_name, instance_name, n_students,
-                run_id, seed, result):
+                run_id, seed, result, filename_time_limit_seconds=None):
     pareto_dir = os.path.join(results_dir, "pareto")
     ensure_dir(pareto_dir)
 
     safe_instance = instance_name.replace(".txt", "")
+
+    suffix = build_run_suffix(run_id, filename_time_limit_seconds)
+
     pareto_path = os.path.join(
         pareto_dir,
-        "{}__{}__run_{:02d}.csv".format(algorithm_name, safe_instance, run_id)
+        "{}__{}__{}.csv".format(algorithm_name, safe_instance, suffix)
     )
 
     pareto_set = result.get("pareto_set", [])
@@ -272,14 +316,17 @@ def solution_to_assignment_dict(item, solution_id):
 
 # Guarda las asignaciones de cada solución del frente de Pareto en un JSON, con toda la información relevante para análisis posteriores
 def save_assignments(results_dir, algorithm_name, instance_name, n_students,
-                     run_id, seed, result):
+                     run_id, seed, result, time_limit_seconds=None, filename_time_limit_seconds=None):
     assignments_dir = os.path.join(results_dir, "assignments")
     ensure_dir(assignments_dir)
 
     safe_instance = instance_name.replace(".txt", "")
+
+    suffix = build_run_suffix(run_id, filename_time_limit_seconds)
+
     assignments_path = os.path.join(
         assignments_dir,
-        "{}__{}__run_{:02d}.json".format(algorithm_name, safe_instance, run_id)
+        "{}__{}__{}.json".format(algorithm_name, safe_instance, suffix)
     )
 
     pareto_set = result.get("pareto_set", [])
@@ -290,6 +337,7 @@ def save_assignments(results_dir, algorithm_name, instance_name, n_students,
         "n_students": n_students,
         "run_id": run_id,
         "seed": seed,
+        "time_limit_seconds": time_limit_seconds,
         "created_at": now_str(),
         "pareto_size": len(pareto_set),
         "solutions": [],
@@ -302,7 +350,7 @@ def save_assignments(results_dir, algorithm_name, instance_name, n_students,
 
 # Guarda el resultado completo de una ejecución, incluyendo estadísticas, frente de Pareto y asignaciones
 def save_full_result(results_dir, algorithm_name, instance_name, n_students,
-                     run_id, seed, time_limit_seconds, result, save_assignments_flag=False):
+                     run_id, seed, time_limit_seconds, result, save_assignments_flag=False, filename_time_limit_seconds=None):
     save_pareto(
         results_dir=results_dir,
         algorithm_name=algorithm_name,
@@ -311,6 +359,7 @@ def save_full_result(results_dir, algorithm_name, instance_name, n_students,
         run_id=run_id,
         seed=seed,
         result=result,
+        filename_time_limit_seconds=filename_time_limit_seconds,
     )
 
     if save_assignments_flag:
@@ -322,6 +371,8 @@ def save_full_result(results_dir, algorithm_name, instance_name, n_students,
             run_id=run_id,
             seed=seed,
             result=result,
+            time_limit_seconds=time_limit_seconds,
+            filename_time_limit_seconds=filename_time_limit_seconds,
         )
 
     save_stats(
@@ -516,7 +567,23 @@ def run_experiment(args):
     log_line(log_path, "Dry run: {}".format(args.dry_run))
     log_line(log_path, "Número de instancias encontradas: {}".format(len(instance_paths)))
 
-    total_jobs = len(algorithm_names) * len(instance_paths) * args.runs
+    custom_time_limits = args.time_limits_seconds
+
+    if custom_time_limits is not None:
+        for t in custom_time_limits:
+            if t <= 0:
+                raise ValueError("Todos los time_limits_seconds deben ser > 0. Valor recibido: {}".format(t))
+
+        log_line(
+            log_path,
+            "Time limits personalizados: {}".format(", ".join(str(t) for t in custom_time_limits))
+        )
+
+        total_jobs = len(algorithm_names) * len(instance_paths) * args.runs * len(custom_time_limits)
+    else:
+        log_line(log_path, "Time limits: TIME_LIMITS_SECONDS por tamaño")
+        total_jobs = len(algorithm_names) * len(instance_paths) * args.runs
+
     job_counter = 0
 
     for algorithm_name in algorithm_names:
@@ -526,105 +593,121 @@ def run_experiment(args):
             instance_name = os.path.basename(instance_path)
             n_students = parse_n_students_from_instance_name(instance_name)
 
-            if n_students not in TIME_LIMITS_SECONDS:
-                raise ValueError(
-                    "No hay tiempo definido para n_students={}".format(n_students)
+            time_limits_for_instance = get_time_limits_for_instance(
+                n_students=n_students,
+                custom_time_limits=custom_time_limits
+            )
+
+            for time_limit_seconds in time_limits_for_instance:
+                filename_time_limit_seconds = (
+                    time_limit_seconds if custom_time_limits is not None else None
                 )
 
-            time_limit_seconds = TIME_LIMITS_SECONDS[n_students]
+                for run_id in range(args.runs):
+                    job_counter += 1
+                    seed = build_seed(algorithm_name, instance_name, run_id)
 
-            for run_id in range(args.runs):
-                job_counter += 1
-                seed = build_seed(algorithm_name, instance_name, run_id)
-
-                prefix = "[{}/{}] {} | {} | run {:02d} | {}s".format(
-                    job_counter,
-                    total_jobs,
-                    algorithm_name,
-                    instance_name,
-                    run_id,
-                    time_limit_seconds,
-                )
-
-                if args.resume and is_done(results_dir, algorithm_name, instance_name, run_id):
-                    log_line(log_path, "{} | SKIP resume".format(prefix))
-                    continue
-
-                if args.dry_run:
-                    log_line(log_path, "{} | DRY RUN".format(prefix))
-                    continue
-
-                log_line(log_path, "{} | START | seed={}".format(prefix, seed))
-
-                result = None
-                start_job = time.time()
-
-                try:
-                    problem = load_instance(instance_path)
-
-                    result = execute_fn(
-                        problem=problem,
-                        time_limit_seconds=time_limit_seconds,
-                        seed=seed,
-                        verbose=args.verbose
+                    prefix = "[{}/{}] {} | {} | run {:02d} | {}s".format(
+                        job_counter,
+                        total_jobs,
+                        algorithm_name,
+                        instance_name,
+                        run_id,
+                        time_limit_seconds,
                     )
 
-                    save_full_result(
-                        results_dir=results_dir,
-                        algorithm_name=algorithm_name,
-                        instance_name=instance_name,
-                        n_students=n_students,
-                        run_id=run_id,
-                        seed=seed,
-                        time_limit_seconds=time_limit_seconds,
-                        result=result,
-                        save_assignments_flag=args.save_assignments
-                    )
+                    if args.resume and is_done(
+                        results_dir,
+                        algorithm_name,
+                        instance_name,
+                        run_id,
+                        filename_time_limit_seconds=filename_time_limit_seconds
+                    ):
+                        log_line(log_path, "{} | SKIP resume".format(prefix))
+                        continue
 
-                    mark_done(results_dir, algorithm_name, instance_name, run_id)
+                    if args.dry_run:
+                        log_line(log_path, "{} | DRY RUN".format(prefix))
+                        continue
 
-                    elapsed = time.time() - start_job
-                    pareto_size = len(result.get("pareto_set", []))
+                    log_line(log_path, "{} | START | seed={}".format(prefix, seed))
 
-                    log_line(
-                        log_path,
-                        "{} | OK | elapsed={:.2f}s | pareto_size={}".format(
-                            prefix,
-                            elapsed,
-                            pareto_size,
+                    result = None
+                    start_job = time.time()
+
+                    try:
+                        problem = load_instance(instance_path)
+
+                        result = execute_fn(
+                            problem=problem,
+                            time_limit_seconds=time_limit_seconds,
+                            seed=seed,
+                            verbose=args.verbose
                         )
-                    )
 
-                except Exception as e:
-                    elapsed = time.time() - start_job
-                    error_message = "{}".format(e)
-
-                    log_line(
-                        log_path,
-                        "{} | ERROR | elapsed={:.2f}s | {}".format(
-                            prefix,
-                            elapsed,
-                            error_message,
+                        save_full_result(
+                            results_dir=results_dir,
+                            algorithm_name=algorithm_name,
+                            instance_name=instance_name,
+                            n_students=n_students,
+                            run_id=run_id,
+                            seed=seed,
+                            time_limit_seconds=time_limit_seconds,
+                            result=result,
+                            save_assignments_flag=args.save_assignments,
+                            filename_time_limit_seconds=filename_time_limit_seconds
                         )
-                    )
 
-                    log_line(log_path, traceback.format_exc())
+                        mark_done(
+                            results_dir,
+                            algorithm_name,
+                            instance_name,
+                            run_id,
+                            filename_time_limit_seconds=filename_time_limit_seconds
+                        )
 
-                    save_stats(
-                        results_dir=results_dir,
-                        algorithm_name=algorithm_name,
-                        instance_name=instance_name,
-                        n_students=n_students,
-                        run_id=run_id,
-                        seed=seed,
-                        time_limit_seconds=time_limit_seconds,
-                        result=result,
-                        status="error",
-                        error_message=error_message,
-                    )
+                        elapsed = time.time() - start_job
+                        pareto_size = len(result.get("pareto_set", []))
 
-                    if args.stop_on_error:
-                        raise
+                        log_line(
+                            log_path,
+                            "{} | OK | elapsed={:.2f}s | pareto_size={}".format(
+                                prefix,
+                                elapsed,
+                                pareto_size,
+                            )
+                        )
+
+                    except Exception as e:
+                        elapsed = time.time() - start_job
+                        error_message = "{}".format(e)
+
+                        log_line(
+                            log_path,
+                            "{} | ERROR | elapsed={:.2f}s | {}".format(
+                                prefix,
+                                elapsed,
+                                error_message,
+                            )
+                        )
+
+                        log_line(log_path, traceback.format_exc())
+
+                        save_stats(
+                            results_dir=results_dir,
+                            algorithm_name=algorithm_name,
+                            instance_name=instance_name,
+                            n_students=n_students,
+                            run_id=run_id,
+                            seed=seed,
+                            time_limit_seconds=time_limit_seconds,
+                            result=result,
+                            status="error",
+                            error_message=error_message,
+                        )
+
+                        if args.stop_on_error:
+                            raise
 
     log_line(log_path, "Fin de run_general.py")
 
@@ -664,6 +747,18 @@ def parse_args(argv):
         type=int,
         default=None,
         help="Filtrar por tamaños. Ejemplo: --sizes 200 400 600",
+    )
+
+    parser.add_argument(
+        "--time_limits_seconds",
+        nargs="+",
+        type=int,
+        default=None,
+        help=(
+            "Límites de tiempo personalizados en segundos. "
+            "Si no se indica, se usa TIME_LIMITS_SECONDS según el tamaño de cada instancia. "
+            "Ejemplo: --time_limits_seconds 300 600 900 1200"
+        ),
     )
 
     parser.add_argument(
