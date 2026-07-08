@@ -136,10 +136,10 @@ This is the simplest command. It keeps the process attached to the terminal:
 
 ```bash
 python code/run_general.py \
---runs 30 \
---algorithms random nsga3 grasp hh_lap_v0 hh_lap_v1 \
---results_dir results/final_sequential \
---resume
+  --runs 30 \
+  --algorithms random nsga3 grasp hh_lap_v0 hh_lap_v1 \
+  --results_dir results/final_sequential \
+  --resume
 ```
 
 Background execution option:
@@ -148,10 +148,11 @@ Background execution option:
 mkdir -p results/logs
 
 nohup python code/run_general.py \
---runs 30 \
---algorithms random nsga3 grasp hh_lap_v0 hh_lap_v1 \
---results_dir results/final_sequential \
---resume &
+  --runs 30 \
+  --algorithms random nsga3 grasp hh_lap_v0 hh_lap_v1 \
+  --results_dir results/final_sequential \
+  --resume \
+  > results/logs/final_sequential.out 2>&1 &
 ```
 
 Meaning of the main options:
