@@ -1,0 +1,980 @@
+[2026-07-09 00:44:19] Inicio de run_general.py
+[2026-07-09 00:44:19] Instancias dir: /home/gti/jose_antonio_sipa_experiments/instances
+[2026-07-09 00:44:19] Results dir: /home/gti/jose_antonio_sipa_experiments/results/time_budget_1000
+[2026-07-09 00:44:19] Algoritmos: hh_lap_v0, hh_lap_v1
+[2026-07-09 00:44:19] Runs por algoritmo/instancia: 10
+[2026-07-09 00:44:19] Resume: True
+[2026-07-09 00:44:19] Dry run: True
+[2026-07-09 00:44:19] Número de instancias encontradas: 4
+[2026-07-09 00:44:19] Time limits personalizados: 300, 600, 900, 1200
+[2026-07-09 00:44:19] [1/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [2/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [3/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [4/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [5/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [6/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [7/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [8/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [9/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [10/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [11/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [12/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [13/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [14/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [15/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [16/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [17/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [18/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [19/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [20/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [21/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [22/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [23/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [24/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [25/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [26/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [27/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [28/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [29/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [30/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [31/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [32/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [33/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [34/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [35/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [36/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [37/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [38/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [39/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [40/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [41/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [42/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [43/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [44/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [45/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [46/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [47/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [48/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [49/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [50/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [51/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [52/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [53/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [54/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [55/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [56/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [57/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [58/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [59/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [60/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [61/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [62/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [63/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [64/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [65/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [66/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [67/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [68/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [69/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [70/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [71/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [72/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [73/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [74/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [75/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [76/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [77/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [78/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [79/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [80/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [81/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [82/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [83/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [84/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [85/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [86/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [87/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [88/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [89/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [90/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [91/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [92/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [93/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [94/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [95/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [96/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [97/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [98/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [99/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [100/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [101/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [102/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [103/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [104/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [105/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [106/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [107/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [108/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [109/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [110/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [111/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [112/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [113/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [114/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [115/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [116/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [117/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [118/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [119/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [120/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [121/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [122/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [123/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [124/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [125/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [126/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [127/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [128/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [129/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [130/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [131/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [132/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [133/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [134/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [135/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [136/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [137/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [138/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [139/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [140/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [141/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [142/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [143/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [144/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [145/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [146/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [147/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [148/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [149/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [150/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [151/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [152/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [153/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [154/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [155/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [156/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [157/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [158/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [159/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [160/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [161/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [162/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [163/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [164/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [165/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [166/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [167/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [168/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [169/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [170/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [171/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [172/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [173/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [174/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [175/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [176/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [177/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [178/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [179/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [180/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [181/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [182/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [183/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [184/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [185/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [186/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [187/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [188/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [189/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [190/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [191/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [192/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [193/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [194/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [195/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [196/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [197/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [198/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [199/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [200/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [201/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [202/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [203/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [204/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [205/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [206/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [207/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [208/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [209/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [210/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [211/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [212/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [213/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [214/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [215/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [216/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [217/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [218/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [219/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [220/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [221/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [222/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [223/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [224/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [225/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [226/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [227/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [228/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [229/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [230/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [231/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [232/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [233/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [234/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [235/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [236/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [237/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [238/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [239/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [240/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [241/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [242/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [243/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [244/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [245/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [246/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [247/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [248/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [249/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [250/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [251/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [252/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [253/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [254/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [255/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [256/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [257/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [258/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [259/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [260/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [261/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [262/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [263/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [264/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [265/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [266/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [267/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [268/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [269/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [270/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [271/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [272/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [273/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [274/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [275/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [276/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [277/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [278/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [279/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [280/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [281/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 300s | DRY RUN
+[2026-07-09 00:44:19] [282/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 300s | DRY RUN
+[2026-07-09 00:44:19] [283/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 300s | DRY RUN
+[2026-07-09 00:44:19] [284/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 300s | DRY RUN
+[2026-07-09 00:44:19] [285/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 300s | DRY RUN
+[2026-07-09 00:44:19] [286/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 300s | DRY RUN
+[2026-07-09 00:44:19] [287/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 300s | DRY RUN
+[2026-07-09 00:44:19] [288/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 300s | DRY RUN
+[2026-07-09 00:44:19] [289/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 300s | DRY RUN
+[2026-07-09 00:44:19] [290/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 300s | DRY RUN
+[2026-07-09 00:44:19] [291/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 600s | DRY RUN
+[2026-07-09 00:44:19] [292/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 600s | DRY RUN
+[2026-07-09 00:44:19] [293/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 600s | DRY RUN
+[2026-07-09 00:44:19] [294/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 600s | DRY RUN
+[2026-07-09 00:44:19] [295/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 600s | DRY RUN
+[2026-07-09 00:44:19] [296/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 600s | DRY RUN
+[2026-07-09 00:44:19] [297/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 600s | DRY RUN
+[2026-07-09 00:44:19] [298/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 600s | DRY RUN
+[2026-07-09 00:44:19] [299/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 600s | DRY RUN
+[2026-07-09 00:44:19] [300/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 600s | DRY RUN
+[2026-07-09 00:44:19] [301/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 900s | DRY RUN
+[2026-07-09 00:44:19] [302/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 900s | DRY RUN
+[2026-07-09 00:44:19] [303/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 900s | DRY RUN
+[2026-07-09 00:44:19] [304/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 900s | DRY RUN
+[2026-07-09 00:44:19] [305/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 900s | DRY RUN
+[2026-07-09 00:44:19] [306/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 900s | DRY RUN
+[2026-07-09 00:44:19] [307/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 900s | DRY RUN
+[2026-07-09 00:44:19] [308/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 900s | DRY RUN
+[2026-07-09 00:44:19] [309/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 900s | DRY RUN
+[2026-07-09 00:44:19] [310/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 900s | DRY RUN
+[2026-07-09 00:44:19] [311/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [312/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [313/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [314/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [315/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [316/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [317/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [318/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [319/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 1200s | DRY RUN
+[2026-07-09 00:44:19] [320/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 1200s | DRY RUN
+[2026-07-09 00:44:19] Fin de run_general.py
+[2026-07-09 00:50:59] Inicio de run_general.py
+[2026-07-09 00:50:59] Instancias dir: /home/gti/jose_antonio_sipa_experiments/instances
+[2026-07-09 00:50:59] Results dir: /home/gti/jose_antonio_sipa_experiments/results/time_budget_1000
+[2026-07-09 00:50:59] Algoritmos: hh_lap_v0, hh_lap_v1
+[2026-07-09 00:50:59] Runs por algoritmo/instancia: 10
+[2026-07-09 00:50:59] Resume: True
+[2026-07-09 00:50:59] Dry run: False
+[2026-07-09 00:50:59] Número de instancias encontradas: 4
+[2026-07-09 00:50:59] Time limits personalizados: 300, 600, 900, 1200
+[2026-07-09 00:50:59] [1/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 300s | START | seed=18195331
+[2026-07-09 00:55:59] [1/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 300s | OK | elapsed=300.39s | pareto_size=14
+[2026-07-09 00:55:59] [2/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 300s | START | seed=18195332
+[2026-07-09 01:01:00] [2/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 300s | OK | elapsed=300.49s | pareto_size=14
+[2026-07-09 01:01:00] [3/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 300s | START | seed=18195333
+[2026-07-09 01:06:01] [3/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 300s | OK | elapsed=301.66s | pareto_size=12
+[2026-07-09 01:06:01] [4/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 300s | START | seed=18195334
+[2026-07-09 01:11:08] [4/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 300s | OK | elapsed=306.63s | pareto_size=13
+[2026-07-09 01:11:08] [5/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 300s | START | seed=18195335
+[2026-07-09 01:16:09] [5/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 300s | OK | elapsed=300.55s | pareto_size=13
+[2026-07-09 01:16:09] [6/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 300s | START | seed=18195336
+[2026-07-09 01:21:15] [6/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 300s | OK | elapsed=306.14s | pareto_size=13
+[2026-07-09 01:21:15] [7/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 300s | START | seed=18195337
+[2026-07-09 01:26:22] [7/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 300s | OK | elapsed=307.22s | pareto_size=13
+[2026-07-09 01:26:22] [8/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 300s | START | seed=18195338
+[2026-07-09 01:31:28] [8/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 300s | OK | elapsed=306.33s | pareto_size=15
+[2026-07-09 01:31:28] [9/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 300s | START | seed=18195339
+[2026-07-09 01:36:34] [9/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 300s | OK | elapsed=305.58s | pareto_size=15
+[2026-07-09 01:36:34] [10/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 300s | START | seed=18195340
+[2026-07-09 01:41:40] [10/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 300s | OK | elapsed=305.91s | pareto_size=15
+[2026-07-09 01:41:40] [11/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 600s | START | seed=18195331
+[2026-07-09 01:51:42] [11/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 600s | OK | elapsed=602.27s | pareto_size=16
+[2026-07-09 01:51:42] [12/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 600s | START | seed=18195332
+[2026-07-09 02:01:42] [12/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 600s | OK | elapsed=600.48s | pareto_size=16
+[2026-07-09 02:01:42] [13/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 600s | START | seed=18195333
+[2026-07-09 02:11:50] [13/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 600s | OK | elapsed=607.37s | pareto_size=14
+[2026-07-09 02:11:50] [14/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 600s | START | seed=18195334
+[2026-07-09 02:21:55] [14/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 600s | OK | elapsed=605.38s | pareto_size=14
+[2026-07-09 02:21:55] [15/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 600s | START | seed=18195335
+[2026-07-09 02:32:01] [15/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 600s | OK | elapsed=606.20s | pareto_size=14
+[2026-07-09 02:32:01] [16/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 600s | START | seed=18195336
+[2026-07-09 02:42:08] [16/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 600s | OK | elapsed=606.10s | pareto_size=15
+[2026-07-09 02:42:08] [17/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 600s | START | seed=18195337
+[2026-07-09 02:52:09] [17/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 600s | OK | elapsed=601.59s | pareto_size=15
+[2026-07-09 02:52:09] [18/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 600s | START | seed=18195338
+[2026-07-09 03:02:12] [18/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 600s | OK | elapsed=603.14s | pareto_size=15
+[2026-07-09 03:02:12] [19/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 600s | START | seed=18195339
+[2026-07-09 03:12:18] [19/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 600s | OK | elapsed=605.66s | pareto_size=15
+[2026-07-09 03:12:18] [20/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 600s | START | seed=18195340
+[2026-07-09 03:22:19] [20/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 600s | OK | elapsed=601.51s | pareto_size=15
+[2026-07-09 03:22:19] [21/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 900s | START | seed=18195331
+[2026-07-09 03:37:27] [21/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 900s | OK | elapsed=907.64s | pareto_size=20
+[2026-07-09 03:37:27] [22/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 900s | START | seed=18195332
+[2026-07-09 03:52:33] [22/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 900s | OK | elapsed=906.33s | pareto_size=20
+[2026-07-09 03:52:33] [23/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 900s | START | seed=18195333
+[2026-07-09 04:07:38] [23/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 900s | OK | elapsed=904.40s | pareto_size=18
+[2026-07-09 04:07:38] [24/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 900s | START | seed=18195334
+[2026-07-09 04:22:42] [24/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 900s | OK | elapsed=904.19s | pareto_size=18
+[2026-07-09 04:22:42] [25/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 900s | START | seed=18195335
+[2026-07-09 04:37:46] [25/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 900s | OK | elapsed=904.29s | pareto_size=19
+[2026-07-09 04:37:46] [26/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 900s | START | seed=18195336
+[2026-07-09 04:52:48] [26/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 900s | OK | elapsed=902.06s | pareto_size=19
+[2026-07-09 04:52:48] [27/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 900s | START | seed=18195337
+[2026-07-09 05:07:55] [27/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 900s | OK | elapsed=906.87s | pareto_size=19
+[2026-07-09 05:07:55] [28/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 900s | START | seed=18195338
+[2026-07-09 05:22:59] [28/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 900s | OK | elapsed=903.56s | pareto_size=19
+[2026-07-09 05:22:59] [29/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 900s | START | seed=18195339
+[2026-07-09 05:38:04] [29/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 900s | OK | elapsed=905.61s | pareto_size=19
+[2026-07-09 05:38:04] [30/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 900s | START | seed=18195340
+[2026-07-09 05:53:09] [30/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 900s | OK | elapsed=904.92s | pareto_size=19
+[2026-07-09 05:53:09] [31/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 1200s | START | seed=18195331
+[2026-07-09 06:13:14] [31/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 00 | 1200s | OK | elapsed=1205.10s | pareto_size=18
+[2026-07-09 06:13:14] [32/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 1200s | START | seed=18195332
+[2026-07-09 06:33:21] [32/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 01 | 1200s | OK | elapsed=1206.80s | pareto_size=18
+[2026-07-09 06:33:21] [33/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 1200s | START | seed=18195333
+[2026-07-09 06:53:23] [33/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 02 | 1200s | OK | elapsed=1201.32s | pareto_size=16
+[2026-07-09 06:53:23] [34/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 1200s | START | seed=18195334
+[2026-07-09 07:13:27] [34/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 03 | 1200s | OK | elapsed=1204.86s | pareto_size=16
+[2026-07-09 07:13:27] [35/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 1200s | START | seed=18195335
+[2026-07-09 07:33:31] [35/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 04 | 1200s | OK | elapsed=1203.25s | pareto_size=16
+[2026-07-09 07:33:31] [36/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 1200s | START | seed=18195336
+[2026-07-09 07:53:35] [36/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 05 | 1200s | OK | elapsed=1204.04s | pareto_size=16
+[2026-07-09 07:53:35] [37/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 1200s | START | seed=18195337
+[2026-07-09 08:13:36] [37/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 06 | 1200s | OK | elapsed=1200.98s | pareto_size=16
+[2026-07-09 08:13:36] [38/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 1200s | START | seed=18195338
+[2026-07-09 08:33:37] [38/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 07 | 1200s | OK | elapsed=1201.66s | pareto_size=16
+[2026-07-09 08:33:37] [39/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 1200s | START | seed=18195339
+[2026-07-09 08:53:42] [39/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 08 | 1200s | OK | elapsed=1204.31s | pareto_size=16
+[2026-07-09 08:53:42] [40/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 1200s | START | seed=18195340
+[2026-07-09 09:13:46] [40/320] hh_lap_v0 | problem_instance_ext_1000_0.txt | run 09 | 1200s | OK | elapsed=1204.44s | pareto_size=16
+[2026-07-09 09:13:46] [41/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 300s | START | seed=931304241
+[2026-07-09 09:18:55] [41/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 300s | OK | elapsed=308.59s | pareto_size=2
+[2026-07-09 09:18:55] [42/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 300s | START | seed=931304242
+[2026-07-09 09:24:03] [42/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 300s | OK | elapsed=308.70s | pareto_size=2
+[2026-07-09 09:24:03] [43/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 300s | START | seed=931304243
+[2026-07-09 09:29:12] [43/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 300s | OK | elapsed=308.63s | pareto_size=2
+[2026-07-09 09:29:12] [44/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 300s | START | seed=931304244
+[2026-07-09 09:34:21] [44/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 300s | OK | elapsed=309.05s | pareto_size=2
+[2026-07-09 09:34:21] [45/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 300s | START | seed=931304245
+[2026-07-09 09:39:30] [45/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 300s | OK | elapsed=309.11s | pareto_size=2
+[2026-07-09 09:39:30] [46/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 300s | START | seed=931304246
+[2026-07-09 09:44:36] [46/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 300s | OK | elapsed=306.28s | pareto_size=2
+[2026-07-09 09:44:36] [47/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 300s | START | seed=931304247
+[2026-07-09 09:49:44] [47/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 300s | OK | elapsed=307.71s | pareto_size=2
+[2026-07-09 09:49:44] [48/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 300s | START | seed=931304248
+[2026-07-09 09:54:53] [48/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 300s | OK | elapsed=309.30s | pareto_size=3
+[2026-07-09 09:54:53] [49/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 300s | START | seed=931304249
+[2026-07-09 10:00:07] [49/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 300s | OK | elapsed=313.97s | pareto_size=15
+[2026-07-09 10:00:07] [50/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 300s | START | seed=931304250
+[2026-07-09 10:05:20] [50/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 300s | OK | elapsed=312.30s | pareto_size=16
+[2026-07-09 10:05:20] [51/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 600s | START | seed=931304241
+[2026-07-09 10:15:22] [51/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 600s | OK | elapsed=601.95s | pareto_size=5
+[2026-07-09 10:15:22] [52/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 600s | START | seed=931304242
+[2026-07-09 10:25:38] [52/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 600s | OK | elapsed=616.35s | pareto_size=5
+[2026-07-09 10:25:38] [53/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 600s | START | seed=931304243
+[2026-07-09 10:35:57] [53/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 600s | OK | elapsed=619.36s | pareto_size=5
+[2026-07-09 10:35:57] [54/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 600s | START | seed=931304244
+[2026-07-09 10:46:14] [54/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 600s | OK | elapsed=616.56s | pareto_size=5
+[2026-07-09 10:46:14] [55/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 600s | START | seed=931304245
+[2026-07-09 10:56:33] [55/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 600s | OK | elapsed=619.24s | pareto_size=5
+[2026-07-09 10:56:33] [56/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 600s | START | seed=931304246
+[2026-07-09 11:06:48] [56/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 600s | OK | elapsed=614.79s | pareto_size=5
+[2026-07-09 11:06:48] [57/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 600s | START | seed=931304247
+[2026-07-09 11:17:03] [57/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 600s | OK | elapsed=615.31s | pareto_size=5
+[2026-07-09 11:17:03] [58/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 600s | START | seed=931304248
+[2026-07-09 11:27:20] [58/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 600s | OK | elapsed=616.71s | pareto_size=5
+[2026-07-09 11:27:20] [59/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 600s | START | seed=931304249
+[2026-07-09 11:37:23] [59/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 600s | OK | elapsed=602.83s | pareto_size=30
+[2026-07-09 11:37:23] [60/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 600s | START | seed=931304250
+[2026-07-09 11:47:25] [60/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 600s | OK | elapsed=602.12s | pareto_size=23
+[2026-07-09 11:47:25] [61/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 900s | START | seed=931304241
+[2026-07-09 12:02:43] [61/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 900s | OK | elapsed=917.55s | pareto_size=5
+[2026-07-09 12:02:43] [62/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 900s | START | seed=931304242
+[2026-07-09 12:17:50] [62/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 900s | OK | elapsed=907.75s | pareto_size=5
+[2026-07-09 12:17:50] [63/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 900s | START | seed=931304243
+[2026-07-09 12:32:58] [63/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 900s | OK | elapsed=907.75s | pareto_size=6
+[2026-07-09 12:32:58] [64/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 900s | START | seed=931304244
+[2026-07-09 12:48:06] [64/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 900s | OK | elapsed=907.66s | pareto_size=6
+[2026-07-09 12:48:06] [65/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 900s | START | seed=931304245
+[2026-07-09 13:03:17] [65/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 900s | OK | elapsed=911.53s | pareto_size=7
+[2026-07-09 13:03:17] [66/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 900s | START | seed=931304246
+[2026-07-09 13:18:27] [66/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 900s | OK | elapsed=909.75s | pareto_size=7
+[2026-07-09 13:18:27] [67/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 900s | START | seed=931304247
+[2026-07-09 13:33:38] [67/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 900s | OK | elapsed=911.34s | pareto_size=7
+[2026-07-09 13:33:38] [68/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 900s | START | seed=931304248
+[2026-07-09 13:48:41] [68/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 900s | OK | elapsed=902.53s | pareto_size=7
+[2026-07-09 13:48:41] [69/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 900s | START | seed=931304249
+[2026-07-09 14:03:47] [69/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 900s | OK | elapsed=906.02s | pareto_size=26
+[2026-07-09 14:03:47] [70/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 900s | START | seed=931304250
+[2026-07-09 14:18:52] [70/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 900s | OK | elapsed=905.51s | pareto_size=26
+[2026-07-09 14:18:52] [71/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 1200s | START | seed=931304241
+[2026-07-09 14:39:08] [71/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 00 | 1200s | OK | elapsed=1215.33s | pareto_size=9
+[2026-07-09 14:39:08] [72/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 1200s | START | seed=931304242
+[2026-07-09 14:59:19] [72/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 01 | 1200s | OK | elapsed=1211.54s | pareto_size=9
+[2026-07-09 14:59:19] [73/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 1200s | START | seed=931304243
+[2026-07-09 15:19:21] [73/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 02 | 1200s | OK | elapsed=1202.20s | pareto_size=9
+[2026-07-09 15:19:21] [74/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 1200s | START | seed=931304244
+[2026-07-09 15:39:39] [74/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 03 | 1200s | OK | elapsed=1217.55s | pareto_size=9
+[2026-07-09 15:39:39] [75/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 1200s | START | seed=931304245
+[2026-07-09 15:59:41] [75/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 04 | 1200s | OK | elapsed=1202.09s | pareto_size=9
+[2026-07-09 15:59:41] [76/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 1200s | START | seed=931304246
+[2026-07-09 16:19:56] [76/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 05 | 1200s | OK | elapsed=1215.25s | pareto_size=9
+[2026-07-09 16:19:56] [77/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 1200s | START | seed=931304247
+[2026-07-09 16:40:15] [77/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 06 | 1200s | OK | elapsed=1218.85s | pareto_size=9
+[2026-07-09 16:40:15] [78/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 1200s | START | seed=931304248
+[2026-07-09 17:00:17] [78/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 07 | 1200s | OK | elapsed=1202.00s | pareto_size=9
+[2026-07-09 17:00:17] [79/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 1200s | START | seed=931304249
+[2026-07-09 17:20:28] [79/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 08 | 1200s | OK | elapsed=1210.81s | pareto_size=27
+[2026-07-09 17:20:28] [80/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 1200s | START | seed=931304250
+[2026-07-09 17:40:32] [80/320] hh_lap_v0 | problem_instance_ext_1000_1.txt | run 09 | 1200s | OK | elapsed=1203.87s | pareto_size=27
+[2026-07-09 17:40:32] [81/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 300s | START | seed=844413144
+[2026-07-09 17:45:33] [81/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 300s | OK | elapsed=301.41s | pareto_size=14
+[2026-07-09 17:45:33] [82/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 300s | START | seed=844413145
+[2026-07-09 17:50:39] [82/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 300s | OK | elapsed=306.11s | pareto_size=14
+[2026-07-09 17:50:39] [83/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 300s | START | seed=844413146
+[2026-07-09 17:55:44] [83/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 300s | OK | elapsed=305.03s | pareto_size=15
+[2026-07-09 17:55:44] [84/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 300s | START | seed=844413147
+[2026-07-09 18:00:46] [84/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 300s | OK | elapsed=301.60s | pareto_size=15
+[2026-07-09 18:00:46] [85/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 300s | START | seed=844413148
+[2026-07-09 18:05:48] [85/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 300s | OK | elapsed=301.94s | pareto_size=15
+[2026-07-09 18:05:48] [86/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 300s | START | seed=844413149
+[2026-07-09 18:10:51] [86/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 300s | OK | elapsed=302.61s | pareto_size=16
+[2026-07-09 18:10:51] [87/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 300s | START | seed=844413150
+[2026-07-09 18:15:53] [87/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 300s | OK | elapsed=302.03s | pareto_size=16
+[2026-07-09 18:15:53] [88/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 300s | START | seed=844413151
+[2026-07-09 18:20:56] [88/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 300s | OK | elapsed=302.99s | pareto_size=16
+[2026-07-09 18:20:56] [89/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 300s | START | seed=844413152
+[2026-07-09 18:25:59] [89/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 300s | OK | elapsed=303.14s | pareto_size=16
+[2026-07-09 18:25:59] [90/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 300s | START | seed=844413153
+[2026-07-09 18:31:02] [90/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 300s | OK | elapsed=303.37s | pareto_size=15
+[2026-07-09 18:31:02] [91/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 600s | START | seed=844413144
+[2026-07-09 18:41:08] [91/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 600s | OK | elapsed=606.31s | pareto_size=23
+[2026-07-09 18:41:08] [92/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 600s | START | seed=844413145
+[2026-07-09 18:51:15] [92/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 600s | OK | elapsed=606.21s | pareto_size=23
+[2026-07-09 18:51:15] [93/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 600s | START | seed=844413146
+[2026-07-09 19:01:23] [93/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 600s | OK | elapsed=608.32s | pareto_size=23
+[2026-07-09 19:01:23] [94/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 600s | START | seed=844413147
+[2026-07-09 19:11:30] [94/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 600s | OK | elapsed=607.40s | pareto_size=23
+[2026-07-09 19:11:30] [95/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 600s | START | seed=844413148
+[2026-07-09 19:21:35] [95/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 600s | OK | elapsed=604.83s | pareto_size=23
+[2026-07-09 19:21:35] [96/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 600s | START | seed=844413149
+[2026-07-09 19:31:40] [96/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 600s | OK | elapsed=604.60s | pareto_size=22
+[2026-07-09 19:31:40] [97/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 600s | START | seed=844413150
+[2026-07-09 19:41:45] [97/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 600s | OK | elapsed=605.66s | pareto_size=22
+[2026-07-09 19:41:45] [98/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 600s | START | seed=844413151
+[2026-07-09 19:51:49] [98/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 600s | OK | elapsed=603.88s | pareto_size=22
+[2026-07-09 19:51:49] [99/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 600s | START | seed=844413152
+[2026-07-09 20:01:57] [99/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 600s | OK | elapsed=607.47s | pareto_size=22
+[2026-07-09 20:01:57] [100/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 600s | START | seed=844413153
+[2026-07-09 20:11:59] [100/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 600s | OK | elapsed=602.39s | pareto_size=22
+[2026-07-09 20:11:59] [101/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 900s | START | seed=844413144
+[2026-07-09 20:27:07] [101/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 900s | OK | elapsed=908.26s | pareto_size=32
+[2026-07-09 20:27:07] [102/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 900s | START | seed=844413145
+[2026-07-09 20:42:15] [102/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 900s | OK | elapsed=907.18s | pareto_size=32
+[2026-07-09 20:42:15] [103/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 900s | START | seed=844413146
+[2026-07-09 20:57:22] [103/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 900s | OK | elapsed=907.28s | pareto_size=32
+[2026-07-09 20:57:22] [104/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 900s | START | seed=844413147
+[2026-07-09 21:12:28] [104/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 900s | OK | elapsed=906.10s | pareto_size=32
+[2026-07-09 21:12:28] [105/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 900s | START | seed=844413148
+[2026-07-09 21:27:29] [105/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 900s | OK | elapsed=900.80s | pareto_size=32
+[2026-07-09 21:27:29] [106/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 900s | START | seed=844413149
+[2026-07-09 21:42:37] [106/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 900s | OK | elapsed=907.87s | pareto_size=30
+[2026-07-09 21:42:37] [107/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 900s | START | seed=844413150
+[2026-07-09 21:57:38] [107/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 900s | OK | elapsed=900.97s | pareto_size=30
+[2026-07-09 21:57:38] [108/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 900s | START | seed=844413151
+[2026-07-09 22:12:42] [108/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 900s | OK | elapsed=903.88s | pareto_size=30
+[2026-07-09 22:12:42] [109/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 900s | START | seed=844413152
+[2026-07-09 22:27:47] [109/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 900s | OK | elapsed=905.84s | pareto_size=30
+[2026-07-09 22:27:47] [110/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 900s | START | seed=844413153
+[2026-07-09 22:42:49] [110/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 900s | OK | elapsed=901.38s | pareto_size=30
+[2026-07-09 22:42:49] [111/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 1200s | START | seed=844413144
+[2026-07-09 23:02:52] [111/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 00 | 1200s | OK | elapsed=1203.02s | pareto_size=38
+[2026-07-09 23:02:52] [112/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 1200s | START | seed=844413145
+[2026-07-09 23:22:57] [112/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 01 | 1200s | OK | elapsed=1205.08s | pareto_size=38
+[2026-07-09 23:22:57] [113/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 1200s | START | seed=844413146
+[2026-07-09 23:43:00] [113/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 02 | 1200s | OK | elapsed=1203.37s | pareto_size=38
+[2026-07-09 23:43:00] [114/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 1200s | START | seed=844413147
+[2026-07-10 00:03:05] [114/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 03 | 1200s | OK | elapsed=1204.37s | pareto_size=38
+[2026-07-10 00:03:05] [115/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 1200s | START | seed=844413148
+[2026-07-10 00:23:11] [115/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 04 | 1200s | OK | elapsed=1206.11s | pareto_size=38
+[2026-07-10 00:23:11] [116/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 1200s | START | seed=844413149
+[2026-07-10 00:43:21] [116/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 05 | 1200s | OK | elapsed=1209.87s | pareto_size=37
+[2026-07-10 00:43:21] [117/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 1200s | START | seed=844413150
+[2026-07-10 01:03:22] [117/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 06 | 1200s | OK | elapsed=1201.76s | pareto_size=37
+[2026-07-10 01:03:22] [118/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 1200s | START | seed=844413151
+[2026-07-10 01:23:24] [118/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 07 | 1200s | OK | elapsed=1201.58s | pareto_size=38
+[2026-07-10 01:23:24] [119/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 1200s | START | seed=844413152
+[2026-07-10 01:43:29] [119/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 08 | 1200s | OK | elapsed=1204.61s | pareto_size=38
+[2026-07-10 01:43:29] [120/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 1200s | START | seed=844413153
+[2026-07-10 02:03:33] [120/320] hh_lap_v0 | problem_instance_ext_1000_2.txt | run 09 | 1200s | OK | elapsed=1204.16s | pareto_size=38
+[2026-07-10 02:03:33] [121/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 300s | START | seed=757522047
+[2026-07-10 02:08:33] [121/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 300s | OK | elapsed=300.43s | pareto_size=13
+[2026-07-10 02:08:33] [122/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 300s | START | seed=757522048
+[2026-07-10 02:13:33] [122/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 300s | OK | elapsed=300.33s | pareto_size=13
+[2026-07-10 02:13:33] [123/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 300s | START | seed=757522049
+[2026-07-10 02:18:38] [123/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 300s | OK | elapsed=304.28s | pareto_size=15
+[2026-07-10 02:18:38] [124/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 300s | START | seed=757522050
+[2026-07-10 02:23:38] [124/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 300s | OK | elapsed=300.69s | pareto_size=15
+[2026-07-10 02:23:38] [125/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 300s | START | seed=757522051
+[2026-07-10 02:28:40] [125/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 300s | OK | elapsed=301.41s | pareto_size=14
+[2026-07-10 02:28:40] [126/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 300s | START | seed=757522052
+[2026-07-10 02:33:41] [126/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 300s | OK | elapsed=301.50s | pareto_size=18
+[2026-07-10 02:33:41] [127/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 300s | START | seed=757522053
+[2026-07-10 02:38:43] [127/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 300s | OK | elapsed=301.53s | pareto_size=20
+[2026-07-10 02:38:43] [128/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 300s | START | seed=757522054
+[2026-07-10 02:43:46] [128/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 300s | OK | elapsed=302.81s | pareto_size=19
+[2026-07-10 02:43:46] [129/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 300s | START | seed=757522055
+[2026-07-10 02:48:57] [129/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 300s | OK | elapsed=311.26s | pareto_size=23
+[2026-07-10 02:48:57] [130/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 300s | START | seed=757522056
+[2026-07-10 02:53:59] [130/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 300s | OK | elapsed=301.73s | pareto_size=23
+[2026-07-10 02:53:59] [131/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 600s | START | seed=757522047
+[2026-07-10 03:04:03] [131/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 600s | OK | elapsed=604.58s | pareto_size=18
+[2026-07-10 03:04:03] [132/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 600s | START | seed=757522048
+[2026-07-10 03:14:09] [132/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 600s | OK | elapsed=606.05s | pareto_size=18
+[2026-07-10 03:14:09] [133/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 600s | START | seed=757522049
+[2026-07-10 03:24:15] [133/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 600s | OK | elapsed=605.65s | pareto_size=18
+[2026-07-10 03:24:15] [134/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 600s | START | seed=757522050
+[2026-07-10 03:34:21] [134/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 600s | OK | elapsed=605.65s | pareto_size=18
+[2026-07-10 03:34:21] [135/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 600s | START | seed=757522051
+[2026-07-10 03:44:30] [135/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 600s | OK | elapsed=609.81s | pareto_size=18
+[2026-07-10 03:44:30] [136/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 600s | START | seed=757522052
+[2026-07-10 03:54:37] [136/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 600s | OK | elapsed=606.69s | pareto_size=16
+[2026-07-10 03:54:37] [137/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 600s | START | seed=757522053
+[2026-07-10 04:04:46] [137/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 600s | OK | elapsed=609.40s | pareto_size=16
+[2026-07-10 04:04:46] [138/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 600s | START | seed=757522054
+[2026-07-10 04:14:56] [138/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 600s | OK | elapsed=609.48s | pareto_size=14
+[2026-07-10 04:14:56] [139/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 600s | START | seed=757522055
+[2026-07-10 04:25:02] [139/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 600s | OK | elapsed=605.58s | pareto_size=14
+[2026-07-10 04:25:02] [140/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 600s | START | seed=757522056
+[2026-07-10 04:35:08] [140/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 600s | OK | elapsed=606.63s | pareto_size=14
+[2026-07-10 04:35:08] [141/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 900s | START | seed=757522047
+[2026-07-10 04:50:18] [141/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 900s | OK | elapsed=910.18s | pareto_size=14
+[2026-07-10 04:50:18] [142/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 900s | START | seed=757522048
+[2026-07-10 05:05:26] [142/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 900s | OK | elapsed=907.31s | pareto_size=14
+[2026-07-10 05:05:26] [143/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 900s | START | seed=757522049
+[2026-07-10 05:20:37] [143/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 900s | OK | elapsed=910.96s | pareto_size=14
+[2026-07-10 05:20:37] [144/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 900s | START | seed=757522050
+[2026-07-10 05:35:45] [144/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 900s | OK | elapsed=908.06s | pareto_size=14
+[2026-07-10 05:35:45] [145/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 900s | START | seed=757522051
+[2026-07-10 05:50:56] [145/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 900s | OK | elapsed=911.40s | pareto_size=14
+[2026-07-10 05:50:56] [146/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 900s | START | seed=757522052
+[2026-07-10 06:06:04] [146/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 900s | OK | elapsed=907.73s | pareto_size=12
+[2026-07-10 06:06:04] [147/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 900s | START | seed=757522053
+[2026-07-10 06:21:13] [147/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 900s | OK | elapsed=908.85s | pareto_size=12
+[2026-07-10 06:21:13] [148/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 900s | START | seed=757522054
+[2026-07-10 06:36:19] [148/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 900s | OK | elapsed=906.48s | pareto_size=12
+[2026-07-10 06:36:19] [149/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 900s | START | seed=757522055
+[2026-07-10 06:51:24] [149/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 900s | OK | elapsed=905.04s | pareto_size=13
+[2026-07-10 06:51:24] [150/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 900s | START | seed=757522056
+[2026-07-10 07:06:30] [150/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 900s | OK | elapsed=905.96s | pareto_size=13
+[2026-07-10 07:06:30] [151/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 1200s | START | seed=757522047
+[2026-07-10 07:26:38] [151/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 00 | 1200s | OK | elapsed=1208.22s | pareto_size=15
+[2026-07-10 07:26:38] [152/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 1200s | START | seed=757522048
+[2026-07-10 07:46:42] [152/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 01 | 1200s | OK | elapsed=1203.58s | pareto_size=15
+[2026-07-10 07:46:42] [153/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 1200s | START | seed=757522049
+[2026-07-10 08:06:52] [153/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 02 | 1200s | OK | elapsed=1210.15s | pareto_size=15
+[2026-07-10 08:06:52] [154/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 1200s | START | seed=757522050
+[2026-07-10 08:26:59] [154/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 03 | 1200s | OK | elapsed=1206.65s | pareto_size=15
+[2026-07-10 08:26:59] [155/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 1200s | START | seed=757522051
+[2026-07-10 08:47:04] [155/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 04 | 1200s | OK | elapsed=1205.16s | pareto_size=15
+[2026-07-10 08:47:04] [156/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 1200s | START | seed=757522052
+[2026-07-10 09:07:10] [156/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 05 | 1200s | OK | elapsed=1206.39s | pareto_size=13
+[2026-07-10 09:07:10] [157/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 1200s | START | seed=757522053
+[2026-07-10 09:27:19] [157/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 06 | 1200s | OK | elapsed=1208.87s | pareto_size=13
+[2026-07-10 09:27:19] [158/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 1200s | START | seed=757522054
+[2026-07-10 09:47:30] [158/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 07 | 1200s | OK | elapsed=1210.97s | pareto_size=13
+[2026-07-10 09:47:30] [159/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 1200s | START | seed=757522055
+[2026-07-10 10:07:40] [159/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 08 | 1200s | OK | elapsed=1209.55s | pareto_size=13
+[2026-07-10 10:07:40] [160/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 1200s | START | seed=757522056
+[2026-07-10 10:27:51] [160/320] hh_lap_v0 | problem_instance_ext_1000_3.txt | run 09 | 1200s | OK | elapsed=1211.26s | pareto_size=13
+[2026-07-10 10:27:51] [161/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 300s | START | seed=891219705
+[2026-07-10 10:32:56] [161/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 300s | OK | elapsed=304.67s | pareto_size=81
+[2026-07-10 10:32:56] [162/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 300s | START | seed=891219706
+[2026-07-10 10:37:56] [162/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 300s | OK | elapsed=300.87s | pareto_size=81
+[2026-07-10 10:37:56] [163/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 300s | START | seed=891219707
+[2026-07-10 10:42:58] [163/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 300s | OK | elapsed=301.05s | pareto_size=81
+[2026-07-10 10:42:58] [164/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 300s | START | seed=891219708
+[2026-07-10 10:48:03] [164/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 300s | OK | elapsed=305.39s | pareto_size=71
+[2026-07-10 10:48:03] [165/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 300s | START | seed=891219709
+[2026-07-10 10:53:07] [165/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 300s | OK | elapsed=304.37s | pareto_size=72
+[2026-07-10 10:53:07] [166/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 300s | START | seed=891219710
+[2026-07-10 10:58:08] [166/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 300s | OK | elapsed=300.90s | pareto_size=72
+[2026-07-10 10:58:08] [167/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 300s | START | seed=891219711
+[2026-07-10 11:03:09] [167/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 300s | OK | elapsed=301.26s | pareto_size=72
+[2026-07-10 11:03:09] [168/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 300s | START | seed=891219712
+[2026-07-10 11:08:12] [168/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 300s | OK | elapsed=302.37s | pareto_size=72
+[2026-07-10 11:08:12] [169/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 300s | START | seed=891219713
+[2026-07-10 11:13:17] [169/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 300s | OK | elapsed=305.26s | pareto_size=73
+[2026-07-10 11:13:17] [170/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 300s | START | seed=891219714
+[2026-07-10 11:18:23] [170/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 300s | OK | elapsed=305.42s | pareto_size=72
+[2026-07-10 11:18:23] [171/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 600s | START | seed=891219705
+[2026-07-10 11:28:25] [171/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 600s | OK | elapsed=602.54s | pareto_size=78
+[2026-07-10 11:28:25] [172/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 600s | START | seed=891219706
+[2026-07-10 11:38:26] [172/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 600s | OK | elapsed=600.61s | pareto_size=78
+[2026-07-10 11:38:26] [173/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 600s | START | seed=891219707
+[2026-07-10 11:48:29] [173/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 600s | OK | elapsed=603.82s | pareto_size=78
+[2026-07-10 11:48:29] [174/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 600s | START | seed=891219708
+[2026-07-10 11:58:34] [174/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 600s | OK | elapsed=604.28s | pareto_size=68
+[2026-07-10 11:58:34] [175/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 600s | START | seed=891219709
+[2026-07-10 12:08:35] [175/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 600s | OK | elapsed=600.89s | pareto_size=68
+[2026-07-10 12:08:35] [176/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 600s | START | seed=891219710
+[2026-07-10 12:18:37] [176/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 600s | OK | elapsed=602.29s | pareto_size=68
+[2026-07-10 12:18:37] [177/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 600s | START | seed=891219711
+[2026-07-10 12:28:38] [177/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 600s | OK | elapsed=601.09s | pareto_size=68
+[2026-07-10 12:28:38] [178/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 600s | START | seed=891219712
+[2026-07-10 12:38:43] [178/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 600s | OK | elapsed=604.59s | pareto_size=69
+[2026-07-10 12:38:43] [179/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 600s | START | seed=891219713
+[2026-07-10 12:48:46] [179/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 600s | OK | elapsed=603.20s | pareto_size=69
+[2026-07-10 12:48:46] [180/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 600s | START | seed=891219714
+[2026-07-10 12:58:51] [180/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 600s | OK | elapsed=605.34s | pareto_size=69
+[2026-07-10 12:58:51] [181/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 900s | START | seed=891219705
+[2026-07-10 13:13:53] [181/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 900s | OK | elapsed=901.51s | pareto_size=94
+[2026-07-10 13:13:53] [182/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 900s | START | seed=891219706
+[2026-07-10 13:28:54] [182/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 900s | OK | elapsed=901.79s | pareto_size=94
+[2026-07-10 13:28:54] [183/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 900s | START | seed=891219707
+[2026-07-10 13:44:00] [183/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 900s | OK | elapsed=905.36s | pareto_size=94
+[2026-07-10 13:44:00] [184/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 900s | START | seed=891219708
+[2026-07-10 13:59:02] [184/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 900s | OK | elapsed=901.99s | pareto_size=88
+[2026-07-10 13:59:02] [185/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 900s | START | seed=891219709
+[2026-07-10 14:14:06] [185/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 900s | OK | elapsed=903.71s | pareto_size=88
+[2026-07-10 14:14:06] [186/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 900s | START | seed=891219710
+[2026-07-10 14:29:08] [186/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 900s | OK | elapsed=902.88s | pareto_size=91
+[2026-07-10 14:29:08] [187/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 900s | START | seed=891219711
+[2026-07-10 14:44:11] [187/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 900s | OK | elapsed=902.07s | pareto_size=91
+[2026-07-10 14:44:11] [188/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 900s | START | seed=891219712
+[2026-07-10 14:59:11] [188/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 900s | OK | elapsed=900.41s | pareto_size=91
+[2026-07-10 14:59:11] [189/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 900s | START | seed=891219713
+[2026-07-10 15:14:13] [189/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 900s | OK | elapsed=902.04s | pareto_size=91
+[2026-07-10 15:14:13] [190/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 900s | START | seed=891219714
+[2026-07-10 15:29:18] [190/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 900s | OK | elapsed=905.13s | pareto_size=91
+[2026-07-10 15:29:18] [191/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 1200s | START | seed=891219705
+[2026-07-10 15:49:23] [191/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 00 | 1200s | OK | elapsed=1204.78s | pareto_size=105
+[2026-07-10 15:49:23] [192/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 1200s | START | seed=891219706
+[2026-07-10 16:09:24] [192/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 01 | 1200s | OK | elapsed=1200.68s | pareto_size=105
+[2026-07-10 16:09:24] [193/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 1200s | START | seed=891219707
+[2026-07-10 16:29:26] [193/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 02 | 1200s | OK | elapsed=1202.10s | pareto_size=105
+[2026-07-10 16:29:26] [194/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 1200s | START | seed=891219708
+[2026-07-10 16:49:28] [194/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 03 | 1200s | OK | elapsed=1201.89s | pareto_size=99
+[2026-07-10 16:49:28] [195/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 1200s | START | seed=891219709
+[2026-07-10 17:09:28] [195/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 04 | 1200s | OK | elapsed=1200.41s | pareto_size=101
+[2026-07-10 17:09:28] [196/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 1200s | START | seed=891219710
+[2026-07-10 17:29:30] [196/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 05 | 1200s | OK | elapsed=1202.36s | pareto_size=101
+[2026-07-10 17:29:30] [197/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 1200s | START | seed=891219711
+[2026-07-10 17:49:32] [197/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 06 | 1200s | OK | elapsed=1201.88s | pareto_size=101
+[2026-07-10 17:49:32] [198/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 1200s | START | seed=891219712
+[2026-07-10 18:09:33] [198/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 07 | 1200s | OK | elapsed=1200.94s | pareto_size=101
+[2026-07-10 18:09:33] [199/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 1200s | START | seed=891219713
+[2026-07-10 18:29:35] [199/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 08 | 1200s | OK | elapsed=1201.97s | pareto_size=101
+[2026-07-10 18:29:35] [200/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 1200s | START | seed=891219714
+[2026-07-10 18:49:37] [200/320] hh_lap_v1 | problem_instance_ext_1000_0.txt | run 09 | 1200s | OK | elapsed=1201.90s | pareto_size=101
+[2026-07-10 18:49:37] [201/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 300s | START | seed=804328608
+[2026-07-10 18:54:40] [201/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 300s | OK | elapsed=302.58s | pareto_size=75
+[2026-07-10 18:54:40] [202/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 300s | START | seed=804328609
+[2026-07-10 18:59:43] [202/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 300s | OK | elapsed=303.44s | pareto_size=75
+[2026-07-10 18:59:43] [203/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 300s | START | seed=804328610
+[2026-07-10 19:04:48] [203/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 300s | OK | elapsed=304.49s | pareto_size=75
+[2026-07-10 19:04:48] [204/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 300s | START | seed=804328611
+[2026-07-10 19:09:51] [204/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 300s | OK | elapsed=303.19s | pareto_size=80
+[2026-07-10 19:09:51] [205/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 300s | START | seed=804328612
+[2026-07-10 19:14:56] [205/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 300s | OK | elapsed=304.78s | pareto_size=80
+[2026-07-10 19:14:56] [206/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 300s | START | seed=804328613
+[2026-07-10 19:19:56] [206/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 300s | OK | elapsed=300.79s | pareto_size=80
+[2026-07-10 19:19:56] [207/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 300s | START | seed=804328614
+[2026-07-10 19:24:59] [207/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 300s | OK | elapsed=302.40s | pareto_size=79
+[2026-07-10 19:24:59] [208/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 300s | START | seed=804328615
+[2026-07-10 19:30:02] [208/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 300s | OK | elapsed=303.49s | pareto_size=75
+[2026-07-10 19:30:02] [209/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 300s | START | seed=804328616
+[2026-07-10 19:35:04] [209/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 300s | OK | elapsed=301.95s | pareto_size=62
+[2026-07-10 19:35:04] [210/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 300s | START | seed=804328617
+[2026-07-10 19:40:05] [210/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 300s | OK | elapsed=301.06s | pareto_size=62
+[2026-07-10 19:40:05] [211/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 600s | START | seed=804328608
+[2026-07-10 19:50:06] [211/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 600s | OK | elapsed=600.76s | pareto_size=90
+[2026-07-10 19:50:06] [212/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 600s | START | seed=804328609
+[2026-07-10 20:00:12] [212/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 600s | OK | elapsed=605.65s | pareto_size=90
+[2026-07-10 20:00:12] [213/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 600s | START | seed=804328610
+[2026-07-10 20:10:17] [213/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 600s | OK | elapsed=605.02s | pareto_size=90
+[2026-07-10 20:10:17] [214/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 600s | START | seed=804328611
+[2026-07-10 20:20:22] [214/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 600s | OK | elapsed=605.33s | pareto_size=92
+[2026-07-10 20:20:22] [215/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 600s | START | seed=804328612
+[2026-07-10 20:30:30] [215/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 600s | OK | elapsed=607.73s | pareto_size=92
+[2026-07-10 20:30:30] [216/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 600s | START | seed=804328613
+[2026-07-10 20:40:36] [216/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 600s | OK | elapsed=606.15s | pareto_size=92
+[2026-07-10 20:40:36] [217/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 600s | START | seed=804328614
+[2026-07-10 20:50:42] [217/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 600s | OK | elapsed=606.46s | pareto_size=92
+[2026-07-10 20:50:42] [218/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 600s | START | seed=804328615
+[2026-07-10 21:00:48] [218/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 600s | OK | elapsed=605.91s | pareto_size=92
+[2026-07-10 21:00:48] [219/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 600s | START | seed=804328616
+[2026-07-10 21:10:51] [219/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 600s | OK | elapsed=602.84s | pareto_size=86
+[2026-07-10 21:10:51] [220/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 600s | START | seed=804328617
+[2026-07-10 21:20:59] [220/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 600s | OK | elapsed=607.87s | pareto_size=93
+[2026-07-10 21:20:59] [221/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 900s | START | seed=804328608
+[2026-07-10 21:36:02] [221/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 900s | OK | elapsed=903.02s | pareto_size=100
+[2026-07-10 21:36:02] [222/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 900s | START | seed=804328609
+[2026-07-10 21:51:07] [222/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 900s | OK | elapsed=904.57s | pareto_size=101
+[2026-07-10 21:51:07] [223/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 900s | START | seed=804328610
+[2026-07-10 22:06:11] [223/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 900s | OK | elapsed=904.03s | pareto_size=109
+[2026-07-10 22:06:11] [224/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 900s | START | seed=804328611
+[2026-07-10 22:21:13] [224/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 900s | OK | elapsed=902.64s | pareto_size=109
+[2026-07-10 22:21:13] [225/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 900s | START | seed=804328612
+[2026-07-10 22:36:20] [225/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 900s | OK | elapsed=907.09s | pareto_size=109
+[2026-07-10 22:36:20] [226/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 900s | START | seed=804328613
+[2026-07-10 22:51:21] [226/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 900s | OK | elapsed=900.38s | pareto_size=109
+[2026-07-10 22:51:21] [227/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 900s | START | seed=804328614
+[2026-07-10 23:06:22] [227/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 900s | OK | elapsed=900.83s | pareto_size=109
+[2026-07-10 23:06:22] [228/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 900s | START | seed=804328615
+[2026-07-10 23:21:30] [228/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 900s | OK | elapsed=908.03s | pareto_size=111
+[2026-07-10 23:21:30] [229/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 900s | START | seed=804328616
+[2026-07-10 23:36:32] [229/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 900s | OK | elapsed=902.35s | pareto_size=105
+[2026-07-10 23:36:32] [230/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 900s | START | seed=804328617
+[2026-07-10 23:51:34] [230/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 900s | OK | elapsed=901.73s | pareto_size=105
+[2026-07-10 23:51:34] [231/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 1200s | START | seed=804328608
+[2026-07-11 00:11:38] [231/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 00 | 1200s | OK | elapsed=1204.43s | pareto_size=132
+[2026-07-11 00:11:38] [232/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 1200s | START | seed=804328609
+[2026-07-11 00:31:45] [232/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 01 | 1200s | OK | elapsed=1206.98s | pareto_size=132
+[2026-07-11 00:31:45] [233/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 1200s | START | seed=804328610
+[2026-07-11 00:51:50] [233/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 02 | 1200s | OK | elapsed=1205.37s | pareto_size=132
+[2026-07-11 00:51:50] [234/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 1200s | START | seed=804328611
+[2026-07-11 01:11:54] [234/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 03 | 1200s | OK | elapsed=1203.15s | pareto_size=131
+[2026-07-11 01:11:54] [235/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 1200s | START | seed=804328612
+[2026-07-11 01:32:00] [235/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 04 | 1200s | OK | elapsed=1206.25s | pareto_size=131
+[2026-07-11 01:32:00] [236/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 1200s | START | seed=804328613
+[2026-07-11 01:52:05] [236/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 05 | 1200s | OK | elapsed=1205.50s | pareto_size=139
+[2026-07-11 01:52:05] [237/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 1200s | START | seed=804328614
+[2026-07-11 02:12:08] [237/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 06 | 1200s | OK | elapsed=1202.28s | pareto_size=139
+[2026-07-11 02:12:08] [238/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 1200s | START | seed=804328615
+[2026-07-11 02:32:10] [238/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 07 | 1200s | OK | elapsed=1202.14s | pareto_size=144
+[2026-07-11 02:32:10] [239/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 1200s | START | seed=804328616
+[2026-07-11 02:52:12] [239/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 08 | 1200s | OK | elapsed=1202.62s | pareto_size=144
+[2026-07-11 02:52:12] [240/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 1200s | START | seed=804328617
+[2026-07-11 03:12:15] [240/320] hh_lap_v1 | problem_instance_ext_1000_1.txt | run 09 | 1200s | OK | elapsed=1202.91s | pareto_size=149
+[2026-07-11 03:12:15] [241/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 300s | START | seed=717437511
+[2026-07-11 03:17:19] [241/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 300s | OK | elapsed=303.65s | pareto_size=47
+[2026-07-11 03:17:19] [242/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 300s | START | seed=717437512
+[2026-07-11 03:22:22] [242/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 300s | OK | elapsed=302.61s | pareto_size=47
+[2026-07-11 03:22:22] [243/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 300s | START | seed=717437513
+[2026-07-11 03:27:25] [243/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 300s | OK | elapsed=302.93s | pareto_size=47
+[2026-07-11 03:27:25] [244/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 300s | START | seed=717437514
+[2026-07-11 03:32:27] [244/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 300s | OK | elapsed=302.56s | pareto_size=47
+[2026-07-11 03:32:27] [245/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 300s | START | seed=717437515
+[2026-07-11 03:37:30] [245/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 300s | OK | elapsed=303.35s | pareto_size=44
+[2026-07-11 03:37:30] [246/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 300s | START | seed=717437516
+[2026-07-11 03:42:34] [246/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 300s | OK | elapsed=303.39s | pareto_size=44
+[2026-07-11 03:42:34] [247/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 300s | START | seed=717437517
+[2026-07-11 03:47:37] [247/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 300s | OK | elapsed=302.84s | pareto_size=44
+[2026-07-11 03:47:37] [248/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 300s | START | seed=717437518
+[2026-07-11 03:52:40] [248/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 300s | OK | elapsed=303.18s | pareto_size=44
+[2026-07-11 03:52:40] [249/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 300s | START | seed=717437519
+[2026-07-11 03:57:42] [249/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 300s | OK | elapsed=302.21s | pareto_size=44
+[2026-07-11 03:57:42] [250/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 300s | START | seed=717437520
+[2026-07-11 04:02:44] [250/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 300s | OK | elapsed=301.86s | pareto_size=46
+[2026-07-11 04:02:44] [251/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 600s | START | seed=717437511
+[2026-07-11 04:12:48] [251/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 600s | OK | elapsed=603.90s | pareto_size=59
+[2026-07-11 04:12:48] [252/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 600s | START | seed=717437512
+[2026-07-11 04:22:48] [252/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 600s | OK | elapsed=600.53s | pareto_size=59
+[2026-07-11 04:22:48] [253/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 600s | START | seed=717437513
+[2026-07-11 04:32:50] [253/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 600s | OK | elapsed=601.76s | pareto_size=60
+[2026-07-11 04:32:50] [254/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 600s | START | seed=717437514
+[2026-07-11 04:42:56] [254/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 600s | OK | elapsed=605.52s | pareto_size=60
+[2026-07-11 04:42:56] [255/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 600s | START | seed=717437515
+[2026-07-11 04:53:01] [255/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 600s | OK | elapsed=605.28s | pareto_size=60
+[2026-07-11 04:53:01] [256/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 600s | START | seed=717437516
+[2026-07-11 05:03:05] [256/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 600s | OK | elapsed=604.43s | pareto_size=60
+[2026-07-11 05:03:05] [257/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 600s | START | seed=717437517
+[2026-07-11 05:13:07] [257/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 600s | OK | elapsed=601.56s | pareto_size=49
+[2026-07-11 05:13:07] [258/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 600s | START | seed=717437518
+[2026-07-11 05:23:08] [258/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 600s | OK | elapsed=601.18s | pareto_size=49
+[2026-07-11 05:23:08] [259/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 600s | START | seed=717437519
+[2026-07-11 05:33:08] [259/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 600s | OK | elapsed=600.26s | pareto_size=49
+[2026-07-11 05:33:08] [260/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 600s | START | seed=717437520
+[2026-07-11 05:43:10] [260/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 600s | OK | elapsed=601.80s | pareto_size=46
+[2026-07-11 05:43:10] [261/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 900s | START | seed=717437511
+[2026-07-11 05:58:14] [261/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 900s | OK | elapsed=903.76s | pareto_size=79
+[2026-07-11 05:58:14] [262/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 900s | START | seed=717437512
+[2026-07-11 06:13:18] [262/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 900s | OK | elapsed=904.00s | pareto_size=81
+[2026-07-11 06:13:18] [263/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 900s | START | seed=717437513
+[2026-07-11 06:28:20] [263/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 900s | OK | elapsed=901.85s | pareto_size=81
+[2026-07-11 06:28:20] [264/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 900s | START | seed=717437514
+[2026-07-11 06:43:21] [264/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 900s | OK | elapsed=900.84s | pareto_size=81
+[2026-07-11 06:43:21] [265/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 900s | START | seed=717437515
+[2026-07-11 06:58:23] [265/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 900s | OK | elapsed=901.97s | pareto_size=81
+[2026-07-11 06:58:23] [266/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 900s | START | seed=717437516
+[2026-07-11 07:13:27] [266/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 900s | OK | elapsed=904.29s | pareto_size=81
+[2026-07-11 07:13:27] [267/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 900s | START | seed=717437517
+[2026-07-11 07:28:30] [267/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 900s | OK | elapsed=903.24s | pareto_size=81
+[2026-07-11 07:28:30] [268/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 900s | START | seed=717437518
+[2026-07-11 07:43:31] [268/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 900s | OK | elapsed=900.44s | pareto_size=81
+[2026-07-11 07:43:31] [269/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 900s | START | seed=717437519
+[2026-07-11 07:58:36] [269/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 900s | OK | elapsed=905.31s | pareto_size=81
+[2026-07-11 07:58:36] [270/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 900s | START | seed=717437520
+[2026-07-11 08:13:39] [270/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 900s | OK | elapsed=902.70s | pareto_size=81
+[2026-07-11 08:13:39] [271/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 1200s | START | seed=717437511
+[2026-07-11 08:33:41] [271/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 00 | 1200s | OK | elapsed=1201.97s | pareto_size=96
+[2026-07-11 08:33:41] [272/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 1200s | START | seed=717437512
+[2026-07-11 08:53:44] [272/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 01 | 1200s | OK | elapsed=1203.13s | pareto_size=96
+[2026-07-11 08:53:44] [273/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 1200s | START | seed=717437513
+[2026-07-11 09:13:47] [273/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 02 | 1200s | OK | elapsed=1203.73s | pareto_size=96
+[2026-07-11 09:13:47] [274/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 1200s | START | seed=717437514
+[2026-07-11 09:33:52] [274/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 03 | 1200s | OK | elapsed=1204.13s | pareto_size=96
+[2026-07-11 09:33:52] [275/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 1200s | START | seed=717437515
+[2026-07-11 09:53:53] [275/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 04 | 1200s | OK | elapsed=1201.32s | pareto_size=96
+[2026-07-11 09:53:53] [276/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 1200s | START | seed=717437516
+[2026-07-11 10:13:58] [276/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 05 | 1200s | OK | elapsed=1205.09s | pareto_size=96
+[2026-07-11 10:13:58] [277/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 1200s | START | seed=717437517
+[2026-07-11 10:34:02] [277/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 06 | 1200s | OK | elapsed=1204.31s | pareto_size=102
+[2026-07-11 10:34:02] [278/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 1200s | START | seed=717437518
+[2026-07-11 10:54:06] [278/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 07 | 1200s | OK | elapsed=1203.98s | pareto_size=102
+[2026-07-11 10:54:06] [279/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 1200s | START | seed=717437519
+[2026-07-11 11:14:08] [279/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 08 | 1200s | OK | elapsed=1201.22s | pareto_size=102
+[2026-07-11 11:14:08] [280/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 1200s | START | seed=717437520
+[2026-07-11 11:34:09] [280/320] hh_lap_v1 | problem_instance_ext_1000_2.txt | run 09 | 1200s | OK | elapsed=1201.79s | pareto_size=102
+[2026-07-11 11:34:09] [281/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 300s | START | seed=630546414
+[2026-07-11 11:39:15] [281/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 300s | OK | elapsed=305.27s | pareto_size=43
+[2026-07-11 11:39:15] [282/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 300s | START | seed=630546415
+[2026-07-11 11:44:18] [282/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 300s | OK | elapsed=303.01s | pareto_size=43
+[2026-07-11 11:44:18] [283/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 300s | START | seed=630546416
+[2026-07-11 11:49:24] [283/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 300s | OK | elapsed=306.51s | pareto_size=43
+[2026-07-11 11:49:24] [284/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 300s | START | seed=630546417
+[2026-07-11 11:54:30] [284/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 300s | OK | elapsed=305.76s | pareto_size=43
+[2026-07-11 11:54:30] [285/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 300s | START | seed=630546418
+[2026-07-11 11:59:30] [285/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 300s | OK | elapsed=300.33s | pareto_size=43
+[2026-07-11 11:59:30] [286/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 300s | START | seed=630546419
+[2026-07-11 12:04:34] [286/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 300s | OK | elapsed=303.70s | pareto_size=43
+[2026-07-11 12:04:34] [287/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 300s | START | seed=630546420
+[2026-07-11 12:09:40] [287/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 300s | OK | elapsed=305.78s | pareto_size=43
+[2026-07-11 12:09:40] [288/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 300s | START | seed=630546421
+[2026-07-11 12:14:44] [288/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 300s | OK | elapsed=304.10s | pareto_size=43
+[2026-07-11 12:14:44] [289/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 300s | START | seed=630546422
+[2026-07-11 12:19:49] [289/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 300s | OK | elapsed=304.76s | pareto_size=43
+[2026-07-11 12:19:49] [290/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 300s | START | seed=630546423
+[2026-07-11 12:24:55] [290/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 300s | OK | elapsed=306.80s | pareto_size=44
+[2026-07-11 12:24:55] [291/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 600s | START | seed=630546414
+[2026-07-11 12:34:56] [291/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 600s | OK | elapsed=600.34s | pareto_size=77
+[2026-07-11 12:34:56] [292/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 600s | START | seed=630546415
+[2026-07-11 12:45:01] [292/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 600s | OK | elapsed=605.04s | pareto_size=77
+[2026-07-11 12:45:01] [293/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 600s | START | seed=630546416
+[2026-07-11 12:55:05] [293/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 600s | OK | elapsed=604.00s | pareto_size=77
+[2026-07-11 12:55:05] [294/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 600s | START | seed=630546417
+[2026-07-11 13:05:09] [294/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 600s | OK | elapsed=604.23s | pareto_size=77
+[2026-07-11 13:05:09] [295/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 600s | START | seed=630546418
+[2026-07-11 13:15:13] [295/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 600s | OK | elapsed=603.56s | pareto_size=77
+[2026-07-11 13:15:13] [296/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 600s | START | seed=630546419
+[2026-07-11 13:25:14] [296/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 600s | OK | elapsed=601.32s | pareto_size=77
+[2026-07-11 13:25:14] [297/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 600s | START | seed=630546420
+[2026-07-11 13:35:18] [297/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 600s | OK | elapsed=603.89s | pareto_size=77
+[2026-07-11 13:35:18] [298/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 600s | START | seed=630546421
+[2026-07-11 13:45:22] [298/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 600s | OK | elapsed=604.22s | pareto_size=77
+[2026-07-11 13:45:22] [299/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 600s | START | seed=630546422
+[2026-07-11 13:55:27] [299/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 600s | OK | elapsed=604.61s | pareto_size=77
+[2026-07-11 13:55:27] [300/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 600s | START | seed=630546423
+[2026-07-11 14:05:29] [300/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 600s | OK | elapsed=602.74s | pareto_size=77
+[2026-07-11 14:05:29] [301/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 900s | START | seed=630546414
+[2026-07-11 14:20:33] [301/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 900s | OK | elapsed=903.22s | pareto_size=93
+[2026-07-11 14:20:33] [302/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 900s | START | seed=630546415
+[2026-07-11 14:35:39] [302/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 900s | OK | elapsed=906.38s | pareto_size=93
+[2026-07-11 14:35:39] [303/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 900s | START | seed=630546416
+[2026-07-11 14:50:42] [303/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 900s | OK | elapsed=903.43s | pareto_size=93
+[2026-07-11 14:50:42] [304/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 900s | START | seed=630546417
+[2026-07-11 15:05:48] [304/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 900s | OK | elapsed=905.19s | pareto_size=93
+[2026-07-11 15:05:48] [305/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 900s | START | seed=630546418
+[2026-07-11 15:20:51] [305/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 900s | OK | elapsed=903.78s | pareto_size=93
+[2026-07-11 15:20:51] [306/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 900s | START | seed=630546419
+[2026-07-11 15:35:53] [306/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 900s | OK | elapsed=902.13s | pareto_size=95
+[2026-07-11 15:35:53] [307/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 900s | START | seed=630546420
+[2026-07-11 15:50:54] [307/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 900s | OK | elapsed=900.77s | pareto_size=95
+[2026-07-11 15:50:54] [308/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 900s | START | seed=630546421
+[2026-07-11 16:06:00] [308/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 900s | OK | elapsed=906.19s | pareto_size=95
+[2026-07-11 16:06:00] [309/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 900s | START | seed=630546422
+[2026-07-11 16:21:02] [309/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 900s | OK | elapsed=901.85s | pareto_size=95
+[2026-07-11 16:21:02] [310/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 900s | START | seed=630546423
+[2026-07-11 16:36:09] [310/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 900s | OK | elapsed=906.83s | pareto_size=94
+[2026-07-11 16:36:09] [311/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 1200s | START | seed=630546414
+[2026-07-11 16:56:15] [311/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 00 | 1200s | OK | elapsed=1205.79s | pareto_size=101
+[2026-07-11 16:56:15] [312/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 1200s | START | seed=630546415
+[2026-07-11 17:16:21] [312/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 01 | 1200s | OK | elapsed=1205.78s | pareto_size=101
+[2026-07-11 17:16:21] [313/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 1200s | START | seed=630546416
+[2026-07-11 17:36:21] [313/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 02 | 1200s | OK | elapsed=1200.79s | pareto_size=101
+[2026-07-11 17:36:21] [314/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 1200s | START | seed=630546417
+[2026-07-11 17:56:26] [314/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 03 | 1200s | OK | elapsed=1204.50s | pareto_size=101
+[2026-07-11 17:56:26] [315/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 1200s | START | seed=630546418
+[2026-07-11 18:16:31] [315/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 04 | 1200s | OK | elapsed=1205.07s | pareto_size=101
+[2026-07-11 18:16:31] [316/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 1200s | START | seed=630546419
+[2026-07-11 18:36:32] [316/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 05 | 1200s | OK | elapsed=1200.90s | pareto_size=101
+[2026-07-11 18:36:32] [317/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 1200s | START | seed=630546420
+[2026-07-11 18:56:33] [317/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 06 | 1200s | OK | elapsed=1201.21s | pareto_size=101
+[2026-07-11 18:56:33] [318/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 1200s | START | seed=630546421
+[2026-07-11 19:16:37] [318/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 07 | 1200s | OK | elapsed=1203.58s | pareto_size=103
+[2026-07-11 19:16:37] [319/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 1200s | START | seed=630546422
+[2026-07-11 19:36:41] [319/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 08 | 1200s | OK | elapsed=1203.87s | pareto_size=101
+[2026-07-11 19:36:41] [320/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 1200s | START | seed=630546423
+[2026-07-11 19:56:47] [320/320] hh_lap_v1 | problem_instance_ext_1000_3.txt | run 09 | 1200s | OK | elapsed=1206.23s | pareto_size=101
+[2026-07-11 19:56:47] Fin de run_general.py
