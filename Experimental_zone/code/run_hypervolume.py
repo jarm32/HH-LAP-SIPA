@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Lee los frentes Pareto generados por run_general.py en results/pareto/ y calcula el hipervolumen (algoritmo + instancia + run_id)
-# Después genera un resumen (algoritmo + instancia), con archivos de salida results/hypervolume/hypervolume_by_run.csv y results/hypervolume/hypervolume_summary.csv
+# Después genera un resumen (algoritmo + instancia), con archivos de salida results/hypervolume/hypervolume_by_run.csv y results/hypervolume/hypervolume_summary.csv - Modificado para __t...s__
 
 # Librerías
 import argparse
@@ -47,22 +47,24 @@ def parse_pareto_filename(filepath):
 
     random__problem_instance_ext_200_0__run_00.csv
     nsga3__problem_instance_ext_1000_3__run_29.csv
+    hh_lap_v0__problem_instance_ext_1000_0__t1200s__run_00.csv
 
     Devuelve:
-    algorithm, instance_name, run_id
+    algorithm, instance_name, run_id, time_budget
     """
     filename = os.path.basename(filepath)
 
-    m = re.match(r"(.+)__(problem_instance_ext_\d+_\d+)__run_(\d+)\.csv$", filename)
+    m = re.match(r"(.+)__(problem_instance_ext_\d+_\d+)(?:__t(\d+)s)?__run_(\d+)\.csv$", filename)
 
     if not m:
         return None
 
     algorithm = m.group(1)
     instance_name = m.group(2) + ".txt"
-    run_id = int(m.group(3))
+    time_budget = int(m.group(3)) if m.group(3) is not None else None
+    run_id = int(m.group(4))
 
-    return algorithm, instance_name, run_id
+    return algorithm, instance_name, time_budget, run_id
 
 # Extrae el número de estudiantes de un nombre de instancia
 def parse_n_students(instance_name):
@@ -86,7 +88,7 @@ def discover_pareto_files(pareto_dir, algorithms=None, sizes=None):
         if parsed is None:
             continue
 
-        algorithm, instance_name, run_id = parsed
+        algorithm, instance_name, time_budget, run_id = parsed
         n_students = parse_n_students(instance_name)
 
         if algorithms_set is not None and algorithm not in algorithms_set:
@@ -98,6 +100,7 @@ def discover_pareto_files(pareto_dir, algorithms=None, sizes=None):
         records.append({
             "algorithm": algorithm,
             "instance": instance_name,
+            "time_budget": time_budget,
             "n_students": n_students,
             "run_id": run_id,
             "filepath": filepath,
@@ -109,15 +112,16 @@ def discover_pareto_files(pareto_dir, algorithms=None, sizes=None):
 def compute_instance_bounds(records):
     bounds_by_instance = {}
 
-    instances = sorted(set(r["instance"] for r in records))
+    keys = sorted(
+        set((r["instance"], r["time_budget"]) for r in records),
+        key=lambda k: (k[0], k[1] if k[1] is not None else -1),
+    )
 
-    for instance in instances:
+    for key in keys:
         all_points = []
-
         for r in records:
-            if r["instance"] != instance:
+            if (r["instance"], r["time_budget"]) != key:
                 continue
-
             points = load_pareto_from_csv(r["filepath"])
             if len(points) > 0:
                 all_points.append(points)
@@ -126,12 +130,9 @@ def compute_instance_bounds(records):
             continue
 
         merged = np.vstack(all_points)
-        mins = merged.min(axis=0)
-        maxs = merged.max(axis=0)
-
-        bounds_by_instance[instance] = {
-            "mins": mins,
-            "maxs": maxs,
+        bounds_by_instance[key] = {
+            "mins": merged.min(axis=0),
+            "maxs": merged.max(axis=0),
         }
 
     return bounds_by_instance
@@ -145,9 +146,9 @@ def compute_hypervolume_by_run(records, bounds_by_instance):
     rows = []
 
     for r in records:
-        instance = r["instance"]
+        key = (r["instance"], r["time_budget"])
 
-        if instance not in bounds_by_instance:
+        if key not in bounds_by_instance:
             hv = 0.0
             n_points = 0
             mins = ["", "", "", ""]
@@ -155,10 +156,8 @@ def compute_hypervolume_by_run(records, bounds_by_instance):
         else:
             points = load_pareto_from_csv(r["filepath"])
             n_points = len(points)
-
-            mins = bounds_by_instance[instance]["mins"]
-            maxs = bounds_by_instance[instance]["maxs"]
-
+            mins = bounds_by_instance[key]["mins"]
+            maxs = bounds_by_instance[key]["maxs"]
             if n_points == 0:
                 hv = 0.0
             else:
@@ -168,6 +167,7 @@ def compute_hypervolume_by_run(records, bounds_by_instance):
         rows.append({
             "algorithm": r["algorithm"],
             "instance": r["instance"],
+            "time_budget": r["time_budget"] if r["time_budget"] is not None else "",
             "n_students": r["n_students"],
             "run_id": r["run_id"],
             "pareto_points": n_points,
@@ -192,7 +192,7 @@ def compute_summary(by_run_rows):
     groups = {}
 
     for row in by_run_rows:
-        key = (row["algorithm"], row["instance"], row["n_students"])
+        key = (row["algorithm"], row["instance"], row["time_budget"], row["n_students"])
 
         if key not in groups:
             groups[key] = []
@@ -201,13 +201,14 @@ def compute_summary(by_run_rows):
 
     summary_rows = []
 
-    for key in sorted(groups.keys()):
-        algorithm, instance, n_students = key
+    for key in sorted(groups.keys(), key=lambda k: (k[0], k[1], str(k[2]), k[3])):
+        algorithm, instance, time_budget, n_students = key
         values = np.asarray(groups[key], dtype=float)
 
         summary_rows.append({
             "algorithm": algorithm,
             "instance": instance,
+            "time_budget": time_budget,
             "n_students": n_students,
             "n_runs": len(values),
             "mean_hv": float(np.mean(values)),
@@ -280,6 +281,7 @@ def main():
     by_run_fields = [
         "algorithm",
         "instance",
+        "time_budget",
         "n_students",
         "run_id",
         "pareto_points",
@@ -297,6 +299,7 @@ def main():
     summary_fields = [
         "algorithm",
         "instance",
+        "time_budget",
         "n_students",
         "n_runs",
         "mean_hv",
