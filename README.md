@@ -38,10 +38,10 @@ Todos los algoritmos generan soluciones factibles, las evalúan según los cuatr
 
 ## Estructura general del repositorio
 
-La carpeta principal del proyecto es `Teachers+Centers`, organizada actualmente de la siguiente forma:
+La carpeta principal del proyecto es `Code`, organizada actualmente de la siguiente forma:
 
 ```text
-Teachers+Centers/
+Code/
 ├── inst_creator/       # generación de instancias utilizadas en los experimentos
 ├── metaheuristics/     # algoritmos implementados y scripts de ejecución
 ├── results/            # resultados producidos por los experimentos y análisis posterior
