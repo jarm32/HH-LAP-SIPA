@@ -220,7 +220,7 @@ def _compute_rcl(candidate_pairs, g_matrix, alpha_rcl):
     rcl = [(i, j) for (i, j), s in zip(candidate_pairs, scores) if s >= threshold]
     return rcl # lista de tuplas (i, j) que entran en la RCL
 
-
+    
 def _balanced_scalar_score(eval_data, problem, weights):
                           # datos de evaluación de la solución, instancia del problema, pesos para la combinación escalar
     """
@@ -230,25 +230,25 @@ def _balanced_scalar_score(eval_data, problem, weights):
     Normaliza:
     - tau_sum y eta_sum por número de estudiantes
     - lbar_sum por número de profesores
-    - sigma_sum por número de centros, si existe; si no, se deja sin normalizar
+    - omega se utiliza directamente, al ser una desviación típica global
     """
     n_students = max(int(problem.n_students), 1)
     n_professors = max(int(problem.n_professors), 1)
-    n_centers = max(int(problem.n_centers), 1)
 
     components = eval_data["components"]
 
     tau_norm = float(components["tau_sum"]) / n_students
     eta_norm = float(components["eta_sum"]) / n_students
     lbar_norm = float(components["lbar_sum"]) / n_professors
-    sigma_norm = float(components["sigma_sum"]) / n_centers
+    omega = float(components["omega"])
 
     return (
         weights.alpha * tau_norm
         + weights.beta * eta_norm
         - weights.gamma * lbar_norm
-        - weights.delta * sigma_norm
+        - weights.delta * omega
     ) # score escalar combinado, con normalización para equilibrar la influencia de cada objetivo durante la búsqueda local
+
 
 
 # --------------------------------------------------
@@ -372,7 +372,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
     """
     Aplica búsqueda local basada en swap entre dos estudiantes. Explora vecinos y acepta el primero (first improvement)
     que mejora un score escalar auxiliar normalizado, ya que este proporciona una dirección clara de avance
-    sin dejar que tau_sum y eta_sum dominen completamente sobre lbar_sum y sigma_sum.
+    sin dejar que tau_sum y eta_sum dominen completamente sobre lbar_sum y omega.
 
     Para controlar el coste temporal, limita el número de vecinos evaluados por pasada y el número total de mejoras
     aceptadas. Así se evita que una única solución consuma todo el presupuesto temporal.
@@ -475,7 +475,7 @@ def run_grasp(
     max_pareto_size = None,               # Tamaño máximo opcional del Pareto
     base_seed = None,                     # Semilla base para reproducibilidad (cada iteración suma su número a esta semilla)
     normalize_student_dist = True,        # booleano para normalizar distancias estudiante-empresa
-    normalize_supervision_dist = True,    # booleano para normalizar distancias profesor-plaza
+    normalize_supervision_dist = True,    # booleano para normalizar distancias de supervisión centro-empresa y empresa-empresa
     constructive_max_attempts = 5,        # Máximo de intentos del constructivo
     constructive_time_limit_seconds = 30, # Límite de tiempo para cada intento del constructivo (prioritario sobre constructive_max_attempts)
     use_random_fallback = True,           # booleano para activar un fallback aleatorio que intente generar una solución factible de forma completamente aleatoria si el constructivo falla mucho
