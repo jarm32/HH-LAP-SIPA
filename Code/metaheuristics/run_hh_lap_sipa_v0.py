@@ -46,7 +46,7 @@ def main():
                 normalize_student_dist=True,
                 normalize_supervision_dist=True,
                 professor_lbar_weight=1.0,
-                professor_sigma_weight=1.0,
+                professor_omega_weight=1.0,
                 verbose=True,
             )
 
