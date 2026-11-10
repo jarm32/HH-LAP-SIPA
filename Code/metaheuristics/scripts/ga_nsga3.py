@@ -30,7 +30,7 @@ def _ensure_deap_types():
         creator.create(
             "FitnessSIPAMulti",               # nombre del tipo de fitness
             base.Fitness,                     # clase base de DEAP que gestiona la evaluación
-            weights=(1.0, 1.0, -1.0, -1.0)    # max tau, max eta, min lbar, min sigma
+            weights=(1.0, 1.0, -1.0, -1.0)    # max tau, max eta, min lbar, min omega
         )
 
     # Creación del tipo de individuo --> lista con el fitness definido arriba
@@ -412,7 +412,7 @@ def _evaluate_individual(individual, normalize_student_dist=True, normalize_supe
         float(c["tau_sum"]),
         float(c["eta_sum"]),
         float(c["lbar_sum"]),
-        float(c["sigma_sum"]),
+        float(c["omega"]),
     )  
 
     # Guarda la evaluación en caché
