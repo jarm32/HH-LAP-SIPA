@@ -1,9 +1,0 @@
-n_students,best_algorithm,n_instance_wins
-200,HH-LAP-SIPA-Lite,3
-200,HH-LAP-SIPA-Intensive,1
-400,HH-LAP-SIPA-Intensive,2
-400,HH-LAP-SIPA-Lite,2
-600,HH-LAP-SIPA-Lite,4
-800,HH-LAP-SIPA-Lite,4
-1000,HH-LAP-SIPA-Intensive,2
-1000,HH-LAP-SIPA-Lite,2

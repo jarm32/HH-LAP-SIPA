@@ -1,2 +1,0 @@
-comparison,test,n_instances,statistic,p_value,mean_diff_lite_minus_intensive,median_diff_lite_minus_intensive
-HH-LAP-SIPA-Lite vs HH-LAP-SIPA-Intensive,Wilcoxon signed-rank,20,47.0,0.029575347900390625,0.21019413171218065,0.38723659584959647

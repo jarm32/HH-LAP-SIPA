@@ -175,7 +175,7 @@ PARETO_FIELDS = [
     "tau_sum",
     "eta_sum",
     "lbar_sum",
-    "sigma_sum",
+    "omega",
 ]
 
 # Guarda las estadísticas de una ejecución en un CSV acumulativo, con una fila por ejecución
@@ -412,7 +412,7 @@ def execute_hh_lap_v0(problem, time_limit_seconds, seed, verbose):
         normalize_student_dist=True,
         normalize_supervision_dist=True,
         professor_lbar_weight=1.0,
-        professor_sigma_weight=1.0,
+        professor_omega_weight=1.0,
         verbose=verbose
     )
 

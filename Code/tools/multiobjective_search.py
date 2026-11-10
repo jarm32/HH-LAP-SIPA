@@ -195,8 +195,8 @@ def summarize_pareto_set(pareto_set): # pareto actual
             "mean_eta": None,
             "max_lbar": None,
             "mean_lbar": None,
-            "max_sigma": None,
-            "mean_sigma": None,
+            "max_omega": None,
+            "mean_omega": None,
             "max_objective_value": None,
             "mean_objective_value": None,
         }
@@ -205,7 +205,7 @@ def summarize_pareto_set(pareto_set): # pareto actual
     tau_vals = []
     eta_vals = []
     lbar_vals = []
-    sigma_vals = []
+    omega_vals = []
     obj_vals = []
     
     # Recorre cada solución del Pareto y extrae sus componentes para calcular máximos y medias
@@ -214,7 +214,7 @@ def summarize_pareto_set(pareto_set): # pareto actual
         tau_vals.append(float(c["tau_sum"]))
         eta_vals.append(float(c["eta_sum"]))
         lbar_vals.append(float(c["lbar_sum"]))
-        sigma_vals.append(float(c["sigma_sum"]))
+        omega_vals.append(float(c["omega"]))
         obj_vals.append(float(item.evaluation["objective_value"]))
 
     return {
@@ -224,8 +224,8 @@ def summarize_pareto_set(pareto_set): # pareto actual
         "mean_eta": sum(eta_vals) / len(eta_vals),
         "max_lbar": max(lbar_vals),
         "mean_lbar": sum(lbar_vals) / len(lbar_vals),
-        "max_sigma": max(sigma_vals),
-        "mean_sigma": sum(sigma_vals) / len(sigma_vals),
+        "max_omega": max(omega_vals),
+        "mean_omega": sum(omega_vals) / len(omega_vals),
         "max_objective_value": max(obj_vals),
         "mean_objective_value": sum(obj_vals) / len(obj_vals),
     } # Diccionario con resumen de máximos y medias de cada componente del Pareto y del objective_value global
@@ -255,7 +255,7 @@ def print_pareto_set(pareto_set):
             f"tau={c['tau_sum']:.6f}, "
             f"eta={c['eta_sum']:.6f}, "
             f"lbar={c['lbar_sum']:.6f}, "
-            f"sigma={c['sigma_sum']:.6f}"
+            f"omega={c['omega']:.6f}"
         )
 
 
@@ -288,8 +288,8 @@ def save_statistics_to_txt(filepath, instance_name, stats, pareto_set, model="--
             f.write(f"mean_eta: {summary['mean_eta']:.6f}\n")
             f.write(f"max_lbar: {summary['max_lbar']:.6f}\n")
             f.write(f"mean_lbar: {summary['mean_lbar']:.6f}\n")
-            f.write(f"max_sigma: {summary['max_sigma']:.6f}\n")
-            f.write(f"mean_sigma: {summary['mean_sigma']:.6f}\n")
+            f.write(f"max_omega: {summary['max_omega']:.6f}\n")
+            f.write(f"mean_omega: {summary['mean_omega']:.6f}\n")
             f.write(f"max_objective_value: {summary['max_objective_value']:.6f}\n")
             f.write(f"mean_objective_value: {summary['mean_objective_value']:.6f}\n")
 
@@ -309,7 +309,7 @@ def save_statistics_to_txt(filepath, instance_name, stats, pareto_set, model="--
                 f"tau={c['tau_sum']:.6f}, "
                 f"eta={c['eta_sum']:.6f}, "
                 f"lbar={c['lbar_sum']:.6f}, "
-                f"sigma={c['sigma_sum']:.6f}\n"
+                f"omega={c['omega']:.6f}\n"
             )
 
 def save_assignments_to_txt(filepath, instance_name, pareto_set, model="---"):
@@ -341,7 +341,7 @@ def save_assignments_to_txt(filepath, instance_name, pareto_set, model="---"):
             f.write(f"tau_sum: {c['tau_sum']:.6f}\n")
             f.write(f"eta_sum: {c['eta_sum']:.6f}\n")
             f.write(f"lbar_sum: {c['lbar_sum']:.6f}\n")
-            f.write(f"sigma_sum: {c['sigma_sum']:.6f}\n\n")
+            f.write(f"omega: {c['omega']:.6f}\n\n")
 
             # Asignaciones detalladas por estudiante, indicando su placement, empresa asignada y profesor asignado
             f.write("---- STUDENT -> PLACEMENT / COMPANY / PROFESSOR ----\n")

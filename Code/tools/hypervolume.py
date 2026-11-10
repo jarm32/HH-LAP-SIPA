@@ -7,7 +7,7 @@ from deap.tools._hypervolume import hv
 
 
 # Objetivos en orden
-OBJECTIVES = ["tau_sum", "eta_sum", "lbar_sum", "sigma_sum"]
+OBJECTIVES = ["tau_sum", "eta_sum", "lbar_sum", "omega"]
 
 def pareto_set_to_matrix(pareto_set):
                         # Lista de soluciones evaluadas del frente Pareto
@@ -15,7 +15,7 @@ def pareto_set_to_matrix(pareto_set):
     Convierte el conjunto Pareto, que está guardado como objetos EvaluatedSolution, 
     en una matriz numérica para procesar
     """
-    # Cada fila es una solución, las columnas son [tau_sum, eta_sum, lbar_sum, sigma_sum]
+    # Cada fila es una solución, las columnas son [tau_sum, eta_sum, lbar_sum, omega]
     rows = []
     for item in pareto_set:
         c = item.evaluation["components"]
@@ -54,7 +54,7 @@ def normalize_for_hypervolume(points, mins, maxs):
                              # Matriz de soluciones de un frente Pareto concreto, mínimos y máximos globales de los objetivos
     """
     Normaliza los puntos a [0,1] usando las cotas globales y convierte lbar_sum y 
-    sigma_sum para que valores bajos pasen a ser valores altos (para que todo se pueda maximizar)
+    omega para que valores bajos pasen a ser valores altos (para que todo se pueda maximizar)
     """
     # Conversión a arrays NumPy para asegurar operaciones numéricas correctas
     points = np.asarray(points, dtype=float)
@@ -73,7 +73,7 @@ def normalize_for_hypervolume(points, mins, maxs):
             # Si un objetivo no varía entre algoritmos, no debe afectar a la comparación
             norm[:, col] = 1.0
 
-    # lbar_sum y sigma_sum son de minimización, por eso se invierten
+    # lbar_sum y omega son de minimización, por eso se invierten
     # Si alguno no varía, se deja a 1.0 para que no penalice el hipervolumen
     if denom[2] > 1e-12:
         norm[:, 2] = 1.0 - norm[:, 2]
