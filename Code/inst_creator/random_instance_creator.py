@@ -341,7 +341,7 @@ def sample_geo_points_from_locations(n, location_names):
 
 def create_center_and_professors(n_students, location_names, cfg):
                                  # nº total de estudiante a asignar, lista de localizaciones disponibles
-                                 # configuración del generador (rangos para número de centros y capacidad de cada profesor)
+                                 # configuración del generador y capacidades de profesores
     """
     Genera la ubicación del centro educativo y los profesores, garantizando que
     la capacidad total de los profesores sea suficiente para todos los estudiantes
@@ -367,7 +367,7 @@ def create_center_and_professors(n_students, location_names, cfg):
             need -= add
             i = (i + 1) % len(prof_capacity)
 
-    return center_coords, prof_capacity # (lat, lon) del centro educativo; lista de coordenadas de cada centro
+    return center_coords, prof_capacity # (lat, lon) del centro educativo,
                                         # [Ct1, Ct2, Ct3, ...]; lista donde el índice es el profesor (t) y el valor es su capacidad (Ct)
 
 
@@ -380,7 +380,7 @@ def write_instance_file(filename, n_students, n_companies, n_placements, n_compe
                         student_info_rows, company_min, company_max, placement_company, 
                         # info de cada estudiante (id, pesos de distancia/desarrollo, vectores de competencias y preferencias), cuota mínima y máxima de estudiantes por empresa, lista que indica la empresa a la que pertenece cada plaza
                         placement_comp_needs, student_company_matrix, company_coords, center_coords, 
-                        # vector de necesidades de competencias asociado a cada plaza, matriz de distancias/tiempos entre estudiantes y empresas, listas de coordenadas de las empresas y el centro educativo,
+                        # vector de necesidades de competencias asociado a cada plaza, matriz de distancias/tiempos entre estudiantes y empresas, coordenadas de las empresas y coordenadas del centro educativo,
                         prof_capacity, center_company_dist, company_company_matrix):
                         # lista que indica la capacidad de cada profesor (Ct), lista de distancias/tiempos el centro y empresas, y matriz de distancias/tiempos entre las empresas
     """
@@ -620,7 +620,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             # Asigna coordenadas geográficas a cada empresa seleccionándolas del conjunto disponible (si n_companies > len(list), usamos choice con replacement)
             company_coords = [all_business_locations[i] for i in np.random.choice(len(all_business_locations), n_companies, replace=True)]
 
-            # Genera centros educativos y profesores, garantizando capacidad total suficiente
+            # Genera el centro educativo y sus profesores, garantizando capacidad total suficiente
             center_coords, prof_capacity = create_center_and_professors(n_students, location_names, cfg)
 
             # Extrae coordenadas de estudiantes y empresas para calcular matrices de distancia
@@ -639,16 +639,15 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 for _ in range(n_students):
                     student_company_matrix.append([float(synthetic_duration()) for _ in range(n_companies)])
 
-            # Construye la matriz de distancias centro → empresa
-            center_company_dist = []
+            # Construye el vector de distancias centro → empresa
             if use_ors:
                 resp = request_matrix_api(client, [center_coords], company_coords_ors)
                 durations = resp["durations"][0]
-                center_company_dist.append([float(d) if d else float(synthetic_duration()) for d in durations])
+                center_company_dist = [float(d) if d is not None else float(synthetic_duration()) for d in durations]
             else:
-                center_company_dist.append([float(synthetic_duration()) for _ in range(n_companies)])
+                center_company_dist = [float(synthetic_duration()) for _ in range(n_companies)]
 
-            # Construye la matriz de distancias empresa → empresa
+            # Construye el vector de distancias empresa → empresa
             company_company_matrix = []
             if use_ors:
                 for k in range(len(company_coords)):
