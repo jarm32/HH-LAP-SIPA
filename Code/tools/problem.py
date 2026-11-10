@@ -5,7 +5,7 @@ import numpy as np
 class Problem:
     """
     Representación en memoria de una instancia del problema
-    (estudiantes, empresas, dependencias, centros y profesores)
+    (estudiantes, empresas, dependencias y profesores del centro educativo)
     """
     def __init__(self):
         # Dimensiones
@@ -13,7 +13,6 @@ class Problem:
         self.n_companies = 0 #B
         self.n_placements = 0 #P
         self.n_competences = 0 #C
-        self.n_centers = 0 #E
         self.n_professors = 0 #T
 
         # Empresas
@@ -30,15 +29,14 @@ class Problem:
         self.student_w_dev = [] # peso de i al desarrollo profesional
         self.student_dev = [] # vector real de competencias de i
         self.student_pref = [] # vector de preferencias de i
-
+        
         # Distancias
         self.student_company_dist = None # matriz distancia estudiante → empresa
-        self.center_company_dist = None # matriz distancia centro → empresa
+        self.center_company_dist = None # vector distancia centro → empresa
         self.company_company_dist = None # matriz distancia empresa → empresa
 
-        # Centros y profesores
-        self.centers_coords = [] # coordenadas del centro c
-        self.prof_center = [] # centro al que pertenece el profesor t
+        # Centro y profesores
+        self.center_coords = None # (latitud, longitud) del centro educativo
         self.prof_capacity = [] # capacidad máxima de supervisión Ct
 
     # Métodos auxiliares útiles más adelante
@@ -146,51 +144,38 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
     # Localización de las empresas (no se guarda y solo se usa para avanzar en la instancia)
     idx += 1
     idx += problem.n_companies
-
-    # Dimensiones faltantes (n_centers, n_professors)
-    key, value = lines[idx].split("\t")
-    if key == "n_centers":
-        problem.n_centers = int(value)
-    idx += 1
-
+    
+    # Número de profesores
     key, value = lines[idx].split("\t")
     if key == "n_professors":
         problem.n_professors = int(value)
     idx += 1
 
-    # Localización de los centros --> c | latitud | longitud
+    # Localización del centro educativo --> latitud | longitud
     idx += 1
-    for _ in range(problem.n_centers):
+    tokens = lines[idx].split("\t")
+    lat = float(tokens[0])
+    lon = float(tokens[1])
 
-        tokens = lines[idx].split("\t")
+    problem.center_coords = (lat, lon)
+    idx += 1
 
-        lat = float(tokens[1])
-        lon = float(tokens[2])
-        problem.centers_coords.append((lat, lon))
-        idx += 1
-
-    # Información de los profesores --> t | e(t) | Ct
+    # Información de los profesores --> t | Ct
     idx += 1
     for _ in range(problem.n_professors):
 
         tokens = lines[idx].split("\t")
-        
-        problem.prof_center.append(int(tokens[1]))
-        problem.prof_capacity.append(int(tokens[2]))
+
+        problem.prof_capacity.append(int(tokens[1]))
         idx += 1
 
-    # Matriz de distancias: center → company (center_company_dist[c][k] del centro c a la empresa k)
+    # Vector de distancias: centro → empresa
     idx += 1
-    center_company_matrix = [] # n_centers x n_companies
+    center_company_vector = list(map(float, lines[idx].split("\t")))
+    problem.center_company_dist = np.array(center_company_vector)
+    idx += 1
 
-    for _ in range(problem.n_centers):
-        row = list(map(float, lines[idx].split("\t")))
-        center_company_matrix.append(row)
-        idx += 1
-
-    problem.center_company_dist = np.array(center_company_matrix)
-
-    # Matriz de distancias: company → company (company_company_dist[k][k'] de la empresa k a la empresa k')
+    # Matriz de distancias: empresa → empresa
     idx += 1
     company_company_matrix = [] # n_companies x n_companies
 
@@ -213,7 +198,6 @@ def load_instance(filename): # ruta del archivo .txt que contiene la instancia
     problem.student_dev = np.asarray(problem.student_dev, dtype=np.float64)
     problem.student_pref = np.asarray(problem.student_pref, dtype=np.float64)
 
-    problem.prof_center = np.asarray(problem.prof_center, dtype=np.int32)
     problem.prof_capacity = np.asarray(problem.prof_capacity, dtype=np.int32)
 
-    return problem # Un objeto Problem con la información de la instancia (dimensiones, datos de estudiantes, empresas, plazas, dependencias, distancias, centros y profesores)
+    return problem # Un objeto Problem con la información de la instancia (dimensiones, estudiantes, empresas, plazas, dependencias, distancias, centro y profesores)
