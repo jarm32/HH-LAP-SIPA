@@ -249,7 +249,7 @@ def save_pareto(results_dir, algorithm_name, instance_name, n_students,
                 "tau_sum": c.get("tau_sum", ""),
                 "eta_sum": c.get("eta_sum", ""),
                 "lbar_sum": c.get("lbar_sum", ""),
-                "sigma_sum": c.get("sigma_sum", ""),
+                "omega": c.get("omega", ""),
             }
 
             writer.writerow(row)
