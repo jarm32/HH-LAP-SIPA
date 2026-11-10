@@ -4,7 +4,6 @@
 
 # Librerías
 from dataclasses import dataclass
-import math
 import numpy as np
 
 
@@ -33,12 +32,10 @@ def evaluate_solution_multi(sol, normalize_student_dist=True, normalize_supervis
     - tau_sum   (maximizar)
     - eta_sum   (maximizar)
     - lbar_sum  (minimizar)
-    - sigma_sum (minimizar)
+    - omega    (minimizar)
 
-    No agrega los objetivos con pesos
+    No añade los objetivos con pesos
     """
-    p = sol.problem
-
     # Validación de la solución
     if not sol.validate():
         return {"valid": False, "reason": "Solution is not valid according to sol.validate()"}
@@ -50,9 +47,8 @@ def evaluate_solution_multi(sol, normalize_student_dist=True, normalize_supervis
     lbar_by_t = _compute_lbar_by_professor(sol, normalize_supervision_dist=normalize_supervision_dist)
     lbar_sum = float(sum(lbar_by_t))
 
-    # sigma_e
-    sigma_by_e = _compute_sigma_by_center(sol)
-    sigma_sum = float(sum(sigma_by_e))
+    # Omega (global)
+    omega = _compute_omega(sol)
 
     # Resultado multiobjetivo puro
     return {
@@ -61,13 +57,13 @@ def evaluate_solution_multi(sol, normalize_student_dist=True, normalize_supervis
             "tau_sum": float(tau_sum),
             "eta_sum": float(eta_sum),
             "lbar_sum": float(lbar_sum),
-            "sigma_sum": float(sigma_sum),
+            "omega": float(omega),
         },
         "details": {
             "lbar_by_professor": lbar_by_t,
-            "sigma_by_center": sigma_by_e,
         }
     }  # dict con los 4 objetivos por separado
+
 
 
 def evaluate_solution_scalar(sol, weights, normalize_student_dist=True, normalize_supervision_dist=True):
@@ -75,7 +71,7 @@ def evaluate_solution_scalar(sol, weights, normalize_student_dist=True, normaliz
                             # se normalizan a [0,1], booleano que indica si las distancias de supervisión se normalizan a [0,1]
     """
     Calcula la versión escalar monobjetivo de la evaluación:
-    α * tau_sum + β * eta_sum - γ * lbar_sum - δ * sigma_sum
+    α * tau_sum + β * eta_sum - γ * lbar_sum - δ * omega
 
     Se apoya en evaluate_solution_multi(...) para obtener primero
     los 4 componentes por separado
@@ -93,14 +89,14 @@ def evaluate_solution_scalar(sol, weights, normalize_student_dist=True, normaliz
     tau_sum = multi_eval["components"]["tau_sum"]
     eta_sum = multi_eval["components"]["eta_sum"]
     lbar_sum = multi_eval["components"]["lbar_sum"]
-    sigma_sum = multi_eval["components"]["sigma_sum"]
-
+    omega = multi_eval["components"]["omega"]
+    
     # Función objetivo escalarizada
     obj = (
         weights.alpha * tau_sum
         + weights.beta * eta_sum
         - weights.gamma * lbar_sum
-        - weights.delta * sigma_sum
+        - weights.delta * omega
     )
 
     # Resultado escalar, manteniendo también componentes y detalles
@@ -184,11 +180,11 @@ def _compute_lbar_by_professor(sol, normalize_supervision_dist):
     p = sol.problem
 
     # Distancias base (centro-empresa y empresa-empresa)
-    center_company = np.asarray(p.center_company_dist, dtype=np.float64)   # [n_centers, n_companies]
+    center_company = np.asarray(p.center_company_dist, dtype=np.float64)   # [n_companies]
     company_company = np.asarray(p.company_company_dist, dtype=np.float64) # [n_companies, n_companies]
 
     if normalize_supervision_dist:
-        # Normaliza globalmente ambas matrices juntas a [0,1]
+        # Normaliza globalmente el vector y la matriz de distancias a [0,1]
         cc_min = float(min(center_company.min(), company_company.min()))
         cc_max = float(max(center_company.max(), company_company.max()))
         if cc_max > cc_min:
@@ -213,22 +209,18 @@ def _compute_lbar_by_professor(sol, normalize_supervision_dist):
         if Nt == 0:
             lbar[t] = 0.0
             continue
-
-        center = p.prof_center[t]
-
-        # nodos --> 0 será el origen, 1..Nt serán placements
-        # distancia entre nodos a,b:
-        # - si ambos placements: company_company[comp(a)][comp(b)]
-        # - si uno es origen: center_company[center][comp(placement)]
+        
+        # Nodos: 0 es el origen y 1..Nt son las plazas supervisadas
+        # Distancia entre nodos = centro-empresa o empresa-empresa
         comps = [p.placement_company[j] for j in supervised]
 
         def d(a: int, b: int) -> float:
             if a == 0 and b == 0:
                 return 0.0
             if a == 0:
-                return float(center_company[center, comps[b - 1]])
+                return float(center_company[comps[b - 1]])
             if b == 0:
-                return float(center_company[center, comps[a - 1]])
+                return float(center_company[comps[a - 1]])
             return float(company_company[comps[a - 1], comps[b - 1]])
 
         Lt = _prim_mst_length(num_nodes=Nt + 1, dist_fn=d)
@@ -237,39 +229,19 @@ def _compute_lbar_by_professor(sol, normalize_supervision_dist):
     return lbar
 
 
-def _compute_sigma_by_center(sol): # objeto Solution
+def _compute_omega(sol):
     """
-    Calcula σ_e por centro
+    Calcula omega (desviación típica global de las proporciones
+    de carga de todos los profesores)
     """
     p = sol.problem
 
-    Nt = sol.professor_load[:]
-    Ct = p.prof_capacity
+    Nt = np.asarray(sol.professor_load, dtype=np.float64)
+    Ct = np.asarray(p.prof_capacity, dtype=np.float64)
 
-    # Agrupar profesores por centro
-    profs_by_center = [[] for _ in range(p.n_centers)]
-    for t in range(p.n_professors):
-        e = p.prof_center[t]
-        profs_by_center[e].append(t)
-    
-    # Para cada centro, calcula σ_e
-    sigma = [0.0] * p.n_centers
-    for e in range(p.n_centers):
-        Ts = profs_by_center[e]
-        if not Ts:
-            sigma[e] = 0.0
-            continue
+    pt = Nt / Ct
 
-        ps = []
-        for t in Ts:
-            cap = Ct[t]
-            ps.append((Nt[t] / cap) if cap > 0 else 0.0)
-
-        pbar = sum(ps) / len(ps)
-        var = sum((x - pbar) ** 2 for x in ps) / len(ps)
-        sigma[e] = float(math.sqrt(var))
-
-    return sigma
+    return float(np.std(pt))
 
 
 def _minmax_normalize_rows(a): # matriz numérica cuyas filas se quieren normalizar a [0,1]

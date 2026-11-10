@@ -1,6 +1,6 @@
-# Código para generar instancias aleatorias del problema de asignación de estudiantes a plazas de empresas, con profesores y centros educativos, y restricciones de dependencias entre plazas.
+# Código generador de instancias SIPA con estudiantes, empresas, plazas y profesores de un único centro educativo.
 
-# cd C:\Code\VRAIN-practicas\Code\Teachers+Centers\inst_creator
+# cd C:\Code\VRAIN-practicas\Code\inst_creator
 # python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
 # python random_instance_creator.py output 200 600 4 20 0.2 30 6 2 1234
 # python random_instance_creator.py output 800 1000 4 20 0.2 30 6 2 1250
@@ -43,28 +43,19 @@ class GeneratorConfig:
     slack_ratio: float = 0.0
     seed: int | None = None # Reproducibilidad
 
-    # Profesores / centros
-    n_centers_min: int = 2
-    n_centers_max: int = 6
-
     # Capacidad por profesor (Ct)
     prof_capacity_min: int = 5
     prof_capacity_max: int = 25
 
-    # ORS // Distancias sintéticas
+    # ORS = False, uso de distancias sintéticas
     use_ors: bool = False 
-    ors_base_url: str = "http://localhost:8080/ors"
-
-    #synthetic_dist_mu: float = 1500.0
-    #synthetic_dist_sigma: float = 250.0
+    #ors_base_url: str = "http://localhost:8080/ors"
 
 
 # En caso de usar ORS, esta función hace la matriz de tiempos con valores reales
 def request_matrix_api(client, sources, destinations):
-    resp = distance_matrix.distance_matrix(client, sources + destinations,
-        sources=[i for i in range(len(sources))],
-        destinations=[i for i in range(len(sources), len(sources) + len(destinations))]
-    )
+    resp = distance_matrix.distance_matrix(client, sources + destinations, sources=[i for i in range(len(sources))],
+                                           destinations=[i for i in range(len(sources), len(sources) + len(destinations))])
     return resp
 
 # Crea una distancia sintética al no usar ORS
@@ -312,7 +303,7 @@ def adjust_max_quotas(max_q, placements_per_company, n_students, slack_ratio=0.0
 
 
 # ----------------------------
-# Hacer la instancia factible por construcción (se amolda a las restricciones de centros y profesores)
+# Hacer la instancia factible por construcción (capacidades de profesores)
 # ----------------------------
 
 def sample_geo_points_from_locations(n, location_names):
@@ -348,42 +339,36 @@ def sample_geo_points_from_locations(n, location_names):
     return points # [(lat1, lon1), (lat2, lon2), ...]; lista de coordenadas
 
 
-def create_centers_and_professors(n_students, location_names, cfg):
+def create_center_and_professors(n_students, location_names, cfg):
                                  # nº total de estudiante a asignar, lista de localizaciones disponibles
-                                 # configuración del generador (rangos para número de centros y capacidad de cada profesor)
+                                 # configuración del generador y capacidades de profesores
     """
-    Crea los centros y los profesores asignados a cada centro de forma aleatoria,
-    garantizando que la capacidad total de los profesores sea suficiente para cubrir a todos los estudiantes
+    Genera la ubicación del centro educativo y los profesores, garantizando que
+    la capacidad total de los profesores sea suficiente para todos los estudiantes
     """
-    n_centers = random.randint(cfg.n_centers_min, cfg.n_centers_max)
-    centers_coords = sample_geo_points_from_locations(n_centers, location_names)
+    center_coords = sample_geo_points_from_locations(1, location_names)[0] # (lat, lon) del centro educativo
 
-    prof_center = []
-    prof_capacity = []
+    # Capacidad de cada profesor
+    n_professors = random.randint(2, 18)
+    prof_capacity = [random.randint(cfg.prof_capacity_min, cfg.prof_capacity_max) for _ in range(n_professors)]
     
-    # Genera un nº de profesores y los asigna a centros
-    n_professors = random.randint(n_centers, 3 * n_centers)
-    for t in range(n_professors):
-        c = random.randint(0, n_centers - 1)
-        prof_center.append(c)
-        prof_capacity.append(random.randint(cfg.prof_capacity_min, cfg.prof_capacity_max))
-
     # Asegura capacidad total
     total_cap = sum(prof_capacity)
     target_cap = int(math.ceil(n_students * (1.0 + cfg.slack_ratio))) # Holgura
+    
     if total_cap < target_cap:
         # Sube capacidades hasta cubrir
         need = target_cap - total_cap
         i = 0
+        
         while need > 0:
             add = min(need, 5)
             prof_capacity[i] += add
             need -= add
             i = (i + 1) % len(prof_capacity)
 
-    return centers_coords, prof_center, prof_capacity # [(lat1, lon1), (lat2, lon2), ...]; lista de coordenadas de cada centro
-                                                      # [c1, c2, c3, ...]; lista donde el índice es el profesor (t) y el valor es el centro al que está asignado (e(t))
-                                                      # [Ct1, Ct2, Ct3, ...]; lista donde el índice es el profesor (t) y el valor es su capacidad (Ct)
+    return center_coords, prof_capacity # (lat, lon) del centro educativo,
+                                        # [Ct1, Ct2, Ct3, ...]; lista donde el índice es el profesor (t) y el valor es su capacidad (Ct)
 
 
 # ----------------------------
@@ -394,10 +379,10 @@ def write_instance_file(filename, n_students, n_companies, n_placements, n_compe
                         # nombre del archivo, número de estudiantes, de empresas, de plazas, total de competencias (nº competencias * nº de perfiles), lista de dependencias (lista de listas de índices de plazas),
                         student_info_rows, company_min, company_max, placement_company, 
                         # info de cada estudiante (id, pesos de distancia/desarrollo, vectores de competencias y preferencias), cuota mínima y máxima de estudiantes por empresa, lista que indica la empresa a la que pertenece cada plaza
-                        placement_comp_needs, student_company_matrix, company_coords, centers_coords, 
-                        # vector de necesidades de competencias asociado a cada plaza, matriz de distancias/tiempos entre estudiantes y empresas, listas de coordenadas de las empresas y los centros educativos,
-                        prof_center, prof_capacity, center_company_matrix, company_company_matrix):
-                        # lista que indica el centro asignado a cada profesor (e(t)), lista que indica la capacidad de cada profesor (Ct), matriz de distancias/tiempos entre centros y empresas y entre empresas mismas
+                        placement_comp_needs, student_company_matrix, company_coords, center_coords, 
+                        # vector de necesidades de competencias asociado a cada plaza, matriz de distancias/tiempos entre estudiantes y empresas, coordenadas de las empresas y coordenadas del centro educativo,
+                        prof_capacity, center_company_dist, company_company_matrix):
+                        # lista que indica la capacidad de cada profesor (Ct), lista de distancias/tiempos el centro y empresas, y matriz de distancias/tiempos entre las empresas
     """
     Crea un archivo .txt con la instancia completa del problema
     """
@@ -449,25 +434,23 @@ def write_instance_file(filename, n_students, n_companies, n_placements, n_compe
         fd.write("COMPANY_LOCATIONS\n")
         for k, (lat, lon) in enumerate(company_coords):
             fd.write(f"{k}\t{lat}\t{lon}\n")
+       
+        # Número de profesores
+        fd.write("n_professors\t{}\n".format(len(prof_capacity)))
 
-        # Nº de centros y profesores
-        fd.write("n_centers\t{}\n".format(len(centers_coords)))
-        fd.write("n_professors\t{}\n".format(len(prof_center)))
+        # Coordenadas del centro
+        fd.write("CENTER_LOCATION\n")
+        lat, lon = center_coords
+        fd.write(f"{lat}\t{lon}\n")
 
-        # Coordenadas de centros
-        fd.write("CENTER_LOCATIONS\n")
-        for c, (lat, lon) in enumerate(centers_coords):
-            fd.write(f"{c}\t{lat}\t{lon}\n")
-        
-        # Para cada profesor (t, e(t), Ct)
+        # Para cada profesor (t, Ct)
         fd.write("PROFESSOR_INFO\n")
-        for t in range(len(prof_center)):
-            fd.write(f"{t}\t{prof_center[t]}\t{prof_capacity[t]}\n")
+        for t in range(len(prof_capacity)):
+            fd.write(f"{t}\t{prof_capacity[t]}\n")
 
-        # Matriz distancia centro → empresa
+        # Distancias del centro → empresa
         fd.write("CENTER_COMPANY_DISTANCE\n")
-        for row in center_company_matrix:
-            fd.write("\t".join(str(d) for d in row) + "\n")
+        fd.write("\t".join(str(d) for d in center_company_dist) + "\n")
 
         # Matriz distancia empresa → empresa
         fd.write("COMPANY_COMPANY_DISTANCE\n")
@@ -637,8 +620,8 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             # Asigna coordenadas geográficas a cada empresa seleccionándolas del conjunto disponible (si n_companies > len(list), usamos choice con replacement)
             company_coords = [all_business_locations[i] for i in np.random.choice(len(all_business_locations), n_companies, replace=True)]
 
-            # Genera centros educativos y profesores, garantizando capacidad total suficiente
-            centers_coords, prof_center, prof_capacity = create_centers_and_professors(n_students, location_names, cfg)
+            # Genera el centro educativo y sus profesores, garantizando capacidad total suficiente
+            center_coords, prof_capacity = create_center_and_professors(n_students, location_names, cfg)
 
             # Extrae coordenadas de estudiantes y empresas para calcular matrices de distancia
             student_coords = [(x[0], x[1]) for x in student_info]
@@ -656,18 +639,15 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 for _ in range(n_students):
                     student_company_matrix.append([float(synthetic_duration()) for _ in range(n_companies)])
 
-            # Construye la matriz de distancias centro → empresa
-            center_company_matrix = []
+            # Construye el vector de distancias centro → empresa
             if use_ors:
-                for c in range(len(centers_coords)):
-                    resp = request_matrix_api(client, [centers_coords[c]], company_coords_ors)
-                    durations = resp["durations"][0]
-                    center_company_matrix.append([float(d) if d else float(synthetic_duration()) for d in durations])
+                resp = request_matrix_api(client, [center_coords], company_coords_ors)
+                durations = resp["durations"][0]
+                center_company_dist = [float(d) if d is not None else float(synthetic_duration()) for d in durations]
             else:
-                for _ in range(len(centers_coords)):
-                    center_company_matrix.append([float(synthetic_duration()) for _ in range(n_companies)])
+                center_company_dist = [float(synthetic_duration()) for _ in range(n_companies)]
 
-            # Construye la matriz de distancias empresa → empresa
+            # Construye el vector de distancias empresa → empresa
             company_company_matrix = []
             if use_ors:
                 for k in range(len(company_coords)):
@@ -706,10 +686,9 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 placement_comp_needs=placement_comp_needs,
                 student_company_matrix=student_company_matrix,
                 company_coords=company_coords,
-                centers_coords=centers_coords,
-                prof_center=prof_center,
+                center_coords=center_coords,
                 prof_capacity=prof_capacity,
-                center_company_matrix=center_company_matrix,
+                center_company_dist=center_company_dist,
                 company_company_matrix=company_company_matrix
             )
 

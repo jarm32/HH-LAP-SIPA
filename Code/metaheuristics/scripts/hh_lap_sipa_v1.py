@@ -8,7 +8,6 @@
 import math
 import random
 import time
-from dataclasses import dataclass
 import numpy as np
 
 from tools.solution import Solution
@@ -134,7 +133,7 @@ def compute_target_professor_loads(problem):
 
 
 # -----------------------------------------------------------------------------
-# Preclusterización espacial y extracción de clústeres activos
+# Agrupación de prácticas por empresa y extracción de clústeres activos
 # -----------------------------------------------------------------------------
 
 def build_global_company_clusters(problem):
@@ -181,17 +180,6 @@ def build_selected_placement_clusters(problem, selected_placements, global_clust
 # Utilidades de supervisión, factibilidad y costes
 # -----------------------------------------------------------------------------
 
-@dataclass
-class _SupervisionCostContext:
-    """
-    Matrices de distancias (costes) para poder estimar el coste 
-    incremental de asignar una práctica a un profesor
-    """
-
-    center_company: np.ndarray # Distancia entre el centro educativo del profesor y la empresa
-    company_company: np.ndarray # Distancia entre empresas
-
-
 def _professor_assignment_is_feasible(problem, selected_placements, professor_assignment):
                                      # instancia del problema, lista de índices de prácticas seleccionadas, diccionario de asignación práctica-profesor
     """
@@ -227,60 +215,16 @@ def _loads_from_assignment(problem, selected_placements, professor_assignment):
         loads[t] += 1
     return loads # Lista con la carga de cada profesor
 
-
-def _build_supervision_cost_context(problem, normalize_supervision_dist = True):
-                                   # instancia del problema, booleano para saber si se normalizan las distancias de supervisión
-    """
-    Prepara las matrices de distancia usadas para calcular costes de supervisión.
-    Si se activa la normalización, aplica min-max global a las matrices
-    """
-    # Copia de matrices
-    center_company = np.asarray(problem.center_company_dist, dtype=np.float64).copy()
-    company_company = np.asarray(problem.company_company_dist, dtype=np.float64).copy()
-
-    # Normalización global de distancias de supervisión para que tengan un rango común y evitar dominancia de un objetivo sobre otro por escala
-    if normalize_supervision_dist:
-        dmin = float(min(center_company.min(), company_company.min()))
-        dmax = float(max(center_company.max(), company_company.max()))
-        if dmax > dmin:
-            center_company = (center_company - dmin) / (dmax - dmin)
-            company_company = (company_company - dmin) / (dmax - dmin)
-        else:
-            center_company = np.zeros_like(center_company, dtype=np.float64)
-            company_company = np.zeros_like(company_company, dtype=np.float64)
-
-    return _SupervisionCostContext(center_company=center_company, company_company=company_company) # objeto que contiene las matrices
-
-
-def _cluster_representative_company(problem, cluster):
-                                    # instancia del problema, lista de prácticas de un clúster
-    """
-    Devuelve la empresa representativa de un clúster. Los clústeres se crean por empresa,
-    por lo que se toma la empresa de la primera práctica
-    """
-    return int(problem.placement_company[cluster[0]]) # Empresa representativa del clúster
-
-
-def _distance_professor_to_cluster(problem, context, professor, cluster):
-                                  # instancia del problema, matrices de distancias, profesor, clúster de prácticas
-    """
-    Calcula una distancia simple entre el centro del profesor y la empresa representativa del clúster
-    """
-    center = int(problem.prof_center[professor])
-    company = _cluster_representative_company(problem, cluster)
-    return float(context.center_company[center, company]) # Distancia centro-profesor -> empresa representativa del clúster
-
-
 # -----------------------------------------------------------------------------
 # Construcción inicial profesor-práctica por clústeres
 # -----------------------------------------------------------------------------
 
-def assign_professors_by_clusters(problem, selected_placements, clusters, target_loads, rng = None, normalize_supervision_dist = True):
-                                 # instancia del problema, prácticas seleccionadas, clústeres activos, cargas objetivo, generador aleatorio, normalización de distancias
+def assign_professors_by_clusters(problem, selected_placements, clusters, target_loads, rng = None):
+                                 # instancia del problema, prácticas seleccionadas, clústeres activos, cargas objetivo, generador aleatorio
     """
     Construye una asignación inicial profesor-práctica usando clústeres activos de P'.
     Intenta asignar tantas prácticas como sea posible de un mismo clúster a un mismo profesor,
-    priorizando carga objetivo restante, capacidad disponible y proximidad al clúster
+    priorizando carga objetivo restante y capacidad disponible
     """
     # Inicialización y validaciones básicas
     selected = list(selected_placements)
@@ -290,8 +234,6 @@ def assign_professors_by_clusters(problem, selected_placements, clusters, target
         return None
     if len(target_loads) != problem.n_professors:
         raise ValueError("target_loads must have length n_professors")
-
-    context = _build_supervision_cost_context(problem, normalize_supervision_dist)
 
     # Copia de clústeres pendientes, ordenados por tamaño descendente
     pending_clusters = [list(c) for c in clusters if c]
@@ -309,17 +251,16 @@ def assign_professors_by_clusters(problem, selected_placements, clusters, target
         candidates = [t for t in range(problem.n_professors) if professor_load[t] < int(problem.prof_capacity[t])]
         if not candidates:
             return None
-
-        # Ordenación de candidatos: mayor carga objetivo restante, mayor capacidad libre y menor distancia al clúster
+        
+        # Ordenación de candidatos (mayor carga objetivo restante y mayor capacidad libre)
         scored_candidates = []
         for t in candidates:
             cap_remaining = int(problem.prof_capacity[t]) - professor_load[t]
             target_remaining = max(int(target_loads[t]) - professor_load[t], 0)
-            dist_to_cluster = _distance_professor_to_cluster(problem, context, t, cluster)
-            scored_candidates.append((target_remaining, cap_remaining, -dist_to_cluster, t))
+            scored_candidates.append((target_remaining, cap_remaining, t))
 
-        best_score = max(scored_candidates, key=lambda x: (x[0], x[1], x[2]))[:3]
-        best_candidates = [t for tr, cr, neg_dist, t in scored_candidates if (tr, cr, neg_dist) == best_score]
+        best_score = max(scored_candidates, key=lambda x: (x[0], x[1]))[:2]
+        best_candidates = [t for tr, cr, t in scored_candidates if (tr, cr) == best_score]
         chosen_t = rng.choice(best_candidates)
 
         # Número de prácticas del clúster que se asignan al profesor elegido
@@ -791,8 +732,7 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
             selected_placements=selected_placements,
             clusters=active_clusters,
             target_loads=target_loads,
-            rng=rng,
-            normalize_supervision_dist=normalize_supervision_dist
+            rng=rng
         )
 
         # Si no se ha podido construir la asignación inicial, se descarta este P'
