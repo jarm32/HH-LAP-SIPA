@@ -361,62 +361,25 @@ def create_center_and_professors(n_students, location_names, cfg):
         min_professors = feasible_min
         max_professors = feasible_max
 
-    # Favorecer ligeramente los extremos del intervalo
-    count = max_professors - min_professors + 1
-    if count < 3:
-        n_professors = random.randint(min_professors, max_professors)
-    else:
-        cut1 = min_professors + count // 3
-        cut2 = min_professors + (2 * count) // 3
-        ranges = (range(min_professors, cut1), range(cut1, cut2), range(cut2, max_professors + 1))
+    # Número de profesores aleatorio dentro del rango factible
+    n_professors = random.randint(min_professors, max_professors)
 
-        # Probabilidades: 35 %, 30 %, 35 %
-        selected_range = random.choices(ranges, weights=(35, 30, 35), k=1)[0]
-        n_professors = random.choice(selected_range)
-
-    # ----------------------------------------
-    # Capacidades individuales heterogéneas
-    # ----------------------------------------
-
+    # Intensidad aleatoria de la dispersión (bajo = capacidades similares, alto = mayor amplitud)
     mean_capacity = target_cap / n_professors
-
-    # Intensidad aleatoria de la dispersión
-    # Valores bajos: capacidades más similares
-    # Valores altos: mayor amplitud de capacidades
     dispersion = random.uniform(0.35, 1.0)
+    lower = max(min_cap, math.floor(mean_capacity - dispersion * (mean_capacity - min_cap)))
+    upper = min(max_cap, math.ceil(mean_capacity + dispersion * (max_cap - mean_capacity)))
 
-    # Intervalo aleatorio de capacidades alrededor de la media
-    lower = max(
-        min_cap,
-        math.floor(mean_capacity - dispersion * (mean_capacity - min_cap))
-    )
-
-    upper = min(
-        max_cap,
-        math.ceil(mean_capacity + dispersion * (max_cap - mean_capacity))
-    )
-
-    # Capacidades iniciales aleatorias
-    prof_capacity = [
-        random.randint(lower, upper)
-        for _ in range(n_professors)
-    ]
-
-    # ----------------------------------------
-    # Ajuste de la capacidad total
-    # ----------------------------------------
+    prof_capacity = [random.randint(lower, upper) for _ in range(n_professors)]
 
     # Diferencia entre la capacidad necesaria y la generada
     difference = target_cap - sum(prof_capacity)
 
-    # Ajustar aleatoriamente sin superar límites individuales
     while difference != 0:
-
         if difference > 0:
             candidates = [t for t, cap in enumerate(prof_capacity) if cap < upper]
         else:
             candidates = [t for t, cap in enumerate(prof_capacity) if cap > lower]
-
         if not candidates:
             raise ValueError("No se puede ajustar la capacidad total")
 
