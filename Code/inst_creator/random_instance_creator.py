@@ -18,6 +18,7 @@ import json
 import math
 import sys
 from dataclasses import dataclass
+from functools import lru_cache
 
 
 # ----------------------------
@@ -105,6 +106,18 @@ def create_competence_need_vector(number_competences, most_important):
     return competence_need  # vector tipo: [1,1,...,0.5,0,0,...]. S
 
 
+@lru_cache(maxsize=None)
+def cargar_puntos_residenciales(localidad):
+                                # Nombre de la localidad (Valencia, Alboraya o Paterna)
+    """
+    Carga una sola vez las coordenadas de cada localidad
+    """
+    with open(f"data/points/{localidad}.geojson", "r", encoding="utf-8") as archivo:
+        datos = json.load(archivo)
+
+    return [tuple(elemento["geometry"]["coordinates"]) for elemento in datos["features"]]
+
+
 def create_student_profile(p_excellence_students, number_competences, number_profiles, student_locations, profile_prob): 
                            # vector de dos elementos (prob de alumno excelente // prob de alumno notable), nº de competencias base a considerar (por perfil),
                            # número de perfiles académicos distintos (informático, industrial...) --> el nº de competencias se multiplica por este número para generar perfiles con diferentes competencias importantes,
@@ -171,10 +184,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
     w_distance = round(random.random() * 0.5, 2)
     w_dev = round(1 - w_distance, 2)
 
-    loc_file = open(f"data/points/{location_name}.geojson", "r")
-    loc_obj = json.load(loc_file)
-    (latitude, longitude) = random.choice(loc_obj["features"])["geometry"]["coordinates"]
-    loc_file.close()
+    latitude, longitude = random.choice(cargar_puntos_residenciales(location_name))
 
     return latitude, longitude, has_car, w_distance, w_dev, competence_development, competence_preference 
            # Genera un vector con el perfil del estudiante: latitud y longitud de su casa, si tiene coche, el peso que le da el estudiante a la distancia y el que le da al desarrollo profesional,
@@ -662,7 +672,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                         excess -= dec
 
             # Asigna coordenadas geográficas a cada empresa seleccionándolas del conjunto disponible (si n_companies > len(list), usamos choice con replacement)
-            company_coords = [all_business_locations[i] for i in np.random.choice(len(all_business_locations), n_companies, replace=True)]
+            company_coords = [all_business_locations[i] for i in np.random.choice(len(all_business_locations), n_companies, replace=(n_companies > len(all_business_locations)))]
 
             # Genera el centro educativo y sus profesores, garantizando capacidad total suficiente
             center_coords, prof_capacity = create_center_and_professors(n_students, location_names, cfg)
