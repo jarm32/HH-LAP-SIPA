@@ -340,35 +340,57 @@ def sample_geo_points_from_locations(n, location_names):
 
 
 def create_center_and_professors(n_students, location_names, cfg):
-                                 # nº total de estudiante a asignar, lista de localizaciones disponibles
-                                 # configuración del generador y capacidades de profesores
+                                # Nº total de estudiantes, localizaciones disponibles y configuración del generador
     """
-    Genera la ubicación del centro educativo y los profesores, garantizando que
-    la capacidad total de los profesores sea suficiente para todos los estudiantes
+    Genera la ubicación del centro educativo y a los profesores con
+    cantidades y capacidades aleatorias, garantizando la capacidad total
+    necesaria y respetando los límites individuales
     """
     center_coords = sample_geo_points_from_locations(1, location_names)[0] # (lat, lon) del centro educativo
-
-    # Capacidad de cada profesor
-    n_professors = random.randint(2, 18)
-    prof_capacity = [random.randint(cfg.prof_capacity_min, cfg.prof_capacity_max) for _ in range(n_professors)]
+    target_cap = int(math.ceil(n_students * (1.0 + cfg.slack_ratio))) # Capacidad total necesaria, incluyendo holgura
+    min_cap, max_cap = cfg.prof_capacity_min, cfg.prof_capacity_max
     
-    # Asegura capacidad total
-    total_cap = sum(prof_capacity)
-    target_cap = int(math.ceil(n_students * (1.0 + cfg.slack_ratio))) # Holgura
+    # Límites que garantizan que existe una distribución factible
+    feasible_min = math.ceil(target_cap / max_cap)
+    feasible_max = target_cap // min_cap
     
-    if total_cap < target_cap:
-        # Sube capacidades hasta cubrir
-        need = target_cap - total_cap
-        i = 0
-        
-        while need > 0:
-            add = min(need, 5)
-            prof_capacity[i] += add
-            need -= add
-            i = (i + 1) % len(prof_capacity)
+    # Intervalo
+    min_professors = max(feasible_min, math.ceil(target_cap / 22))
+    max_professors = min(feasible_max, target_cap // 10)
+    if min_professors > max_professors:
+        min_professors = feasible_min
+        max_professors = feasible_max
 
-    return center_coords, prof_capacity # (lat, lon) del centro educativo,
-                                        # [Ct1, Ct2, Ct3, ...]; lista donde el índice es el profesor (t) y el valor es su capacidad (Ct)
+    # Número de profesores aleatorio dentro del rango factible
+    n_professors = random.randint(min_professors, max_professors)
+
+    # Intensidad aleatoria de la dispersión (bajo = capacidades similares, alto = mayor amplitud)
+    mean_capacity = target_cap / n_professors
+    dispersion = random.uniform(0.35, 1.0)
+    lower = max(min_cap, math.floor(mean_capacity - dispersion * (mean_capacity - min_cap)))
+    upper = min(max_cap, math.ceil(mean_capacity + dispersion * (max_cap - mean_capacity)))
+
+    prof_capacity = [random.randint(lower, upper) for _ in range(n_professors)]
+
+    # Diferencia entre la capacidad necesaria y la generada
+    difference = target_cap - sum(prof_capacity)
+
+    while difference != 0:
+        if difference > 0:
+            candidates = [t for t, cap in enumerate(prof_capacity) if cap < upper]
+        else:
+            candidates = [t for t, cap in enumerate(prof_capacity) if cap > lower]
+        if not candidates:
+            raise ValueError("No se puede ajustar la capacidad total")
+
+        t = random.choice(candidates)
+
+        step = 1 if difference > 0 else -1
+
+        prof_capacity[t] += step
+        difference -= step
+
+    return center_coords, prof_capacity # (lat, lon) del centro educativo, [Ct1, Ct2, Ct3, ...]; capacidades individuales
 
 
 # ----------------------------
