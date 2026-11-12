@@ -58,9 +58,31 @@ def request_matrix_api(client, sources, destinations):
                                            destinations=[i for i in range(len(sources), len(sources) + len(destinations))])
     return resp
 
+
 # Crea una distancia sintética al no usar ORS
-def synthetic_duration():
-    return max(1.0, random.normalvariate(1500, 250))
+def synthetic_duration(origin, destination):
+    """
+    Calcula el tiempo estimado de desplazamiento utilizando la distancia
+    geográfica Haversine, un factor de recorrido y una velocidad media
+    """
+    lat1, lon1 = map(math.radians, origin)
+    lat2, lon2 = map(math.radians, destination)
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Distancia geográfica entre los dos puntos
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    a = min(1.0, max(0.0, a))
+    distance_km = 2 * 6371.0 * math.asin(math.sqrt(a))
+
+    if distance_km == 0.0:
+        return 0.0
+
+    # Estimación de tiempo (30 % más y velocidad media de 30 km/h)
+    road_distance_km = distance_km * 1.3
+    duration_seconds = road_distance_km / 30.0 * 3600.0
+
+    return round(max(1.0, duration_seconds), 2)
 
 
 # ----------------------------
@@ -648,43 +670,44 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             # Extrae coordenadas de estudiantes y empresas para calcular matrices de distancia
             student_coords = [(x[0], x[1]) for x in student_info]
             company_coords_ors = [(x[0], x[1]) for x in company_coords]
-
-            # Construye la matriz de distancias estudiante → empresa
+            
+            # Construye la matriz de costes estudiante → empresa
             student_company_matrix = []
             if use_ors:
-                # pedimos fila a fila como en tu original para evitar tamaños enormes
-                for i in range(len(student_coords)):
-                    resp = request_matrix_api(client, [student_coords[i]], company_coords_ors)
+                for i, student_coord in enumerate(student_coords):
+                    resp = request_matrix_api(client, [student_coord], company_coords_ors)
                     durations = resp["durations"][0]
-                    student_company_matrix.append([float(d) if d else float(synthetic_duration()) for d in durations])
-            else:
-                for _ in range(n_students):
-                    student_company_matrix.append([float(synthetic_duration()) for _ in range(n_companies)])
 
-            # Construye el vector de distancias centro → empresa
+                    # Costes para los estudiantes asociados a su ubicación y a la de la empresa
+                    student_company_matrix.append([float(d) if d is not None else synthetic_duration(student_coord, company_coords_ors[k])
+                                                   for k, d in enumerate(durations)])
+            else:
+                for student_coord in student_coords:
+                    student_company_matrix.append([synthetic_duration(student_coord, company_coord) for company_coord in company_coords_ors])
+            
+            # Construye el vector de costes centro → empresa
             if use_ors:
                 resp = request_matrix_api(client, [center_coords], company_coords_ors)
                 durations = resp["durations"][0]
-                center_company_dist = [float(d) if d is not None else float(synthetic_duration()) for d in durations]
-            else:
-                center_company_dist = [float(synthetic_duration()) for _ in range(n_companies)]
 
-            # Construye el vector de distancias empresa → empresa
+                # Costes entre el centro y las empresas asociadas a las ubicaciones
+                center_company_dist = [float(d) if d is not None else synthetic_duration(center_coords, company_coords_ors[k])
+                                       for k, d in enumerate(durations)]
+            else:
+                center_company_dist = [synthetic_duration(center_coords, company_coord) for company_coord in company_coords_ors]
+
+            # Construye la matriz de costes empresa → empresa
             company_company_matrix = []
             if use_ors:
-                for k in range(len(company_coords)):
-                    resp = request_matrix_api(client, [company_coords_ors[k]], company_coords_ors)
+                for k, origin in enumerate(company_coords_ors):
+                    resp = request_matrix_api(client, [origin], company_coords_ors)
                     durations = resp["durations"][0]
-                    company_company_matrix.append(
-                        [float(d) if d else float(synthetic_duration()) for d in durations]
-                    )
-            else:
-                for _ in range(n_companies):
-                    row = []
-                    for _ in range(n_companies):
-                        row.append(float(synthetic_duration()))
-                    company_company_matrix.append(row)
 
+                    company_company_matrix.append([0.0 if origin == destination else (float(d) if d is not None else synthetic_duration(origin, destination))
+                                                  for destination, d in zip(company_coords_ors, durations)])
+            else:
+                company_company_matrix = [[synthetic_duration(origin, destination) for destination in company_coords_ors] for origin in company_coords_ors]
+                
             # Archivo de salida
             out = f"{cfg.result_path}/problem_instance_ext_{n_students}_{n_instance}.txt"
 
