@@ -234,7 +234,7 @@ def main():
 
     parser.add_argument(
         "--results_dir",
-        default="../results",
+        default="results",
         help="Carpeta results generada por run_general.py",
     )
 
@@ -254,8 +254,12 @@ def main():
     )
 
     args = parser.parse_args()
-
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    
     results_dir = args.results_dir
+    if not os.path.isabs(results_dir):
+        results_dir = os.path.join(base_dir, results_dir)
+
     pareto_dir = os.path.join(results_dir, "pareto")
     output_dir = os.path.join(results_dir, "hypervolume")
 
