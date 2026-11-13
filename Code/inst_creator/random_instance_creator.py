@@ -253,6 +253,64 @@ def create_dependencies(placements, percentage_dependencies):
     return deps # [[3, 6], [4, 7, 5]]...; cada sublista representa un grupo de plazas que dependen entre sí
 
 
+def create_dependencies_global(company_placements, percentage_dependencies):
+    """
+    Genera dependencias sobre un porcentaje global de plazas.
+    Cada grupo contiene plazas de una misma empresa (2, 3 o 4 plazas)
+    """
+    # Calcula el número total de plazas y el objetivo de dependencias
+    total_placements = sum(len(v) for v in company_placements.values())
+    target = round(total_placements * percentage_dependencies / 100.0)
+
+    if target == 0:
+        return []
+    if target < 2 or target > total_placements:
+        raise ValueError("Porcentaje de dependencias no válido")
+
+    # Copia de las plazas disponibles por empresa y baraja aleatoriamente
+    available = {k: list(v) for k, v in company_placements.items()}
+    for slots in available.values():
+        random.shuffle(slots)
+
+    groups_by_company = {k: [] for k in company_placements}
+    remaining = target
+
+    # Un grupo de 3 si el objetivo es impar
+    if remaining % 2:
+        candidates = [k for k, slots in available.items() if len(slots) >= 3]
+        if not candidates:
+            raise ValueError("No se puede crear el grupo de tres plazas. Arreglar.")
+
+        k = random.choice(candidates)
+        groups_by_company[k].append([available[k].pop() for _ in range(3)])
+        remaining -= 3
+
+    # Completar el porcentaje mediante grupos de 2
+    while remaining > 0:
+        candidates = [k for k, slots in available.items() if len(slots) >= 2]
+        if not candidates:
+            raise ValueError("No hay plazas suficientes para las dependencias")
+
+        k = random.choices(candidates, weights=[len(available[k]) for k in candidates], k=1)[0]
+        groups_by_company[k].append([available[k].pop(), available[k].pop()])
+        remaining -= 2
+
+    # Fusionar aleatoriamente algunos pares en grupos de 4
+    dependencies = []
+    for groups in groups_by_company.values():
+        random.shuffle(groups)
+
+        while len(groups) >= 2:
+            if random.random() < 0.35:
+                dependencies.append(groups.pop() + groups.pop())
+            else:
+                dependencies.append(groups.pop())
+        dependencies.extend(groups)
+
+    assert sum(len(g) for g in dependencies) == target
+    return dependencies
+
+
 def build_company_blocks(placements_of_company, dep_groups_in_company):
                         # Lista de índices de plazas de la empresa, lista de grupos de dependencias (lista de listas de índices de plazas)
     """
@@ -472,7 +530,7 @@ def write_instance_file(filename, n_students, n_companies, n_placements, n_compe
         fd.write("PLACEMENT_INFO\n")
         for j in range(n_placements):
             needs = placement_comp_needs[j]
-            fd.write(f"{j}\t{placement_company[j]}\t" + "\t".join([str(round(x, 2)) for x in needs]) + "\n")
+            fd.write(f"{j}\t{placement_company[j]}\t" + "\t".join(f"{float(x):.6f}" for x in needs) + "\n")
 
         # Grupos de plazas dependientes
         fd.write("PLACEMENT_DEPENDENCIES\n")
@@ -604,7 +662,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                     np.random.shuffle(needs)
                     needs = ([0.0] * (profile * cfg.number_competences)) + needs + \
                             ([0.0] * ((number_profiles - profile - 1) * cfg.number_competences))
-                placement_comp_needs.append(needs)
+                
+                total_needs = sum(needs)
+                if total_needs <= 0:
+                    raise ValueError("Plaza sin necesidades de competencias. Arreglar.")
+                placement_comp_needs.append([value / total_needs for value in needs])
 
             # Elige número de empresas en rango razonable
             lower = max(2, n_placements // 10)
@@ -629,15 +691,12 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             for j, k in enumerate(placement_company):
                 company_placements[int(k)].append(j)
 
-            # Genera los grupos de plazas dependientes por empresa y construye la lista global de dependencias
-            dependencies_all = []
+            # Dependencias sobre el porcentaje global de plazas
+            dependencies_all = create_dependencies_global(company_placements, cfg.placement_dep_prob)
             dep_groups_per_company = {k: [] for k in range(n_companies)}
-            for k in range(n_companies):
-                deps = create_dependencies(company_placements[k], cfg.placement_dep_prob)
-                # filtra grupos tamaño 1
-                deps = [d for d in deps if len(d) >= 2]
-                dep_groups_per_company[k] = deps
-                dependencies_all.extend(deps)
+            for dep in dependencies_all:
+                k = int(placement_company[dep[0]])
+                dep_groups_per_company[k].append(dep)
 
             # Inicializa las cuotas mínimas y máximas por empresa
             company_min = [0] * n_companies
