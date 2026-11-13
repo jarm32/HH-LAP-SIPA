@@ -634,7 +634,7 @@ def parse_args(argv):
 
     parser.add_argument(
         "--instances_dir",
-        default="instances",
+        default="inst_creator/output",
         help="Carpeta con las instancias .txt",
     )
 
@@ -647,8 +647,8 @@ def parse_args(argv):
     parser.add_argument(
         "--algorithms",
         nargs="+",
-        default=["random", "nsga3"],
-        help="Algoritmos a ejecutar. Ejemplo: --algorithms random nsga3",
+        default=["random", "nsga3", "grasp", "hh_lap_v0", "hh_lap_v1"],
+        help="Algoritmos a ejecutar",
     )
 
     parser.add_argument(
