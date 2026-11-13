@@ -26,9 +26,9 @@ def main():
 
     weights = ObjectiveWeights(alpha=0.35, beta=0.35, gamma=0.20, delta=0.10)
 
-    for i in [5,20,40,60]:
+    for n_students in [200, 400, 600, 800, 1000]:
         for j in range(4):
-            instance_path = f"inst_creator/output/problem_instance_ext_{i}0_{j}.txt"
+            instance_path = f"inst_creator/output/problem_instance_ext_{n_students}_{j}.txt"
             instance_name = instance_path.split("/")[-1]
 
             # Carga de la instancia
