@@ -12,13 +12,13 @@ Describir el diseño y funcionamiento del generador de instancias `random_instan
 - Qué datos externos utiliza.
 - Qué formato tienen los ficheros `.txt` resultantes.
 
-Este documento no describe una instancia concreta. Para eso se utiliza una plantilla independiente de configuración de instancia. Este documento describe la lógica general del generador.
+Este documento describe la lógica general del generador de instancias del modelo SIPA adaptado a un único centro educativo. La configuración concreta y las características de las 20 instancias sintéticas definitivas se recogen en un documento PDF independiente, que complementa esta explicación técnica.
 
 ---
 
 ## 2. Contexto del problema
 
-El problema tratado es una versión modificada del problema SIPA (*Student–Industry Placement Allocation*). En esta versión se consideran: estudiantes, plazas de prácticas, empresas, centros educativos y profesores supervisores. Por tanto, una instancia del problema debe contener, como mínimo:
+El problema tratado es una versión modificada del problema SIPA (*Student–Industry Placement Allocation*). Una instancia del problema debe contener, como mínimo:
 
 - Estudiantes.
 - Empresas.
@@ -28,12 +28,14 @@ El problema tratado es una versión modificada del problema SIPA (*Student–Ind
 - Necesidades de competencias de las plazas.
 - Cuotas mínimas y máximas de empresas.
 - Dependencias entre plazas.
-- Centros educativos.
+- Ubicación del centro educativo.
 - Profesores.
 - Capacidades de supervisión.
 - Matrices de distancia.
 
 El generador se diseña para producir instancias factibles por construcción, es decir, instancias que permitan asignar todos los estudiantes respetando las restricciones estructurales principales del modelo.
+
+La instancia considera un único centro educativo al que pertenecen todos los supervisores. Cada profesor dispone de una capacidad individual de supervisión, y el equilibrio de las cargas docentes se representa mediante una única magnitud global, \(\omega\), calculada a partir de las cargas normalizadas de todos los profesores del centro.
 
 ## 3. Parámetros de entrada por línea de comandos
 
@@ -44,8 +46,10 @@ python random_instance_creator.py <result_path> <start_size> <end_size> <number_
 ```
 
 ```bash
-python random_instance_creator.py output 200 600 3 20 0.0 30 6 2 1234
+python random_instance_creator.py output 200 1000 4 20 0.2 30 6 2 1234
 ```
+
+Esta configuración utilizada genera cuatro instancias para cada uno de los tamaños 200, 400, 600, 800 y 1000 estudiantes, obteniendo un total de 20 instancias mediante una única ejecución.
 
 | Argumento | Descripción |
 |---|---|
@@ -54,8 +58,8 @@ python random_instance_creator.py output 200 600 3 20 0.0 30 6 2 1234
 | `end_size` | Último tamaño de estudiantes considerado. |
 | `number_instances` | Número de instancias generadas para cada tamaño de estudiantes. |
 | `surplus` | Porcentaje de plazas adicionales respecto al número de estudiantes. |
-| `slack_ratio` | Holgura adicional usada al ajustar capacidades de empresas y profesores. |
-| `placement_dep_prob` | Parámetro usado para generar dependencias entre plazas. |
+| `slack_ratio` | Porcentaje de capacidad adicional para profesores y empresas respecto al número de estudiantes. |
+| `placement_dep_prob` | Porcentaje global de plazas que formarán parte de algún grupo de dependencias. |
 | `number_competences` | Número de competencias base por perfil académico. |
 | `most_important_competences` | Número de competencias principales en las necesidades de una plaza. |
 | `seed` | Semilla base opcional para asegurar reproducibilidad. |
@@ -73,15 +77,16 @@ Además de los argumentos de entrada, el generador contiene parámetros internos
 | `number_profiles` | `8` | Número de perfiles académicos o bloques competenciales. |
 | `p_excellent_student` | `0.05` | Probabilidad de generar un estudiante excelente. |
 | `p_notable_student` | `0.25` | Probabilidad de generar un estudiante notable. |
-| `n_centers_min` | `2` | Número mínimo de centros educativos. |
-| `n_centers_max` | `6` | Número máximo de centros educativos. |
+| `number_centers` | `1` (implícito) | Cada instancia contiene exactamente un centro educativo; no se configura como un número variable. |
 | `prof_capacity_min` | `5` | Capacidad mínima de supervisión de un profesor. |
 | `prof_capacity_max` | `25` | Capacidad máxima de supervisión de un profesor. |
 | `ORS_AVAILABLE` | `False` | Indica si el script tiene disponible ORS. |
 | `use_ors` | `False` | Indica si se usan distancias reales mediante ORS. |
 | `car_probability` | `0.65` | Probabilidad de que un estudiante tenga coche. |
 | `student_distance_weight_range` | `[0.0, 0.5]` | Rango usado para generar el peso de distancia del estudiante. |
-| Distancia sintética | `max(1.0, Normal(1500, 250))` | Distribución usada para generar distancias cuando ORS está desactivado. |
+| Factor de recorrido sintético | `1.3` | Factor multiplicativo sobre la distancia Haversine. |
+| Velocidad media supuesta | `30 km/h` | Velocidad utilizada para estimar tiempos de desplazamiento. |
+| Tamaño de grupos dependientes | `2–4` | Número de plazas por grupo de dependencia. |
 
 ---
 
@@ -89,13 +94,23 @@ Además de los argumentos de entrada, el generador contiene parámetros internos
 
 El generador utiliza una carpeta `data/` con información geográfica auxiliar (también generada sintéticamente).
 
+El generador utiliza datos geográficos sintéticos preparados previamente. Se dispone de 5000 puntos residenciales candidatos repartidos entre Valencia (2000), Alboraya (1500) y Paterna (1500), así como de 600 ubicaciones empresariales candidatas. La distribución residencial establecida es del 40%, 30% y 30%, respectivamente.
+
 | Fichero o carpeta | Uso |
 |---|---|
 | `data/proportion_home.csv` | Distribución de probabilidad de las localizaciones de vivienda de los estudiantes. |
 | `data/placement_locations.csv` | Coordenadas posibles para las empresas. |
 | `data/points/*.geojson` | Puntos geográficos usados para ubicar estudiantes y centros educativos. |
 
+Estos datos se generan con `generate_spatial_data.py`, utilizando la semilla 32. Los puntos residenciales se generan alrededor de referencias geográficas con un radio máximo de 350 metros, mientras que las ubicaciones empresariales utilizan un radio máximo de 450 metros (los detalles se documentan en `Code/inst_creator/data/README_data.md`). Cabe destacar que los archivos GeoJSON se interpretan internamente en orden [latitud, longitud].
+
 ---
+
+
+
+
+
+
 
 ## 6. Lógica de tamaños e instancias
 
