@@ -255,11 +255,11 @@ def create_dependencies(placements, percentage_dependencies):
 def create_dependencies_global(company_placements, percentage_dependencies):
     """
     Genera dependencias sobre un porcentaje global de plazas.
-    Cada grupo contiene plazas de una misma empresa (2, 3 o 4 plazas)
+    Cada grupo contiene dos o más plazas de una misma empresa
     """
     # Calcula el número total de plazas y el objetivo de dependencias
     total_placements = sum(len(v) for v in company_placements.values())
-    target = round(total_placements * percentage_dependencies / 100.0)
+    target = int(total_placements * percentage_dependencies / 100.0)
 
     if target == 0:
         return []
@@ -293,18 +293,21 @@ def create_dependencies_global(company_placements, percentage_dependencies):
         k = random.choices(candidates, weights=[len(available[k]) for k in candidates], k=1)[0]
         groups_by_company[k].append([available[k].pop(), available[k].pop()])
         remaining -= 2
-
-    # Fusionar aleatoriamente algunos pares en grupos de 4
+    
+    # Grupos de dependencias por empresa y barajar
     dependencies = []
     for groups in groups_by_company.values():
-        random.shuffle(groups)
+        selected_placements = [placement for group in groups for placement in group]
+        random.shuffle(selected_placements)
 
-        while len(groups) >= 2:
-            if random.random() < 0.35:
-                dependencies.append(groups.pop() + groups.pop())
-            else:
-                dependencies.append(groups.pop())
-        dependencies.extend(groups)
+        while selected_placements:
+            remaining = len(selected_placements)
+
+            # Grupos de tamaño >= 2 y evitar dejar una única plaza sin agrupar.
+            possible_sizes = [size for size in range(2, remaining + 1) if remaining - size != 1]
+            group_size = random.choice(possible_sizes)
+            dep = [selected_placements.pop() for _ in range(group_size)]
+            dependencies.append(dep)
 
     assert sum(len(g) for g in dependencies) == target
     return dependencies
