@@ -168,7 +168,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
     competence_preference = ([0.0] * (profile * number_competences)) + competence_preference + \
                             ([0.0] * ((number_profiles - profile - 1) * number_competences))
 
-    # Asigna localización (dónde vive) y otros atributos (tiene coche y cuánto le importa la distancia vs. el desarrollo profesional)
+    # Asigna la localidad de residencia y genera los pesos de distancia y desarrollo profesional
     r_loc = random.random()
     acum = 0.0
     location_name = None
@@ -179,15 +179,14 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
             break
     if location_name is None:
         location_name = student_locations[-1][0]
-
-    has_car = True if random.random() <= 0.65 else False
+    
     w_distance = round(random.random() * 0.5, 2)
     w_dev = round(1 - w_distance, 2)
 
     latitude, longitude = random.choice(cargar_puntos_residenciales(location_name))
 
-    return latitude, longitude, has_car, w_distance, w_dev, competence_development, competence_preference 
-           # Genera un vector con el perfil del estudiante: latitud y longitud de su casa, si tiene coche, el peso que le da el estudiante a la distancia y el que le da al desarrollo profesional,
+    return latitude, longitude, w_distance, w_dev, competence_development, competence_preference 
+           # Genera un vector con el perfil del estudiante: latitud y longitud de su casa, el peso que le da el estudiante a la distancia y el que le da al desarrollo profesional,
            # su vector de desarrollo de competencias y su vector de preferencias de competencias (en ambos casos, solo el bloque de su perfil tiene valores; el resto son ceros)
 
 
@@ -627,11 +626,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             profile_prob = np.random.random(number_profiles)
             profile_prob = profile_prob / np.sum(profile_prob)
 
-            # estudiantes (localización, coche, peso distancia/desarrollo, vector de desarrollo, vector de preferencias)
+            # estudiantes (localización, peso distancia/desarrollo, vector de desarrollo, vector de preferencias)
             student_info = []
             profiles_used = []
             for i in range(n_students):
-                lat, lon, has_car, w_dist, w_dev, dev_vec, pref_vec = create_student_profile(
+                lat, lon, w_dist, w_dev, dev_vec, pref_vec = create_student_profile(
                     [p_excellent_student, p_notable_student],
                     cfg.number_competences,
                     number_profiles,
@@ -639,7 +638,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                     profile_prob
                 )
                 profiles_used.append(pref_vec)
-                student_info.append((lat, lon, has_car, w_dist, w_dev, dev_vec, pref_vec))
+                student_info.append((lat, lon, w_dist, w_dev, dev_vec, pref_vec))
 
             # nº plazas (más plazas que estudiantes por el surplus)
             n_placements = int(math.ceil(n_students * (1.0 + cfg.surplus / 100.0)))
@@ -783,7 +782,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             # Extrae la información de cada estudiante para escribirla en el fichero
             student_rows = []
             for i in range(n_students):
-                (_, _, _, w_dist, w_dev, dev_vec, pref_vec) = student_info[i]
+                (_, _, w_dist, w_dev, dev_vec, pref_vec) = student_info[i]
                 student_rows.append((i, w_dist, w_dev, dev_vec, pref_vec))
 
             write_instance_file(
