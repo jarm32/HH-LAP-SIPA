@@ -106,12 +106,6 @@ Estos datos se generan con `generate_spatial_data.py`, utilizando la semilla 32.
 
 ---
 
-
-
-
-
-
-
 ## 6. Lógica de tamaños e instancias
 
 La generación de tamaños se controla mediante:
@@ -133,7 +127,7 @@ genera:
 200, 400, 600
 ```
 
-El parámetro `number_instances` no indica cuántos tamaños se generan. Indica cuántas instancias distintas se generan para cada tamaño. Por tanto:
+El parámetro `number_instances` no indica cuántos tamaños se generan, sino cuántas instancias distintas se generan para cada tamaño. Por tanto:
 
 ```text
 start_size = 200
@@ -177,9 +171,7 @@ El generador utiliza dos fuentes de aleatoriedad: `random` de Python y `np.rando
 - `base_seed` es la semilla (opcional) pasada por línea de comandos.
 - `global_instance_idx` es un contador global de instancias generadas (la primera instancia tiene `global_instance_idx = 0`).
 
-Por ejemplo, para `base_seed` = 1234, las semillas de las instancias serían: `problem_instance_ext_200_0.txt` = 1234, `problem_instance_ext_200_1.txt` = 1235, etc.
-
-Dadas estas semillas, antes de generar cada instancia, el código las fija para asociarlas a cada fichero:
+Por ejemplo, para `base_seed` = 1234, las semillas de las instancias serían: `problem_instance_ext_200_0.txt` = 1234, `problem_instance_ext_200_1.txt` = 1235, etc. Dadas estas semillas, antes de generar cada instancia, el código las fija para asociarlas a cada fichero:
 
 ```python
 random.seed(instance_seed)
@@ -203,7 +195,7 @@ Para cada instancia generada, el flujo general es:
 7. Repartir plazas entre empresas.
 8. Generar dependencias entre plazas.
 9. Generar cuotas mínimas y máximas de empresas.
-10. Generar centros educativos y profesores.
+10. Generar el centro educativo y el conjunto de profesores supervisores.
 11. Generar matrices de distancia.
 12. Escribir la instancia en un fichero `.txt`.
 
@@ -246,7 +238,7 @@ Después, el vector se baraja y se expande al bloque del perfil correspondiente.
 
 ### 9.4. Localización, coche y pesos
 
-Cada estudiante recibe una localización según `data/proportion_home.csv`. Además se define una probabilidad de que el estudiante tenga coche (`P(has_car = True)`), un peso asociado a la distancia (`w_distance`) y un peso asociado al desarrollo profesional (`w_development` = 1 - `w_distance`).
+Cada estudiante recibe una localización geográfica según la distribución de probabilidades definida en `data/proportion_home.csv`. Además, se generan un peso asociado a la distancia (`w_distance`) y un peso asociado al desarrollo profesional (`w_development` = 1 - `w_distance`).
 
 ---
 
@@ -263,9 +255,9 @@ Además, cada plaza recibe un vector de necesidades de competencias. Este vector
 1. Reutilizando y perturbando preferencias de estudiantes ya generadas.
 2. Creando nuevos vectores de necesidad competencial.
 
-Cuando se crea un nuevo vector, las `most_important_competences` competencias reciben valor `1.0`, una competencia secundaria recibe valor `0.5`, y el resto recibe valor `0.0`.
+Cuando se crea un nuevo vector, las `most_important_competences` competencias reciben valor `1.0`, una competencia secundaria recibe valor `0.5`, y el resto recibe valor `0.0`. Después se baraja y se expande al bloque del perfil académico seleccionado.
 
-Después se baraja y se expande al bloque del perfil académico seleccionado.
+Independientemente del procedimiento utilizado para generar las necesidades de una plaza, el vector resultante se normaliza dividiendo cada componente entre la suma total de sus componentes. De este modo, todos los vectores de necesidades tienen suma 1 antes de su almacenamiento, evitando diferencias artificiales de escala entre plazas. Los valores se escriben con seis decimales para reducir los errores de redondeo.
 
 ---
 
@@ -287,16 +279,11 @@ Una vez fijado `n_companies`, las plazas se distribuyen entre empresas. Primero 
 
 ## 12. Dependencias entre plazas
 
-Las dependencias se generan empresa por empresa. Para cada empresa:
+Las dependencias se generan sobre un porcentaje global de las plazas disponibles en cada instancia, definido mediante `placement_dep_prob`. El número de plazas dependientes se obtiene aplicando dicho porcentaje sobre el total de plazas y redondeando hacia abajo cuando sea necesario.
 
-1. Se obtiene la lista de plazas de esa empresa.
-2. Se selecciona un porcentaje de plazas según `placement_dep_prob`.
-3. Las plazas seleccionadas se agrupan en grupos de tamaño mayor o igual que 2.
-4. Cada grupo se registra como una dependencia.
+Las plazas seleccionadas se organizan aleatoriamente en grupos de interdependencia de tamaño variable, sin establecer un límite máximo fijo. Cada grupo contiene al menos dos plazas pertenecientes a una misma empresa, y ninguna plaza puede aparecer en más de un grupo.
 
-Una dependencia `[j1, j2, ..., jr]`, significa que esas plazas deben activarse conjuntamente. 
-
-Si una empresa tiene menos de dos plazas, no se generan dependencias para ella.
+Las plazas pertenecientes a un mismo grupo deben ocuparse conjuntamente o permanecer todas desocupadas. Las plazas que no pertenecen a ningún grupo se consideran independientes.
 
 ---
 
@@ -306,22 +293,16 @@ Cada empresa tiene cuota mínima `q_k` y cuota máxima `Q_k`.
 
 ### 13.1. Cuota máxima
 
-La cuota máxima se genera inicialmente entre la mitad de las plazas de la empresa y el total de plazas de esa empresa. Después, se ajusta para garantizar que la suma de cuotas máximas permite asignar todos los estudiantes.
-
-El ajuste respeta:
-
-- Ninguna cuota máxima puede superar las plazas reales de la empresa.
-- La suma total de todas las cuotas máximas debe ser suficiente para cubrir a todos los estudiantes.
-- Si se usa `slack_ratio`, se intenta añadir holgura adicional sin superar las plazas disponibles.
+La cuota máxima de cada empresa (`Q_k`) coincide con el número de plazas de prácticas que ofrece, evitando así que ninguna empresa pueda recibir más estudiantes que plazas disponibles.
 
 ### 13.2. Cuota mínima
 
-La cuota mínima se genera a partir de bloques completos. Un bloque puede ser:
+La cuota mínima se genera inicialmente a partir de bloques completos de plazas. Un bloque puede ser:
 
 - Una plaza individual no dependiente.
-- Un grupo completo de dependencias.
+- Un grupo completo de plazas interdependientes.
 
-Esto evita exigir solo una parte de un grupo dependiente. Si la suma de cuotas mínimas supera el número de estudiantes, el generador reduce cuotas mínimas hasta recuperar factibilidad.
+De esta forma, las cuotas mínimas iniciales tienen en cuenta las dependencias entre plazas. Sin embargo, si la suma de cuotas mínimas supera el número de estudiantes, el generador reduce algunas cuotas hasta cumplir dicho límite. Este ajuste final no garantiza que cada cuota mínima siga siendo exactamente la suma de bloques completos, por lo que se comprueba posteriormente la factibilidad de las instancias generadas.
 
 ---
 
