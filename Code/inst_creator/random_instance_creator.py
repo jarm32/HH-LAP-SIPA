@@ -356,43 +356,6 @@ def choose_min_quota_from_blocks(blocks, max_students):
 
     return min_q # número entero que representa el mínimo de estudiantes exigidos para la empresa
 
-def adjust_max_quotas(max_q, placements_per_company, n_students, slack_ratio=0.0):
-                      # nº máximo de estudiantes por empresa (preliminar, nº de plazas reales de la empresa), número de plazas por empresa, número total de estudiantes a asignarse
-    """
-    Ajusta las cuotas máximas por empresa garantizando que no superen
-    las plazas reales disponibles y que la suma total permita asignar
-    a todos los estudiantes.
-    """    
-    # Objetivo con holgura, pero nunca podemos superar plazas reales totales
-    max_q = [min(max_q[k], placements_per_company[k]) for k in range(len(max_q))]
-    total = sum(max_q)
-
-    total_placements = sum(placements_per_company)
-    target = int(math.ceil(n_students * (1.0 + slack_ratio)))
-    target = min(target, total_placements)
-    target = max(target, n_students)
-
-    if total >= target:
-        return max_q
-
-    # Reparte incrementos donde haya margen si no hay capacidad suficiente
-    idxs = list(range(len(max_q)))
-    while total < target:
-        random.shuffle(idxs)
-        progressed = False
-        for k in idxs:
-            if max_q[k] < placements_per_company[k]:
-                max_q[k] += 1
-                total += 1
-                progressed = True
-                if total >= target:
-                    break
-        if not progressed:
-            # No hay más margen, debería no ocurrir si n_placements >= n_students
-            break
-
-    return max_q # [5, 10, 4, 9]; lista de máximos ajustados y factibles
-
 
 # ----------------------------
 # Hacer la instancia factible por construcción (capacidades de profesores)
@@ -700,19 +663,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 k = int(placement_company[dep[0]])
                 dep_groups_per_company[k].append(dep)
 
-            # Inicializa las cuotas mínimas y máximas por empresa
+            # Cuotas empresariales
             company_min = [0] * n_companies
-            company_max = [0] * n_companies
+            company_max = [len(company_placements[k]) for k in range(n_companies)] # La cuota máxima coincide con las plazas ofertadas por cada empresa
 
-            # Ajusta las cuotas máximas para garantizar que sea posible asignar a todos los estudiantes
-            for k in range(n_companies):
-                # max al menos 1 y como mucho plazas de empresa
-                cap = len(company_placements[k])
-                company_max[k] = random.randint(max(1, cap // 2), cap) if cap > 1 else 1
-
-            company_max = adjust_max_quotas(company_max, [len(company_placements[k]) for k in range(n_companies)], n_students, cfg.slack_ratio)
-
-            # Calcula la cuota mínima de cada empresa respetando bloques de dependencias y la cota máxima
+            # Genera las cuotas mínimas considerando los bloques de dependencias
             for k in range(n_companies):
                 blocks = build_company_blocks(company_placements[k], dep_groups_per_company[k])
                 company_min[k] = choose_min_quota_from_blocks(blocks, company_max[k])
