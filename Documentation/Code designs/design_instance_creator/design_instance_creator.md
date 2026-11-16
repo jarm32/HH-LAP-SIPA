@@ -58,7 +58,7 @@ Esta configuración utilizada genera cuatro instancias para cada uno de los tama
 | `end_size` | Último tamaño de estudiantes considerado. |
 | `number_instances` | Número de instancias generadas para cada tamaño de estudiantes. |
 | `surplus` | Porcentaje de plazas adicionales respecto al número de estudiantes. |
-| `slack_ratio` | Porcentaje de capacidad adicional para profesores y empresas respecto al número de estudiantes. |
+| `slack_ratio` | Porcentaje de capacidad adicional de supervisión docente respecto al número de estudiantes. |
 | `placement_dep_prob` | Porcentaje global de plazas que formarán parte de algún grupo de dependencias. |
 | `number_competences` | Número de competencias base por perfil académico. |
 | `most_important_competences` | Número de competencias principales en las necesidades de una plaza. |
@@ -82,11 +82,10 @@ Además de los argumentos de entrada, el generador contiene parámetros internos
 | `prof_capacity_max` | `25` | Capacidad máxima de supervisión de un profesor. |
 | `ORS_AVAILABLE` | `False` | Indica si el script tiene disponible ORS. |
 | `use_ors` | `False` | Indica si se usan distancias reales mediante ORS. |
-| `car_probability` | `0.65` | Probabilidad de que un estudiante tenga coche. |
 | `student_distance_weight_range` | `[0.0, 0.5]` | Rango usado para generar el peso de distancia del estudiante. |
 | Factor de recorrido sintético | `1.3` | Factor multiplicativo sobre la distancia Haversine. |
 | Velocidad media supuesta | `30 km/h` | Velocidad utilizada para estimar tiempos de desplazamiento. |
-| Tamaño de grupos dependientes | `2–4` | Número de plazas por grupo de dependencia. |
+| Tamaño de grupos dependientes | `2 o más` | Número de plazas por grupo de dependencia. |
 
 ---
 
@@ -206,7 +205,6 @@ Para cada instancia generada, el flujo general es:
 Cada estudiante se genera aleatoriamente con:
 
 - Localización geográfica.
-- Disponibilidad de coche.
 - Peso asociado a distancia.
 - Peso asociado a desarrollo profesional.
 - Vector de desarrollo de competencias.
@@ -236,7 +234,7 @@ Cada estudiante tiene también un vector de preferencias. El generador seleccion
 
 Después, el vector se baraja y se expande al bloque del perfil correspondiente.
 
-### 9.4. Localización, coche y pesos
+### 9.4. Localización y pesos
 
 Cada estudiante recibe una localización geográfica según la distribución de probabilidades definida en `data/proportion_home.csv`. Además, se generan un peso asociado a la distancia (`w_distance`) y un peso asociado al desarrollo profesional (`w_development` = 1 - `w_distance`).
 
