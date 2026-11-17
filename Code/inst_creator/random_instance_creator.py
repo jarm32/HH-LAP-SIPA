@@ -2,8 +2,7 @@
 
 # cd C:\Code\VRAIN-practicas\Code\inst_creator
 # python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
-# python random_instance_creator.py output 200 600 4 20 0.2 30 6 2 1234
-# python random_instance_creator.py output 800 1000 4 20 0.2 30 6 2 1250
+# python random_instance_creator.py output 200 1000 4 20 0.2 30 6 2 1234
 
 
 # ----------------------------
@@ -140,7 +139,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
                                  [random.random() * (0.7 - 0.4) + 0.4 for _ in range(n_notable)]
     elif r <= (p_excellent_student + p_notable_student):
         n_excellent = int(0.1 * number_competences)
-        n_notable = int(0.3 * number_competences)
+        n_notable = min(number_competences - n_excellent, max(1, round(0.3 * number_competences)))
         n_low = number_competences - n_excellent - n_notable
         competence_development = [random.random() * (1 - 0.7) + 0.7 for _ in range(n_excellent)] + \
                                  [random.random() * (0.7 - 0.4) + 0.4 for _ in range(n_notable)] + \
