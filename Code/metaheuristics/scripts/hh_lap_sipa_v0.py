@@ -101,9 +101,10 @@ class _SupervisionCostContext:
     center_company: np.ndarray # Distancia entre el centro educativo y las empresas
     company_company: np.ndarray # Distancia entre empresas
 
-def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, omega_weight = 1.0, normalize_supervision_dist = True):
-                                              # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y omega (equilibrio), 
-                                              # booleano para saber si se normalizan las distancias de supervisión
+def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, omega_weight = 1.0, 
+                                               # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y omega (equilibrio), 
+                                               normalize_supervision_dist = True, supervision_context=None):
+                                               # booleano para saber si se normalizan las distancias de supervisión, distancias de supervisión precomputadas
     """
     Recorre las prácticas seleccionadas y asigna cada una al profesor que menor
     incremento estimado produce en los objetivos de supervisión. Al final,
@@ -117,8 +118,10 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
     if len(selected) > int(np.sum(problem.prof_capacity)):
         return None
 
-    # Precalcula matrices de costes para supervisión (distancias centro-empresa y empresa-empresa)
-    context = _build_supervision_cost_context(problem, normalize_supervision_dist)
+    # Matrices de costes para supervisión (distancias centro-empresa y empresa-empresa)
+    context = supervision_context
+    if context is None:
+        context = _build_supervision_cost_context(problem, normalize_supervision_dist)
 
     # Orden aleatorio para evitar determinación en la construcción
     order = selected[:]
@@ -535,6 +538,9 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
     inserted_into_pareto = 0
     invalid_solutions = 0
     generation_failures = 0
+    
+    # Precalcular una sola vez los costes de supervisión.
+    supervision_context = _build_supervision_cost_context(problem, normalize_supervision_dist)
 
     # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
@@ -567,7 +573,8 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
             rng=rng,
             lbar_weight=professor_lbar_weight,
             omega_weight=professor_omega_weight,
-            normalize_supervision_dist=normalize_supervision_dist
+            normalize_supervision_dist=normalize_supervision_dist,
+            supervision_context=supervision_context
         )
 
         # Si no se ha podido asignar profesores de forma factible, se descarta este subconjunto y se continúa con la siguiente iteración
