@@ -405,4 +405,4 @@ Los mecanismos principales son:
 5. Las dependencias se generan dentro de una misma empresa.
 6. La capacidad docente total se ajusta al objetivo establecido, respetando las capacidades individuales.
 
-Las condiciones anteriores favorecen la factibilidad estructural de las instancias generadas, aunque no garantizan la factibilidad para cualquier combinación de parámetros. En el conjunto definitivo de 20 instancias se ha comprobado la consistencia de las restricciones y la obtención de soluciones factibles mediante los procedimientos de construcción correspondientes.
+Las condiciones anteriores favorecen la factibilidad estructural de las instancias generadas, aunque no garantizan la factibilidad para cualquier combinación de parámetros. En el conjunto definitivo de 20 instancias se ha comprobado la consistencia de las restricciones y la existencia de asignaciones factibles que permiten cubrir a todos los estudiantes respetando las cuotas empresariales, las dependencias entre plazas y las capacidades docentes.
