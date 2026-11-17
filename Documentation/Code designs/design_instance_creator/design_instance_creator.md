@@ -31,7 +31,7 @@ El problema tratado es una versión modificada del problema SIPA (*Student–Ind
 - Ubicación del centro educativo.
 - Profesores.
 - Capacidades de supervisión.
-- Matrices de distancia.
+- Matrices de coste.
 
 El generador se diseña para producir instancias factibles por construcción, es decir, instancias que permitan asignar todos los estudiantes respetando las restricciones estructurales principales del modelo.
 
@@ -81,7 +81,7 @@ Además de los argumentos de entrada, el generador contiene parámetros internos
 | `prof_capacity_max` | `25` | Capacidad máxima de supervisión de un profesor. |
 | `ORS_AVAILABLE` | `False` | Indica si el script tiene disponible ORS. |
 | `use_ors` | `False` | Indica si se usan distancias reales mediante ORS. |
-| `student_distance_weight_range` | `[0.0, 0.5]` | Rango usado para generar el peso de distancia del estudiante. |
+| Rango del peso de distancia del estudiante | `[0.0, 0.5]` | Rango usado para generar el peso de distancia del estudiante (`w_distance`). |
 | Factor de recorrido sintético | `1.3` | Factor multiplicativo sobre la distancia Haversine. |
 | Velocidad media supuesta | `30 km/h` | Velocidad utilizada para estimar tiempos de desplazamiento. |
 | Tamaño de grupos dependientes | `2 o más` | Número de plazas por grupo de dependencia. |
@@ -192,7 +192,7 @@ Para cada instancia generada, el flujo general es:
 8. Generar dependencias entre plazas.
 9. Generar cuotas mínimas y máximas de empresas.
 10. Generar el centro educativo y el conjunto de profesores supervisores.
-11. Generar matrices de distancia.
+11. Generar matrices de coste.
 12. Escribir la instancia en un fichero `.txt`.
 
 ---
@@ -384,7 +384,7 @@ Cada instancia se escribe en un fichero `.txt` con bloques estructurados.
 | `COMPANY_LOCATIONS` | Coordenadas de empresas. |
 | `n_professors` | Número de profesores. |
 | `CENTER_LOCATION` | Coordenadas del centro educativo. |
-| `PROFESSOR_INFO` | Identrificador y capacidad de cada profesor. |
+| `PROFESSOR_INFO` | Identificador y capacidad de cada profesor. |
 | `CENTER_COMPANY_DISTANCE` | Vector de tiempos entre el centro y cada empresa. |
 | `COMPANY_COMPANY_DISTANCE` | Matriz empresa-empresa. |
 

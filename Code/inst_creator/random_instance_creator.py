@@ -138,7 +138,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
         competence_development = [random.random() * (1 - 0.7) + 0.7 for _ in range(n_excellent)] + \
                                  [random.random() * (0.7 - 0.4) + 0.4 for _ in range(n_notable)]
     elif r <= (p_excellent_student + p_notable_student):
-        n_excellent = int(0.1 * number_competences)
+        n_excellent = max(1, round(0.1 * number_competences))
         n_notable = min(number_competences - n_excellent, max(1, round(0.3 * number_competences)))
         n_low = number_competences - n_excellent - n_notable
         competence_development = [random.random() * (1 - 0.7) + 0.7 for _ in range(n_excellent)] + \
