@@ -35,7 +35,7 @@ El problema tratado es una versión modificada del problema SIPA (*Student–Ind
 
 El generador se diseña para producir instancias factibles por construcción, es decir, instancias que permitan asignar todos los estudiantes respetando las restricciones estructurales principales del modelo.
 
-La instancia considera un único centro educativo al que pertenecen todos los supervisores. Cada profesor dispone de una capacidad individual de supervisión, y el equilibrio de las cargas docentes se representa mediante una única magnitud global, \(\omega\), calculada a partir de las cargas normalizadas de todos los profesores del centro.
+La instancia considera un único centro educativo al que pertenecen todos los supervisores. Cada profesor dispone de una capacidad individual de supervisión que se genera en función del número de estudiantes y de la capacidad docente total requerida.
 
 ## 3. Parámetros de entrada por línea de comandos
 
@@ -58,7 +58,7 @@ Esta configuración utilizada genera cuatro instancias para cada uno de los tama
 | `end_size` | Último tamaño de estudiantes considerado. |
 | `number_instances` | Número de instancias generadas para cada tamaño de estudiantes. |
 | `surplus` | Porcentaje de plazas adicionales respecto al número de estudiantes. |
-| `slack_ratio` | Porcentaje de capacidad adicional para profesores y empresas respecto al número de estudiantes. |
+| `slack_ratio` | Porcentaje de capacidad adicional de supervisión docente respecto al número de estudiantes. |
 | `placement_dep_prob` | Porcentaje global de plazas que formarán parte de algún grupo de dependencias. |
 | `number_competences` | Número de competencias base por perfil académico. |
 | `most_important_competences` | Número de competencias principales en las necesidades de una plaza. |
@@ -77,40 +77,30 @@ Además de los argumentos de entrada, el generador contiene parámetros internos
 | `number_profiles` | `8` | Número de perfiles académicos o bloques competenciales. |
 | `p_excellent_student` | `0.05` | Probabilidad de generar un estudiante excelente. |
 | `p_notable_student` | `0.25` | Probabilidad de generar un estudiante notable. |
-| `number_centers` | `1` (implícito) | Cada instancia contiene exactamente un centro educativo; no se configura como un número variable. |
 | `prof_capacity_min` | `5` | Capacidad mínima de supervisión de un profesor. |
 | `prof_capacity_max` | `25` | Capacidad máxima de supervisión de un profesor. |
 | `ORS_AVAILABLE` | `False` | Indica si el script tiene disponible ORS. |
 | `use_ors` | `False` | Indica si se usan distancias reales mediante ORS. |
-| `car_probability` | `0.65` | Probabilidad de que un estudiante tenga coche. |
 | `student_distance_weight_range` | `[0.0, 0.5]` | Rango usado para generar el peso de distancia del estudiante. |
 | Factor de recorrido sintético | `1.3` | Factor multiplicativo sobre la distancia Haversine. |
 | Velocidad media supuesta | `30 km/h` | Velocidad utilizada para estimar tiempos de desplazamiento. |
-| Tamaño de grupos dependientes | `2–4` | Número de plazas por grupo de dependencia. |
+| Tamaño de grupos dependientes | `2 o más` | Número de plazas por grupo de dependencia. |
 
 ---
 
 ## 5. Datos externos utilizados
 
-El generador utiliza una carpeta `data/` con información geográfica auxiliar (también generada sintéticamente).
-
-El generador utiliza datos geográficos sintéticos preparados previamente. Se dispone de 5000 puntos residenciales candidatos repartidos entre Valencia (2000), Alboraya (1500) y Paterna (1500), así como de 600 ubicaciones empresariales candidatas. La distribución residencial establecida es del 40%, 30% y 30%, respectivamente.
+El generador utiliza datos geográficos sintéticos preparados previamente (carpeta `data/`). Se dispone de 5000 puntos residenciales candidatos repartidos entre Valencia (2000), Alboraya (1500) y Paterna (1500), así como de 600 ubicaciones empresariales candidatas. La distribución residencial establecida es del 40%, 30% y 30%, respectivamente.
 
 | Fichero o carpeta | Uso |
 |---|---|
 | `data/proportion_home.csv` | Distribución de probabilidad de las localizaciones de vivienda de los estudiantes. |
 | `data/placement_locations.csv` | Coordenadas posibles para las empresas. |
-| `data/points/*.geojson` | Puntos geográficos usados para ubicar estudiantes y centros educativos. |
+| `data/points/*.geojson` | Puntos geográficos usados para ubicar estudiantes y el centro educativo. |
 
 Estos datos se generan con `generate_spatial_data.py`, utilizando la semilla 32. Los puntos residenciales se generan alrededor de referencias geográficas con un radio máximo de 350 metros, mientras que las ubicaciones empresariales utilizan un radio máximo de 450 metros (los detalles se documentan en `Code/inst_creator/data/README_data.md`). Cabe destacar que los archivos GeoJSON se interpretan internamente en orden [latitud, longitud].
 
 ---
-
-
-
-
-
-
 
 ## 6. Lógica de tamaños e instancias
 
@@ -133,7 +123,7 @@ genera:
 200, 400, 600
 ```
 
-El parámetro `number_instances` no indica cuántos tamaños se generan. Indica cuántas instancias distintas se generan para cada tamaño. Por tanto:
+El parámetro `number_instances` no indica cuántos tamaños se generan, sino cuántas instancias distintas se generan para cada tamaño. Por tanto:
 
 ```text
 start_size = 200
@@ -177,9 +167,7 @@ El generador utiliza dos fuentes de aleatoriedad: `random` de Python y `np.rando
 - `base_seed` es la semilla (opcional) pasada por línea de comandos.
 - `global_instance_idx` es un contador global de instancias generadas (la primera instancia tiene `global_instance_idx = 0`).
 
-Por ejemplo, para `base_seed` = 1234, las semillas de las instancias serían: `problem_instance_ext_200_0.txt` = 1234, `problem_instance_ext_200_1.txt` = 1235, etc.
-
-Dadas estas semillas, antes de generar cada instancia, el código las fija para asociarlas a cada fichero:
+Por ejemplo, para `base_seed` = 1234, las semillas de las instancias serían: `problem_instance_ext_200_0.txt` = 1234, `problem_instance_ext_200_1.txt` = 1235, etc. Dadas estas semillas, antes de generar cada instancia, el código las fija para asociarlas a cada fichero:
 
 ```python
 random.seed(instance_seed)
@@ -203,7 +191,7 @@ Para cada instancia generada, el flujo general es:
 7. Repartir plazas entre empresas.
 8. Generar dependencias entre plazas.
 9. Generar cuotas mínimas y máximas de empresas.
-10. Generar centros educativos y profesores.
+10. Generar el centro educativo y el conjunto de profesores supervisores.
 11. Generar matrices de distancia.
 12. Escribir la instancia en un fichero `.txt`.
 
@@ -214,7 +202,6 @@ Para cada instancia generada, el flujo general es:
 Cada estudiante se genera aleatoriamente con:
 
 - Localización geográfica.
-- Disponibilidad de coche.
 - Peso asociado a distancia.
 - Peso asociado a desarrollo profesional.
 - Vector de desarrollo de competencias.
@@ -244,9 +231,9 @@ Cada estudiante tiene también un vector de preferencias. El generador seleccion
 
 Después, el vector se baraja y se expande al bloque del perfil correspondiente.
 
-### 9.4. Localización, coche y pesos
+### 9.4. Localización y pesos
 
-Cada estudiante recibe una localización según `data/proportion_home.csv`. Además se define una probabilidad de que el estudiante tenga coche (`P(has_car = True)`), un peso asociado a la distancia (`w_distance`) y un peso asociado al desarrollo profesional (`w_development` = 1 - `w_distance`).
+Cada estudiante recibe una localización geográfica según la distribución de probabilidades definida en `data/proportion_home.csv`. Además, se generan un peso asociado a la distancia (`w_distance`) y un peso asociado al desarrollo profesional (`w_development` = 1 - `w_distance`).
 
 ---
 
@@ -263,9 +250,9 @@ Además, cada plaza recibe un vector de necesidades de competencias. Este vector
 1. Reutilizando y perturbando preferencias de estudiantes ya generadas.
 2. Creando nuevos vectores de necesidad competencial.
 
-Cuando se crea un nuevo vector, las `most_important_competences` competencias reciben valor `1.0`, una competencia secundaria recibe valor `0.5`, y el resto recibe valor `0.0`.
+Cuando se crea un nuevo vector, las `most_important_competences` competencias reciben valor `1.0`, una competencia secundaria recibe valor `0.5`, y el resto recibe valor `0.0`. Después se baraja y se expande al bloque del perfil académico seleccionado.
 
-Después se baraja y se expande al bloque del perfil académico seleccionado.
+Independientemente del procedimiento utilizado para generar las necesidades de una plaza, el vector resultante se normaliza dividiendo cada componente entre la suma total de sus componentes. De este modo, todos los vectores de necesidades tienen suma 1 antes de su almacenamiento, evitando diferencias artificiales de escala entre plazas. Los valores se escriben con seis decimales para reducir los errores de redondeo.
 
 ---
 
@@ -287,16 +274,11 @@ Una vez fijado `n_companies`, las plazas se distribuyen entre empresas. Primero 
 
 ## 12. Dependencias entre plazas
 
-Las dependencias se generan empresa por empresa. Para cada empresa:
+Las dependencias se generan sobre un porcentaje global de las plazas disponibles en cada instancia, definido mediante `placement_dep_prob`. El número de plazas dependientes se obtiene aplicando dicho porcentaje sobre el total de plazas y redondeando hacia abajo cuando sea necesario.
 
-1. Se obtiene la lista de plazas de esa empresa.
-2. Se selecciona un porcentaje de plazas según `placement_dep_prob`.
-3. Las plazas seleccionadas se agrupan en grupos de tamaño mayor o igual que 2.
-4. Cada grupo se registra como una dependencia.
+Las plazas seleccionadas se organizan aleatoriamente en grupos de interdependencia de tamaño variable, sin establecer un límite máximo fijo. Cada grupo contiene al menos dos plazas pertenecientes a una misma empresa, y ninguna plaza puede aparecer en más de un grupo.
 
-Una dependencia `[j1, j2, ..., jr]`, significa que esas plazas deben activarse conjuntamente. 
-
-Si una empresa tiene menos de dos plazas, no se generan dependencias para ella.
+Las plazas pertenecientes a un mismo grupo deben ocuparse conjuntamente o permanecer todas desocupadas. Las plazas que no pertenecen a ningún grupo se consideran independientes.
 
 ---
 
@@ -306,60 +288,80 @@ Cada empresa tiene cuota mínima `q_k` y cuota máxima `Q_k`.
 
 ### 13.1. Cuota máxima
 
-La cuota máxima se genera inicialmente entre la mitad de las plazas de la empresa y el total de plazas de esa empresa. Después, se ajusta para garantizar que la suma de cuotas máximas permite asignar todos los estudiantes.
-
-El ajuste respeta:
-
-- Ninguna cuota máxima puede superar las plazas reales de la empresa.
-- La suma total de todas las cuotas máximas debe ser suficiente para cubrir a todos los estudiantes.
-- Si se usa `slack_ratio`, se intenta añadir holgura adicional sin superar las plazas disponibles.
+La cuota máxima de cada empresa (`Q_k`) coincide con el número de plazas de prácticas que ofrece, evitando así que ninguna empresa pueda recibir más estudiantes que plazas disponibles.
 
 ### 13.2. Cuota mínima
 
-La cuota mínima se genera a partir de bloques completos. Un bloque puede ser:
+La cuota mínima se genera inicialmente a partir de bloques completos de plazas. Un bloque puede ser:
 
 - Una plaza individual no dependiente.
-- Un grupo completo de dependencias.
+- Un grupo completo de plazas interdependientes.
 
-Esto evita exigir solo una parte de un grupo dependiente. Si la suma de cuotas mínimas supera el número de estudiantes, el generador reduce cuotas mínimas hasta recuperar factibilidad.
+De esta forma, las cuotas mínimas iniciales tienen en cuenta las dependencias entre plazas. Sin embargo, si la suma de cuotas mínimas supera el número de estudiantes, el generador reduce algunas cuotas hasta cumplir dicho límite. Este ajuste final no garantiza que cada cuota mínima siga siendo exactamente la suma de bloques completos, por lo que se comprueba posteriormente la factibilidad de las instancias generadas.
 
 ---
 
-## 14. Centros educativos y profesores
+## 14. Centro educativo y profesores
 
-La versión modificada del modelo requiere generar centros educativos y profesores supervisores.
+Se considera un único centro educativo por instancia al que pertenecen todos los profesores supervisores.
 
-### 14.1. Centros
+### 14.1. Centro
 
-El número de centros se genera entre `[n_centers_min, n_centers_max]` (por defecto `[2, 6]`). Las coordenadas se muestrean desde los puntos disponibles en `data/points/`.
+La ubicación del centro se selecciona aleatoriamente entre los puntos geográficos residenciales disponibles para Valencia, Alboraya y Paterna. De esta forma, constituye el origen de los desplazamientos de supervisión de cada profesor.
 
-### 14.2. Profesores
+### 14.2. Número de profesores
 
-El número de profesores se genera entre `[n_centers, 3 * n_centers]`. Cada profesor se asigna aleatoriamente a un centro, además de recibir una capacidad `C_t ∈ [prof_capacity_min, prof_capacity_max]` (por defecto `[5, 25]`).
+El número de profesores se determina en función del número de estudiantes y de la capacidad total de supervisión requerida.
+
+Primero se calcula la capacidad docente total objetivo, incorporando la holgura definida mediante `slack_ratio`:
+
+\[
+C_{\text{objetivo}}=\left\lceil S(1+\text{slack\_ratio})\right\rceil
+\]
+
+donde \(S\) representa el número de estudiantes. A partir de esta capacidad, el generador determina un intervalo de posibles cantidades de profesores, considerando que cada uno puede supervisar entre 5 y 25 estudiantes. Para obtener cantidades razonables, se utiliza como referencia una capacidad media aproximada de entre 10 y 22 estudiantes por profesor.
+
+Finalmente, el número de profesores se selecciona aleatoriamente dentro de dicho intervalo, y sus capacidades individuales se generan y ajustan posteriormente para que la suma coincida con la capacidad docente total objetivo.
 
 ### 14.3. Ajuste de capacidad docente
 
-Después de generar profesores, se comprueba que puedan supervisar a todos los estudiantes:
+Cada profesor recibe inicialmente una capacidad aleatoria dentro de los límites establecidos (la dispersión de las capacidades también varía entre instancias). A continuación, el generador ajusta las capacidades individuales hasta conseguir:
 
-```text
-sum(C_t) >= ceil(n_students * (1 + slack_ratio))
-```
+\[
+\sum_{t=1}^{T} C_t=C_{\text{objetivo}}
+\]
 
-Si no se cumple, el generador incrementa capacidades hasta alcanzar la capacidad mínima necesaria.
+Con slack_ratio = 0.2, la capacidad docente total equivale al 120 % del número de estudiantes, lo que permite contar con profesores de diferentes capacidades sin perder la holgura requerida.
 
 ---
 
-## 15. Matrices de distancia
+## 15. Matrices de costes de desplazamiento
 
-Cada instancia contiene tres matrices con distancias, que pueden ser sintéticas (generadas a partir de `max(1.0, Normal(1500, 250))`) u obtenidas mediante ORS. Las matrices son:
+Cada instancia contiene tres estructuras de costes de desplazamiento, calculadas a partir de las coordenadas geográficas de estudiantes, empresas y del centro educativo.
 
-| Matriz | Dimensión | Uso |
-|---|---:|---|
-| Estudiante → Empresa | `n_students x n_companies` | Distancia entre cada estudiante y cada empresa. |
-| Centro → Empresa | `n_centers x n_companies` | Distancia entre cada centro y cada empresa. |
-| Empresa → Empresa | `n_companies x n_companies` | Distancia entre empresas. |
+Los costes representan tiempos estimados de desplazamiento (expresados en segundos). Para calcularlos, se utiliza la distancia geográfica Haversine entre dos ubicaciones, multiplicada por un factor de recorrido de `1.3` y convertida a tiempo mediante una velocidad media de `30 km/h`.
 
-Estas matrices son usadas posteriormente por el evaluador y pueden normalizarse en la fase de evaluación.
+La fórmula utilizada es:
+
+\[
+t_{uv}=\frac{d_{\text{Haversine}}(u,v)\cdot 1.3}{30}\cdot 3600
+\]
+
+donde \(d_{\text{Haversine}}(u,v)\) representa la distancia en kilómetros entre las ubicaciones \(u\) y \(v\), y \(t_{uv}\) es el tiempo estimado de desplazamiento en segundos. Todos los resultados se redondean a dos decimales.
+
+Para ubicaciones diferentes se establece un tiempo mínimo de un segundo, mientras que para coordenadas coincidentes el coste es cero.
+
+Las estructuras generadas son:
+
+| Estructura | Dimensión | Descripción |
+|---|---|---|
+| Estudiante - Empresa | `n_students × n_companies` | Tiempo estimado de desplazamiento desde la residencia de cada estudiante hasta cada empresa. |
+| Centro - Empresa | `n_companies` | Vector de tiempos estimados desde el centro educativo hasta cada empresa. |
+| Empresa - Empresa | `n_companies × n_companies` | Matriz de tiempos estimados entre las ubicaciones de las empresas. |
+
+En el caso de la matriz empresa – empresa, cabe destacar que es simétrica y tiene la diagonal igual a cero, debido a que los tiempos se calculan mediante el mismo procedimiento geográfico en ambos sentidos.
+
+La normalización de estos costes se realizará durante el procesamiento de las instancias y la evaluación de soluciones.
 
 ---
 
@@ -380,11 +382,10 @@ Cada instancia se escribe en un fichero `.txt` con bloques estructurados.
 | `PLACEMENT_DEPENDENCIES` | Grupos de plazas dependientes. |
 | `DISTANCE_MATRIX` | Matriz estudiante-empresa. |
 | `COMPANY_LOCATIONS` | Coordenadas de empresas. |
-| `n_centers` | Número de centros educativos. |
 | `n_professors` | Número de profesores. |
-| `CENTER_LOCATIONS` | Coordenadas de centros educativos. |
-| `PROFESSOR_INFO` | Centro y capacidad de cada profesor. |
-| `CENTER_COMPANY_DISTANCE` | Matriz centro-empresa. |
+| `CENTER_LOCATION` | Coordenadas del centro educativo. |
+| `PROFESSOR_INFO` | Identrificador y capacidad de cada profesor. |
+| `CENTER_COMPANY_DISTANCE` | Vector de tiempos entre el centro y cada empresa. |
 | `COMPANY_COMPANY_DISTANCE` | Matriz empresa-empresa. |
 
 Este formato es posteriormente leído por `problem.py`.
@@ -398,24 +399,10 @@ El generador intenta producir instancias factibles por construcción.
 Los mecanismos principales son:
 
 1. `n_placements >= n_students`.
-2. Las cuotas máximas de empresas se ajustan para cubrir todos los estudiantes.
+2. Las cuotas máximas coinciden con el número de plazas ofertadas por cada empresa.
 3. Las cuotas mínimas se generan desde bloques completos.
 4. Las cuotas mínimas se reducen si su suma supera el número de estudiantes.
 5. Las dependencias se generan dentro de una misma empresa.
-6. La capacidad total de profesores se incrementa si no es suficiente.
-7. Las matrices de distancia sintéticas tienen valores positivos.
+6. La capacidad docente total se ajusta al objetivo establecido, respetando las capacidades individuales.
 
-Estas medidas no optimizan la instancia, pero evitan problemas estructurales básicos de inviabilidad.
-
----
-
-## 18. Notas de diseño
-
-- El generador prioriza factibilidad estructural sobre realismo absoluto.
-- Las distancias sintéticas permiten experimentar sin depender de servicios externos.
-- Los perfiles académicos generan compatibilidades parciales entre estudiantes y plazas.
-- Las dependencias entre plazas introducen restricciones combinatorias relevantes.
-- La incorporación de profesores y centros aumenta la dificultad y realismo organizativo.
-- La seed por instancia permite trazabilidad y reproducibilidad más robustas.
-- Si no se proporciona seed, la generación no es reproducible.
-- Si cambia el código, la carpeta `data/` o los parámetros internos, las instancias deben considerarse pertenecientes a una configuración distinta.
+Las condiciones anteriores favorecen la factibilidad estructural de las instancias generadas, aunque no garantizan la factibilidad para cualquier combinación de parámetros. En el conjunto definitivo de 20 instancias se ha comprobado la consistencia de las restricciones y la obtención de soluciones factibles mediante los procedimientos de construcción correspondientes.

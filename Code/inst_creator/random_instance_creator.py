@@ -2,8 +2,7 @@
 
 # cd C:\Code\VRAIN-practicas\Code\inst_creator
 # python random_instance_creator.py <result_path> <start_size> <end_size> <number_instances> <surplus> <slack_ratio> <placement_dep_prob> <number_competences> <most_important_competences> [seed]
-# python random_instance_creator.py output 200 600 4 20 0.2 30 6 2 1234
-# python random_instance_creator.py output 800 1000 4 20 0.2 30 6 2 1250
+# python random_instance_creator.py output 200 1000 4 20 0.2 30 6 2 1234
 
 
 # ----------------------------
@@ -140,7 +139,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
                                  [random.random() * (0.7 - 0.4) + 0.4 for _ in range(n_notable)]
     elif r <= (p_excellent_student + p_notable_student):
         n_excellent = int(0.1 * number_competences)
-        n_notable = int(0.3 * number_competences)
+        n_notable = min(number_competences - n_excellent, max(1, round(0.3 * number_competences)))
         n_low = number_competences - n_excellent - n_notable
         competence_development = [random.random() * (1 - 0.7) + 0.7 for _ in range(n_excellent)] + \
                                  [random.random() * (0.7 - 0.4) + 0.4 for _ in range(n_notable)] + \
@@ -168,7 +167,7 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
     competence_preference = ([0.0] * (profile * number_competences)) + competence_preference + \
                             ([0.0] * ((number_profiles - profile - 1) * number_competences))
 
-    # Asigna localización (dónde vive) y otros atributos (tiene coche y cuánto le importa la distancia vs. el desarrollo profesional)
+    # Asigna la localidad de residencia y genera los pesos de distancia y desarrollo profesional
     r_loc = random.random()
     acum = 0.0
     location_name = None
@@ -179,15 +178,14 @@ def create_student_profile(p_excellence_students, number_competences, number_pro
             break
     if location_name is None:
         location_name = student_locations[-1][0]
-
-    has_car = True if random.random() <= 0.65 else False
+    
     w_distance = round(random.random() * 0.5, 2)
     w_dev = round(1 - w_distance, 2)
 
     latitude, longitude = random.choice(cargar_puntos_residenciales(location_name))
 
-    return latitude, longitude, has_car, w_distance, w_dev, competence_development, competence_preference 
-           # Genera un vector con el perfil del estudiante: latitud y longitud de su casa, si tiene coche, el peso que le da el estudiante a la distancia y el que le da al desarrollo profesional,
+    return latitude, longitude, w_distance, w_dev, competence_development, competence_preference 
+           # Genera un vector con el perfil del estudiante: latitud y longitud de su casa, el peso que le da el estudiante a la distancia y el que le da al desarrollo profesional,
            # su vector de desarrollo de competencias y su vector de preferencias de competencias (en ambos casos, solo el bloque de su perfil tiene valores; el resto son ceros)
 
 
@@ -256,11 +254,11 @@ def create_dependencies(placements, percentage_dependencies):
 def create_dependencies_global(company_placements, percentage_dependencies):
     """
     Genera dependencias sobre un porcentaje global de plazas.
-    Cada grupo contiene plazas de una misma empresa (2, 3 o 4 plazas)
+    Cada grupo contiene dos o más plazas de una misma empresa
     """
     # Calcula el número total de plazas y el objetivo de dependencias
     total_placements = sum(len(v) for v in company_placements.values())
-    target = round(total_placements * percentage_dependencies / 100.0)
+    target = int(total_placements * percentage_dependencies / 100.0)
 
     if target == 0:
         return []
@@ -294,18 +292,21 @@ def create_dependencies_global(company_placements, percentage_dependencies):
         k = random.choices(candidates, weights=[len(available[k]) for k in candidates], k=1)[0]
         groups_by_company[k].append([available[k].pop(), available[k].pop()])
         remaining -= 2
-
-    # Fusionar aleatoriamente algunos pares en grupos de 4
+    
+    # Grupos de dependencias por empresa y barajar
     dependencies = []
     for groups in groups_by_company.values():
-        random.shuffle(groups)
+        selected_placements = [placement for group in groups for placement in group]
+        random.shuffle(selected_placements)
 
-        while len(groups) >= 2:
-            if random.random() < 0.35:
-                dependencies.append(groups.pop() + groups.pop())
-            else:
-                dependencies.append(groups.pop())
-        dependencies.extend(groups)
+        while selected_placements:
+            remaining = len(selected_placements)
+
+            # Grupos de tamaño >= 2 y evitar dejar una única plaza sin agrupar.
+            possible_sizes = [size for size in range(2, remaining + 1) if remaining - size != 1]
+            group_size = random.choice(possible_sizes)
+            dep = [selected_placements.pop() for _ in range(group_size)]
+            dependencies.append(dep)
 
     assert sum(len(g) for g in dependencies) == target
     return dependencies
@@ -353,43 +354,6 @@ def choose_min_quota_from_blocks(blocks, max_students):
             min_q = smallest
 
     return min_q # número entero que representa el mínimo de estudiantes exigidos para la empresa
-
-def adjust_max_quotas(max_q, placements_per_company, n_students, slack_ratio=0.0):
-                      # nº máximo de estudiantes por empresa (preliminar, nº de plazas reales de la empresa), número de plazas por empresa, número total de estudiantes a asignarse
-    """
-    Ajusta las cuotas máximas por empresa garantizando que no superen
-    las plazas reales disponibles y que la suma total permita asignar
-    a todos los estudiantes.
-    """    
-    # Objetivo con holgura, pero nunca podemos superar plazas reales totales
-    max_q = [min(max_q[k], placements_per_company[k]) for k in range(len(max_q))]
-    total = sum(max_q)
-
-    total_placements = sum(placements_per_company)
-    target = int(math.ceil(n_students * (1.0 + slack_ratio)))
-    target = min(target, total_placements)
-    target = max(target, n_students)
-
-    if total >= target:
-        return max_q
-
-    # Reparte incrementos donde haya margen si no hay capacidad suficiente
-    idxs = list(range(len(max_q)))
-    while total < target:
-        random.shuffle(idxs)
-        progressed = False
-        for k in idxs:
-            if max_q[k] < placements_per_company[k]:
-                max_q[k] += 1
-                total += 1
-                progressed = True
-                if total >= target:
-                    break
-        if not progressed:
-            # No hay más margen, debería no ocurrir si n_placements >= n_students
-            break
-
-    return max_q # [5, 10, 4, 9]; lista de máximos ajustados y factibles
 
 
 # ----------------------------
@@ -627,11 +591,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             profile_prob = np.random.random(number_profiles)
             profile_prob = profile_prob / np.sum(profile_prob)
 
-            # estudiantes (localización, coche, peso distancia/desarrollo, vector de desarrollo, vector de preferencias)
+            # estudiantes (localización, peso distancia/desarrollo, vector de desarrollo, vector de preferencias)
             student_info = []
             profiles_used = []
             for i in range(n_students):
-                lat, lon, has_car, w_dist, w_dev, dev_vec, pref_vec = create_student_profile(
+                lat, lon, w_dist, w_dev, dev_vec, pref_vec = create_student_profile(
                     [p_excellent_student, p_notable_student],
                     cfg.number_competences,
                     number_profiles,
@@ -639,7 +603,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                     profile_prob
                 )
                 profiles_used.append(pref_vec)
-                student_info.append((lat, lon, has_car, w_dist, w_dev, dev_vec, pref_vec))
+                student_info.append((lat, lon, w_dist, w_dev, dev_vec, pref_vec))
 
             # nº plazas (más plazas que estudiantes por el surplus)
             n_placements = int(math.ceil(n_students * (1.0 + cfg.surplus / 100.0)))
@@ -698,19 +662,11 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
                 k = int(placement_company[dep[0]])
                 dep_groups_per_company[k].append(dep)
 
-            # Inicializa las cuotas mínimas y máximas por empresa
+            # Cuotas empresariales
             company_min = [0] * n_companies
-            company_max = [0] * n_companies
+            company_max = [len(company_placements[k]) for k in range(n_companies)] # La cuota máxima coincide con las plazas ofertadas por cada empresa
 
-            # Ajusta las cuotas máximas para garantizar que sea posible asignar a todos los estudiantes
-            for k in range(n_companies):
-                # max al menos 1 y como mucho plazas de empresa
-                cap = len(company_placements[k])
-                company_max[k] = random.randint(max(1, cap // 2), cap) if cap > 1 else 1
-
-            company_max = adjust_max_quotas(company_max, [len(company_placements[k]) for k in range(n_companies)], n_students, cfg.slack_ratio)
-
-            # Calcula la cuota mínima de cada empresa respetando bloques de dependencias y la cota máxima
+            # Genera las cuotas mínimas considerando los bloques de dependencias
             for k in range(n_companies):
                 blocks = build_company_blocks(company_placements[k], dep_groups_per_company[k])
                 company_min[k] = choose_min_quota_from_blocks(blocks, company_max[k])
@@ -783,7 +739,7 @@ def generate_instances(cfg): # Configuración global del generador (tamaños, n�
             # Extrae la información de cada estudiante para escribirla en el fichero
             student_rows = []
             for i in range(n_students):
-                (_, _, _, w_dist, w_dev, dev_vec, pref_vec) = student_info[i]
+                (_, _, w_dist, w_dev, dev_vec, pref_vec) = student_info[i]
                 student_rows.append((i, w_dist, w_dev, dev_vec, pref_vec))
 
             write_instance_file(
