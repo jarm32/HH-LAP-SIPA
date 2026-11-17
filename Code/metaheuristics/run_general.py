@@ -175,7 +175,7 @@ PARETO_FIELDS = [
     "tau_sum",
     "eta_sum",
     "lbar_sum",
-    "sigma_sum",
+    "omega",
 ]
 
 # Guarda las estadísticas de una ejecución en un CSV acumulativo, con una fila por ejecución
@@ -249,7 +249,7 @@ def save_pareto(results_dir, algorithm_name, instance_name, n_students,
                 "tau_sum": c.get("tau_sum", ""),
                 "eta_sum": c.get("eta_sum", ""),
                 "lbar_sum": c.get("lbar_sum", ""),
-                "sigma_sum": c.get("sigma_sum", ""),
+                "omega": c.get("omega", ""),
             }
 
             writer.writerow(row)
@@ -412,7 +412,7 @@ def execute_hh_lap_v0(problem, time_limit_seconds, seed, verbose):
         normalize_student_dist=True,
         normalize_supervision_dist=True,
         professor_lbar_weight=1.0,
-        professor_sigma_weight=1.0,
+        professor_omega_weight=1.0,
         verbose=verbose
     )
 
@@ -634,7 +634,7 @@ def parse_args(argv):
 
     parser.add_argument(
         "--instances_dir",
-        default="instances",
+        default="inst_creator/output",
         help="Carpeta con las instancias .txt",
     )
 
@@ -647,8 +647,8 @@ def parse_args(argv):
     parser.add_argument(
         "--algorithms",
         nargs="+",
-        default=["random", "nsga3"],
-        help="Algoritmos a ejecutar. Ejemplo: --algorithms random nsga3",
+        default=["random", "nsga3", "grasp", "hh_lap_v0", "hh_lap_v1"],
+        help="Algoritmos a ejecutar",
     )
 
     parser.add_argument(

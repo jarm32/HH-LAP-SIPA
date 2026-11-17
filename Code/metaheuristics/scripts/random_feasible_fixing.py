@@ -1,4 +1,4 @@
-# Generador de soluciones aleatorias factibles (random + fixing) --> 1º Asignación estudiante-plaza (con dependencias y cuotas por empresa) / 2º Asignación plaza-profesor (con capacidades y centros)
+# Generador de soluciones aleatorias factibles (random + fixing) --> 1º Asignación estudiante-plaza (con dependencias y cuotas por empresa) / 2º Asignación plaza-profesor (respetando las capacidades individuales)
 
 # ----------------------------
 # Imports

@@ -20,11 +20,11 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-# Lee un CSV generado por run_general.py y extrae tau_sum, eta_sum, lbar_sum, sigma_sum
+# Lee un CSV generado por run_general.py y extrae tau_sum, eta_sum, lbar_sum, omega
 def load_pareto_from_csv(filepath):
     """
     Lee un CSV generado por run_general.py y extrae:
-    tau_sum, eta_sum, lbar_sum, sigma_sum
+    tau_sum, eta_sum, lbar_sum, omega
     """
     points = []
 
@@ -35,8 +35,8 @@ def load_pareto_from_csv(filepath):
             tau = float(row["tau_sum"])
             eta = float(row["eta_sum"])
             lbar = float(row["lbar_sum"])
-            sigma = float(row["sigma_sum"])
-            points.append([tau, eta, lbar, sigma])
+            omega = float(row["omega"])
+            points.append([tau, eta, lbar, omega])
 
     return np.asarray(points, dtype=float)
 
@@ -175,11 +175,11 @@ def compute_hypervolume_by_run(records, bounds_by_instance):
             "min_tau": float(mins[0]) if not isinstance(mins[0], str) else "",
             "min_eta": float(mins[1]) if not isinstance(mins[1], str) else "",
             "min_lbar": float(mins[2]) if not isinstance(mins[2], str) else "",
-            "min_sigma": float(mins[3]) if not isinstance(mins[3], str) else "",
+            "min_omega": float(mins[3]) if not isinstance(mins[3], str) else "",
             "max_tau": float(maxs[0]) if not isinstance(maxs[0], str) else "",
             "max_eta": float(maxs[1]) if not isinstance(maxs[1], str) else "",
             "max_lbar": float(maxs[2]) if not isinstance(maxs[2], str) else "",
-            "max_sigma": float(maxs[3]) if not isinstance(maxs[3], str) else "",
+            "max_omega": float(maxs[3]) if not isinstance(maxs[3], str) else "",
         })
 
     return rows
@@ -234,7 +234,7 @@ def main():
 
     parser.add_argument(
         "--results_dir",
-        default="../results",
+        default="results",
         help="Carpeta results generada por run_general.py",
     )
 
@@ -254,8 +254,12 @@ def main():
     )
 
     args = parser.parse_args()
-
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    
     results_dir = args.results_dir
+    if not os.path.isabs(results_dir):
+        results_dir = os.path.join(base_dir, results_dir)
+
     pareto_dir = os.path.join(results_dir, "pareto")
     output_dir = os.path.join(results_dir, "hypervolume")
 
@@ -289,11 +293,11 @@ def main():
         "min_tau",
         "min_eta",
         "min_lbar",
-        "min_sigma",
+        "min_omega",
         "max_tau",
         "max_eta",
         "max_lbar",
-        "max_sigma",
+        "max_omega",
     ]
 
     summary_fields = [

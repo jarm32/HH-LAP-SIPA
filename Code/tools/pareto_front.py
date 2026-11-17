@@ -11,7 +11,7 @@ OBJECTIVE_SENSE = {
     "tau_sum": "max",
     "eta_sum": "max",
     "lbar_sum": "min",
-    "sigma_sum": "min"
+    "omega": "min"
 }
 
 
@@ -37,7 +37,7 @@ def get_objective_vector(evaluation):
         float(c["tau_sum"]),
         float(c["eta_sum"]),
         float(c["lbar_sum"]),
-        float(c["sigma_sum"]),
+        float(c["omega"]),
     ) # Tupla con las 4 componentes
 
 
