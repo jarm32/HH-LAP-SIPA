@@ -323,16 +323,20 @@ def _omega_for_loads(problem, professor_load):
 # Matrices de beneficio estudiante-práctica
 # -----------------------------------------------------------------------------
 
-def build_tau_matrix(problem, selected_placements, normalize_student_dist = True):
-                    # instancia del problema, lista de índices de prácticas seleccionadas, booleano para saber si se normalizan las distancias entre estudiantes y empresas
+def build_tau_matrix(problem, selected_placements, normalize_student_dist = True, student_dist_matrix=None):
+                    # instancia del problema, lista de índices de prácticas seleccionadas, booleano para saber si se normalizan las distancias entre estudiantes y empresas,
+                    # matriz de distancias estudiante-empresa normalizada
     """
     Construye la matriz tau, donde cada posición representa la utilidad 
     de asignar una práctica seleccionada a un estudiante
     """
     # Selección y distancias
     selected = list(selected_placements)
-    dist = np.asarray(problem.student_company_dist, dtype=np.float64)
-    dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
+    if student_dist_matrix is not None:
+        dist_norm = student_dist_matrix
+    else:
+        dist = np.asarray(problem.student_company_dist, dtype=np.float64)
+        dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
 
     # Competencias, preferencias y empresas
     phi = np.asarray(problem.placement_comp_needs, dtype=np.float64)[selected]
@@ -541,6 +545,10 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
     
     # Precalcular una sola vez los costes de supervisión.
     supervision_context = _build_supervision_cost_context(problem, normalize_supervision_dist)
+    
+    # Preparar una sola vez los costes estudiante-empresa.
+    student_dist = np.asarray(problem.student_company_dist, dtype=np.float64)
+    student_dist_matrix = (_minmax_normalize_rows(student_dist) if normalize_student_dist else student_dist)
 
     # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
@@ -584,7 +592,8 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
 
         # Construcción de la solución tau
         try:
-            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, normalize_student_dist=normalize_student_dist)
+            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, 
+                                          normalize_student_dist=normalize_student_dist, student_dist_matrix=student_dist_matrix)
             assignment_tau = solve_lapjv_max(tau_matrix, solver=lap_solver)
             sol_tau = build_solution_from_lap_assignment(problem=problem, selected_placements=selected_placements, professor_assignment=professor_assignment, lap_assignment=assignment_tau)
         except Exception as exc:

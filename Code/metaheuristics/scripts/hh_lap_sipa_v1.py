@@ -448,7 +448,7 @@ def _assignment_signature(selected_placements, professor_assignment):
 # Matrices de beneficio estudiante-práctica
 # -----------------------------------------------------------------------------
 
-def build_tau_matrix(problem, selected_placements, normalize_student_dist = True):
+def build_tau_matrix(problem, selected_placements, normalize_student_dist = True, student_dist_matrix=None):
                     # instancia del problema, lista de índices de prácticas seleccionadas, booleano para saber si se normalizan las distancias entre estudiantes y empresas
     """
     Construye la matriz tau, donde cada posición representa la utilidad
@@ -456,8 +456,11 @@ def build_tau_matrix(problem, selected_placements, normalize_student_dist = True
     """
     # Selección y distancias
     selected = list(selected_placements)
-    dist = np.asarray(problem.student_company_dist, dtype=np.float64)
-    dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
+    if student_dist_matrix is not None:
+        dist_norm = student_dist_matrix
+    else:
+        dist = np.asarray(problem.student_company_dist, dtype=np.float64)
+        dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
 
     # Competencias, preferencias y empresas
     phi = np.asarray(problem.placement_comp_needs, dtype=np.float64)[selected]
@@ -682,6 +685,10 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
     # Preprocesado fijo de v1: cargas objetivo y clústeres globales
     target_loads = compute_target_professor_loads(problem)
     global_clusters = build_global_company_clusters(problem)
+    
+    # Preparar una sola vez los costes estudiante-empresa.
+    student_dist = np.asarray(problem.student_company_dist, dtype=np.float64)
+    student_dist_matrix = (_minmax_normalize_rows(student_dist) if normalize_student_dist else student_dist)
 
     # Inicialización de estructuras y estadísticas
     start = time.time()
@@ -772,7 +779,8 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
 
         # Resolución de los dos LAP una sola vez por P'
         try:
-            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, normalize_student_dist=normalize_student_dist)
+            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements,
+                                          normalize_student_dist=normalize_student_dist, student_dist_matrix=student_dist_matrix)
             assignment_tau = solve_lapjv_max(tau_matrix, solver=lap_solver)
 
             eta_matrix = build_eta_matrix(problem=problem, selected_placements=selected_placements)
