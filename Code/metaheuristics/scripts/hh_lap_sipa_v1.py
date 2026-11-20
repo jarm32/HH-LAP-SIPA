@@ -682,6 +682,8 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
     if hasattr(weights, "validate"):
         weights.validate()
 
+    start = time.monotonic()
+
     # Preprocesado fijo de v1: cargas objetivo y clústeres globales
     target_loads = compute_target_professor_loads(problem)
     global_clusters = build_global_company_clusters(problem)
@@ -691,7 +693,6 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
     student_dist_matrix = (_minmax_normalize_rows(student_dist) if normalize_student_dist else student_dist)
 
     # Inicialización de estructuras y estadísticas
-    start = time.time()
     pareto_set = []
     iteration = 0
     generated_subsets = 0
@@ -709,7 +710,7 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
     # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
         # Comprobación de criterios de parada
-        elapsed = time.time() - start
+        elapsed = time.monotonic() - start
         if elapsed >= time_limit_seconds:
             break
         if max_iterations is not None and iteration >= max_iterations:
@@ -861,7 +862,7 @@ def run_hh_lap_sipa_v1(problem, weights, time_limit_seconds = 300.0, max_iterati
             )
 
     # Cálculo del tiempo total transcurrido
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {
         "pareto_set": pareto_set,

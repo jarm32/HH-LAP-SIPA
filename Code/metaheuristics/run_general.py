@@ -557,7 +557,7 @@ def run_experiment(args):
                 log_line(log_path, "{} | START | seed={}".format(prefix, seed))
 
                 result = None
-                start_job = time.time()
+                start_job = time.monotonic()
 
                 try:
                     problem = load_instance(instance_path)
@@ -583,7 +583,7 @@ def run_experiment(args):
 
                     mark_done(results_dir, algorithm_name, instance_name, run_id)
 
-                    elapsed = time.time() - start_job
+                    elapsed = time.monotonic() - start_job
                     pareto_size = len(result.get("pareto_set", []))
 
                     log_line(
@@ -596,7 +596,7 @@ def run_experiment(args):
                     )
 
                 except Exception as e:
-                    elapsed = time.time() - start_job
+                    elapsed = time.monotonic() - start_job
                     error_message = "{}".format(e)
 
                     log_line(

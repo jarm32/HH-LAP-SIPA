@@ -275,7 +275,7 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
 
     # Reintentos completos de construcción
     for _ in range(max_attempts):
-        if deadline is not None and time.time() >= deadline:
+        if deadline is not None and time.monotonic() >= deadline:
             break
         
         # Estado inicial de un intento
@@ -293,7 +293,7 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
 
         # Bucle principal de construcción --> Cada vuelta de este bucle añade una nueva asignación estudiante–plaza a la solución
         while unassigned_students:
-            if deadline is not None and time.time() >= deadline:
+            if deadline is not None and time.monotonic() >= deadline:
                 success = False
                 break
 
@@ -397,7 +397,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
             break
         
         # Sale si se alcanza el límite de tiempo
-        if deadline is not None and time.time() >= deadline: 
+        if deadline is not None and time.monotonic() >= deadline: 
             break
             
         # Generación de vecinos (pares de estudiantes)
@@ -418,7 +418,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
         # Exploración de vecinos
         for i, j in pairs:
             # Sale si se alcanza el límite de tiempo
-            if deadline is not None and time.time() >= deadline:
+            if deadline is not None and time.monotonic() >= deadline:
                 break
 
             # Construcción del vecino: Swap
@@ -499,7 +499,7 @@ def run_grasp(
     weights.validate() # Pesos válidos para evaluación escalar
 
     # Inicialización global del tiempo, contadores y Pareto
-    start = time.time()
+    start = time.monotonic()
     deadline = start + time_limit_seconds
 
     iteration = 0
@@ -514,7 +514,7 @@ def run_grasp(
     # Bucle principal del GRASP (construir, mejorar, registrar)
     while True:
         # Criterios de parada
-        now = time.time()
+        now = time.monotonic()
         if now >= deadline: # Tiempo
             break
         if max_iterations is not None and iteration >= max_iterations: # Iteraciones
@@ -539,7 +539,7 @@ def run_grasp(
             # Límite de tiempo específico para cada intento
             construct_deadline = deadline
             if constructive_time_limit_seconds is not None:
-                construct_deadline = min(deadline, time.time() + constructive_time_limit_seconds)
+                construct_deadline = min(deadline, time.monotonic() + constructive_time_limit_seconds)
 
             try:
                 # Intento constructivo normal
@@ -555,7 +555,7 @@ def run_grasp(
             # -------- Fallback aleatorio factible si falla el constructivo --------
 
             # Fallback que genera una solución factible aleatoria para no perder iteraciones
-            if constructed_sol is None and use_random_fallback and time.time() < deadline:
+            if constructed_sol is None and use_random_fallback and time.monotonic() < deadline:
                 fallback_seed = None if seed is None else seed + 2000000
 
                 try:
@@ -629,7 +629,7 @@ def run_grasp(
                   f"local_improvements={local_improvements_total} "
                   f"fallback_used={fallback_used}")
 
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {"pareto_set": pareto_set,
             "stats": {

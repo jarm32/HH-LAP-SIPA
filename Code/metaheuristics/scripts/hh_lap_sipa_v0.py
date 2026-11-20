@@ -531,7 +531,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
         weights.validate()
 
     # Inicialización de estructuras y estadísticas
-    start = time.time()
+    start = time.monotonic()
     pareto_set = []
     iteration = 0
     generated_subsets = 0
@@ -553,7 +553,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
     # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
         # Comprobación de criterios de parada
-        elapsed = time.time() - start
+        elapsed = time.monotonic() - start
         if elapsed >= time_limit_seconds:
             break
         if max_iterations is not None and iteration >= max_iterations:
@@ -654,7 +654,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
             )
 
     # Cálculo del tiempo total transcurrido
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {
         "pareto_set": pareto_set,
