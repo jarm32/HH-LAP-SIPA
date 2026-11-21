@@ -574,14 +574,14 @@ def run_nsga3(
     # Valida los pesos de la función objetivo escalar auxiliar para desempate
     weights.validate()
 
+    # Instante de inicio
+    start = time.monotonic()
+
     # Inicializa el generador aleatorio global del algoritmo
     rng = random.Random(base_seed)
 
     # Construye el toolbox DEAP y genera los puntos de referencia de NSGA-III
     toolbox, ref_points = build_deap_toolbox(problem=problem, rng=rng, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist, ref_points_p=ref_points_p)
-    
-    # Instante de inicio
-    start = time.time()
 
     # Inicializa el Pareto global externo, la población inicial factible y los contadores de estadísticas
     pareto_set = []
@@ -624,7 +624,7 @@ def run_nsga3(
     # ---------------------------------------------------------
     while True:
         # Comprueba criterios de parada (tiempo o nº máximo de generaciones)
-        elapsed = time.time() - start
+        elapsed = time.monotonic() - start
         if elapsed >= time_limit_seconds:
             break
         if max_generations is not None and generations >= max_generations:
@@ -696,7 +696,7 @@ def run_nsga3(
             )
 
     # Calcula el tiempo total de ejecución
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {
         "pareto_set": pareto_set,

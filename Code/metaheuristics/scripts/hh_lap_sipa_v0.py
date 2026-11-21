@@ -101,9 +101,10 @@ class _SupervisionCostContext:
     center_company: np.ndarray # Distancia entre el centro educativo y las empresas
     company_company: np.ndarray # Distancia entre empresas
 
-def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, omega_weight = 1.0, normalize_supervision_dist = True):
-                                              # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y omega (equilibrio), 
-                                              # booleano para saber si se normalizan las distancias de supervisión
+def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, omega_weight = 1.0, 
+                                               # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y omega (equilibrio), 
+                                               normalize_supervision_dist = True, supervision_context=None):
+                                               # booleano para saber si se normalizan las distancias de supervisión, distancias de supervisión precomputadas
     """
     Recorre las prácticas seleccionadas y asigna cada una al profesor que menor
     incremento estimado produce en los objetivos de supervisión. Al final,
@@ -117,8 +118,10 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
     if len(selected) > int(np.sum(problem.prof_capacity)):
         return None
 
-    # Precalcula matrices de costes para supervisión (distancias centro-empresa y empresa-empresa)
-    context = _build_supervision_cost_context(problem, normalize_supervision_dist)
+    # Matrices de costes para supervisión (distancias centro-empresa y empresa-empresa)
+    context = supervision_context
+    if context is None:
+        context = _build_supervision_cost_context(problem, normalize_supervision_dist)
 
     # Orden aleatorio para evitar determinación en la construcción
     order = selected[:]
@@ -320,16 +323,20 @@ def _omega_for_loads(problem, professor_load):
 # Matrices de beneficio estudiante-práctica
 # -----------------------------------------------------------------------------
 
-def build_tau_matrix(problem, selected_placements, normalize_student_dist = True):
-                    # instancia del problema, lista de índices de prácticas seleccionadas, booleano para saber si se normalizan las distancias entre estudiantes y empresas
+def build_tau_matrix(problem, selected_placements, normalize_student_dist = True, student_dist_matrix=None):
+                    # instancia del problema, lista de índices de prácticas seleccionadas, booleano para saber si se normalizan las distancias entre estudiantes y empresas,
+                    # matriz de distancias estudiante-empresa normalizada
     """
     Construye la matriz tau, donde cada posición representa la utilidad 
     de asignar una práctica seleccionada a un estudiante
     """
     # Selección y distancias
     selected = list(selected_placements)
-    dist = np.asarray(problem.student_company_dist, dtype=np.float64)
-    dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
+    if student_dist_matrix is not None:
+        dist_norm = student_dist_matrix
+    else:
+        dist = np.asarray(problem.student_company_dist, dtype=np.float64)
+        dist_norm = _minmax_normalize_rows(dist) if normalize_student_dist else dist
 
     # Competencias, preferencias y empresas
     phi = np.asarray(problem.placement_comp_needs, dtype=np.float64)[selected]
@@ -524,7 +531,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
         weights.validate()
 
     # Inicialización de estructuras y estadísticas
-    start = time.time()
+    start = time.monotonic()
     pareto_set = []
     iteration = 0
     generated_subsets = 0
@@ -535,11 +542,18 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
     inserted_into_pareto = 0
     invalid_solutions = 0
     generation_failures = 0
+    
+    # Precalcular una sola vez los costes de supervisión.
+    supervision_context = _build_supervision_cost_context(problem, normalize_supervision_dist)
+    
+    # Preparar una sola vez los costes estudiante-empresa.
+    student_dist = np.asarray(problem.student_company_dist, dtype=np.float64)
+    student_dist_matrix = (_minmax_normalize_rows(student_dist) if normalize_student_dist else student_dist)
 
     # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
         # Comprobación de criterios de parada
-        elapsed = time.time() - start
+        elapsed = time.monotonic() - start
         if elapsed >= time_limit_seconds:
             break
         if max_iterations is not None and iteration >= max_iterations:
@@ -567,7 +581,8 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
             rng=rng,
             lbar_weight=professor_lbar_weight,
             omega_weight=professor_omega_weight,
-            normalize_supervision_dist=normalize_supervision_dist
+            normalize_supervision_dist=normalize_supervision_dist,
+            supervision_context=supervision_context
         )
 
         # Si no se ha podido asignar profesores de forma factible, se descarta este subconjunto y se continúa con la siguiente iteración
@@ -577,7 +592,8 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
 
         # Construcción de la solución tau
         try:
-            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, normalize_student_dist=normalize_student_dist)
+            tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, 
+                                          normalize_student_dist=normalize_student_dist, student_dist_matrix=student_dist_matrix)
             assignment_tau = solve_lapjv_max(tau_matrix, solver=lap_solver)
             sol_tau = build_solution_from_lap_assignment(problem=problem, selected_placements=selected_placements, professor_assignment=professor_assignment, lap_assignment=assignment_tau)
         except Exception as exc:
@@ -638,7 +654,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
             )
 
     # Cálculo del tiempo total transcurrido
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {
         "pareto_set": pareto_set,

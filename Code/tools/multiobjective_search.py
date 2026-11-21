@@ -99,7 +99,7 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
         raise ValueError("time_limit_seconds must be > 0")
 
     generator_kwargs = generator_kwargs or {}
-    start = time.time()
+    start = time.monotonic()
     iteration = 0
     generated = 0
     feasible = 0
@@ -111,7 +111,7 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
     while True:
 
         # Criterios de parada
-        elapsed = time.time() - start
+        elapsed = time.monotonic() - start
         if elapsed >= time_limit_seconds:
             break # por tiempo
         if max_iterations is not None and iteration >= max_iterations:
@@ -159,7 +159,7 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
             )
 
     # Calcula el tiempo total de ejecución
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {
         "pareto_set": pareto_set,
