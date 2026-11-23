@@ -70,7 +70,7 @@ def _worker(conn, execute_fn, problem, time_limit_seconds, seed, verbose):
         # La heurística recibirá estos parámetros cuando adaptemos sus funciones.
         resultado = execute_fn(problem=problem, time_limit_seconds=time_limit_seconds, seed=seed,
                                verbose=verbose, deadline=deadline, progress_callback=informar)
-        conn.send(("done", resultado.get("stats", {})))
+        conn.send(("done", resultado)) # Resultado entero cuando la heurística termina normal
 
     except Exception:
         try:
@@ -102,6 +102,7 @@ def run_with_deadline(execute_fn, problem, time_limit_seconds, seed, verbose=Fal
 
     pareto_set = []
     stats = {}
+    resultado_final = None
     status = "error"
     error_message = None
     inicio = None
@@ -156,7 +157,7 @@ def run_with_deadline(execute_fn, problem, time_limit_seconds, seed, verbose=Fal
                     elif tipo == "stats":
                         stats.update(contenido)
                     elif tipo == "done":
-                        stats.update(contenido)
+                        resultado_final = contenido
                         status = "completed"
                         break
                     elif tipo == "error":
@@ -178,6 +179,10 @@ def run_with_deadline(execute_fn, problem, time_limit_seconds, seed, verbose=Fal
             proceso.kill()
             proceso.join()
         receptor.close()
+
+    # Si termina normalmente, devuelve exactamente el resultado original
+    if status == "completed":
+        return resultado_final, status, error_message
 
     # Estadísticas calculadas por el controlador, incluso tras interrupción
     stats["elapsed_seconds"] = min(time.monotonic() - inicio, time_limit_seconds) if inicio is not None else 0.0
