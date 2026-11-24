@@ -148,6 +148,7 @@ STATS_FIELDS = [
     "seed",
     "time_limit_seconds",
     "elapsed_seconds",
+    "total_elapsed_seconds",
     "status",
     "error_message",
     "pareto_size",
@@ -179,8 +180,7 @@ PARETO_FIELDS = [
 ]
 
 # Guarda las estadísticas de una ejecución en un CSV acumulativo, con una fila por ejecución
-def save_stats(results_dir, algorithm_name, instance_name, n_students,
-               run_id, seed, time_limit_seconds, result, status, error_message):
+def save_stats(results_dir, algorithm_name, instance_name, n_students, run_id, seed, time_limit_seconds, result, status, error_message, total_elapsed_seconds=None):
     statistics_dir = os.path.join(results_dir, "statistics")
     ensure_dir(statistics_dir)
 
@@ -199,6 +199,7 @@ def save_stats(results_dir, algorithm_name, instance_name, n_students,
         "seed": seed,
         "time_limit_seconds": time_limit_seconds,
         "elapsed_seconds": stats.get("elapsed_seconds", ""),
+        "total_elapsed_seconds": total_elapsed_seconds,
         "status": status,
         "error_message": error_message,
         "pareto_size": stats.get("pareto_size", ""),
@@ -222,11 +223,7 @@ def save_pareto(results_dir, algorithm_name, instance_name, n_students,
     ensure_dir(pareto_dir)
 
     safe_instance = instance_name.replace(".txt", "")
-    pareto_path = os.path.join(
-        pareto_dir,
-        "{}__{}__run_{:02d}.csv".format(algorithm_name, safe_instance, run_id)
-    )
-
+    pareto_path = os.path.join(pareto_dir, "{}__{}__run_{:02d}.csv".format(algorithm_name, safe_instance, run_id))
     pareto_set = result.get("pareto_set", [])
 
     with open(pareto_path, "w", newline="", encoding="utf-8") as f:
@@ -271,17 +268,12 @@ def solution_to_assignment_dict(item, solution_id):
     }
 
 # Guarda las asignaciones de cada solución del frente de Pareto en un JSON, con toda la información relevante para análisis posteriores
-def save_assignments(results_dir, algorithm_name, instance_name, n_students,
-                     run_id, seed, result):
+def save_assignments(results_dir, algorithm_name, instance_name, n_students, run_id, seed, result):
     assignments_dir = os.path.join(results_dir, "assignments")
     ensure_dir(assignments_dir)
 
     safe_instance = instance_name.replace(".txt", "")
-    assignments_path = os.path.join(
-        assignments_dir,
-        "{}__{}__run_{:02d}.json".format(algorithm_name, safe_instance, run_id)
-    )
-
+    assignments_path = os.path.join(assignments_dir, "{}__{}__run_{:02d}.json".format(algorithm_name, safe_instance, run_id))
     pareto_set = result.get("pareto_set", [])
 
     data = {
@@ -301,41 +293,11 @@ def save_assignments(results_dir, algorithm_name, instance_name, n_students,
     write_json(assignments_path, data)
 
 # Guarda el resultado completo de una ejecución, incluyendo estadísticas, frente de Pareto y asignaciones
-def save_full_result(results_dir, algorithm_name, instance_name, n_students,
-                     run_id, seed, time_limit_seconds, result, save_assignments_flag=False):
-    save_pareto(
-        results_dir=results_dir,
-        algorithm_name=algorithm_name,
-        instance_name=instance_name,
-        n_students=n_students,
-        run_id=run_id,
-        seed=seed,
-        result=result,
-    )
+def save_full_result(results_dir, algorithm_name, instance_name, n_students, run_id, seed, time_limit_seconds, result, save_assignments_flag=False):
+    save_pareto(results_dir=results_dir, algorithm_name=algorithm_name, instance_name=instance_name, n_students=n_students, run_id=run_id, seed=seed, result=result)
 
     if save_assignments_flag:
-        save_assignments(
-            results_dir=results_dir,
-            algorithm_name=algorithm_name,
-            instance_name=instance_name,
-            n_students=n_students,
-            run_id=run_id,
-            seed=seed,
-            result=result,
-        )
-
-    save_stats(
-        results_dir=results_dir,
-        algorithm_name=algorithm_name,
-        instance_name=instance_name,
-        n_students=n_students,
-        run_id=run_id,
-        seed=seed,
-        time_limit_seconds=time_limit_seconds,
-        result=result,
-        status="ok",
-        error_message="",
-    )
+        save_assignments(results_dir=results_dir, algorithm_name=algorithm_name, instance_name=instance_name, n_students=n_students, run_id=run_id, seed=seed, result=result)
 
 
 # ----------------------------------------
@@ -527,9 +489,7 @@ def run_experiment(args):
             n_students = parse_n_students_from_instance_name(instance_name)
 
             if n_students not in TIME_LIMITS_SECONDS:
-                raise ValueError(
-                    "No hay tiempo definido para n_students={}".format(n_students)
-                )
+                raise ValueError("No hay tiempo definido para n_students={}".format(n_students))
 
             time_limit_seconds = TIME_LIMITS_SECONDS[n_students]
 
@@ -537,14 +497,7 @@ def run_experiment(args):
                 job_counter += 1
                 seed = build_seed(algorithm_name, instance_name, run_id)
 
-                prefix = "[{}/{}] {} | {} | run {:02d} | {}s".format(
-                    job_counter,
-                    total_jobs,
-                    algorithm_name,
-                    instance_name,
-                    run_id,
-                    time_limit_seconds,
-                )
+                prefix = "[{}/{}] {} | {} | run {:02d} | {}s".format(job_counter, total_jobs, algorithm_name, instance_name, run_id, time_limit_seconds)
 
                 if args.resume and is_done(results_dir, algorithm_name, instance_name, run_id):
                     log_line(log_path, "{} | SKIP resume".format(prefix))
@@ -558,18 +511,21 @@ def run_experiment(args):
 
                 result = None
                 start_job = time.monotonic()
-
+                
                 try:
                     problem = load_instance(instance_path)
 
-                    result = execute_fn(
-                        problem=problem,
-                        time_limit_seconds=time_limit_seconds,
-                        seed=seed,
-                        verbose=args.verbose
-                    )
+                    result = execute_fn(problem=problem, time_limit_seconds=time_limit_seconds, seed=seed, verbose=args.verbose)
 
-                    save_full_result(
+                    # Guardar Pareto y asignaciones
+                    save_full_result(results_dir=results_dir, algorithm_name=algorithm_name, instance_name=instance_name, n_students=n_students, run_id=run_id,
+                                     seed=seed, time_limit_seconds=time_limit_seconds, result=result, save_assignments_flag=args.save_assignments)
+
+                    # Calcular tiempo total
+                    elapsed = time.monotonic() - start_job
+
+                    # Guardar estadísticas con ambos tiempos
+                    save_stats(
                         results_dir=results_dir,
                         algorithm_name=algorithm_name,
                         instance_name=instance_name,
@@ -578,36 +534,21 @@ def run_experiment(args):
                         seed=seed,
                         time_limit_seconds=time_limit_seconds,
                         result=result,
-                        save_assignments_flag=args.save_assignments
+                        status="ok",
+                        error_message="",
+                        total_elapsed_seconds=elapsed
                     )
 
+                    # Marcar ejecución completada
                     mark_done(results_dir, algorithm_name, instance_name, run_id)
-
-                    elapsed = time.monotonic() - start_job
                     pareto_size = len(result.get("pareto_set", []))
-
-                    log_line(
-                        log_path,
-                        "{} | OK | elapsed={:.2f}s | pareto_size={}".format(
-                            prefix,
-                            elapsed,
-                            pareto_size,
-                        )
-                    )
+                    log_line(log_path, "{} | OK | elapsed={:.2f}s | pareto_size={}".format(prefix, elapsed, pareto_size))
+                    
 
                 except Exception as e:
                     elapsed = time.monotonic() - start_job
                     error_message = "{}".format(e)
-
-                    log_line(
-                        log_path,
-                        "{} | ERROR | elapsed={:.2f}s | {}".format(
-                            prefix,
-                            elapsed,
-                            error_message,
-                        )
-                    )
-
+                    log_line(log_path, "{} | ERROR | elapsed={:.2f}s | {}".format(prefix, elapsed, error_message))
                     log_line(log_path, traceback.format_exc())
 
                     save_stats(
@@ -621,6 +562,7 @@ def run_experiment(args):
                         result=result,
                         status="error",
                         error_message=error_message,
+                        total_elapsed_seconds=elapsed
                     )
 
                     if args.stop_on_error:
