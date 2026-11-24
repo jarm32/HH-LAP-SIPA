@@ -24,7 +24,8 @@ def register_solution_in_pareto(
     normalize_student_dist=True,        # booleano para normalización de distancia de estudiantes
     normalize_supervision_dist=True,    # booleano para normalización de distancia de supervisores
     precomputed_multi_eval=None,        # evaluación multiobjetivo ya calculada
-    precomputed_scalar_eval=None        # evaluación escalar ya calculada
+    precomputed_scalar_eval=None,       # evaluación escalar ya calculada
+    on_pareto_update=None               # función llamada cuando cambie el frente de Pareto
 ):
     """
     Evalúa una Solution, la convierte en EvaluatedSolution y la intenta registrar
@@ -68,6 +69,10 @@ def register_solution_in_pareto(
     if max_pareto_size is not None and len(new_pareto_set) > max_pareto_size:
         new_pareto_set = prune_pareto_set_by_size(new_pareto_set, max_pareto_size)
         pruned = True
+        
+    # Notificar el nuevo Pareto cuando haya cambiado
+    if on_pareto_update is not None and (was_inserted or pruned):
+        on_pareto_update(new_pareto_set)
 
     return {
         "pareto_set": new_pareto_set,
