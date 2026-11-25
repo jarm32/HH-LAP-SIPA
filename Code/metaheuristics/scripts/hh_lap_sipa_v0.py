@@ -22,29 +22,40 @@ from scipy.optimize import linear_sum_assignment
 # Selección inicial factible de prácticas P'
 # -----------------------------------------------------------------------------
 
-def generate_random_feasible_placements(problem, seed = None, max_attempts = 50):
+def generate_random_feasible_placements(problem, seed = None, max_attempts = 50, deadline = None):
                                        # instancia del problema, semilla, nº máximo de intentos para generar P' válido 
     """
     Genera un subconjunto P' aleatorio y factible (|P'| = n_students, cuotas por empresa y dependencias completas). 
     Reutiliza funciones ya existentes de random_feasible_fixing (heurística aleatoria), pero en lugar de construir
     una solución completa, devuelve solo las prácticas seleccionadas
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+    
     # Inicialización
     rng = random.Random(seed)
     pre = _preprocess(problem)
 
     # Intentos de generación
     for _ in range(max_attempts):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
         try:
-            selected = list(_choose_final_placements(problem, pre, rng)) # Lista de índices de prácticas seleccionadas
+            selected = list(_choose_final_placements(problem, pre, rng, deadline=deadline)) # Lista de índices de prácticas seleccionadas
         except ValueError:
             continue
-        
-        # Validación estructural de factibilidad de P' antes de intentar asignar profesores o resolver LAP
-        if _selected_placements_are_structurally_feasible(problem, selected):
-            return selected # Lista de índices de prácticas seleccionadas
 
-    # Si no se encuentra un subconjunto factible después de max_attempts, se lanza una excepción
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
+        # Validación estructural de factibilidad de P'
+        if _selected_placements_are_structurally_feasible(problem, selected):
+            return selected
+
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
     raise ValueError(f"No feasible placement subset found after {max_attempts} attempts")
 
 
@@ -103,13 +114,16 @@ class _SupervisionCostContext:
 
 def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, omega_weight = 1.0, 
                                                # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y omega (equilibrio), 
-                                               normalize_supervision_dist = True, supervision_context=None):
+                                               normalize_supervision_dist = True, supervision_context=None, deadline=None):
                                                # booleano para saber si se normalizan las distancias de supervisión, distancias de supervisión precomputadas
     """
     Recorre las prácticas seleccionadas y asigna cada una al profesor que menor
     incremento estimado produce en los objetivos de supervisión. Al final,
     valida que todas las prácticas tengan profesor y que ningún profesor supere su capacidad
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
     # Inicialización
     selected = list(selected_placements)
     rng = rng or random.Random()
@@ -136,6 +150,9 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
 
     # Búsqueda de candidatos
     for j in order:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+        
         candidates = [t for t in range(problem.n_professors) 
                       if professor_load[t] < int(problem.prof_capacity[t])] # Profesores con capacidad para supervisar una práctica más
 
@@ -151,6 +168,9 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
         best_candidates = []  # (profesor, nuevo_lbar, nuevo_omega)
 
         for t in candidates:
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+    
             current_lbar = lbar_by_professor[t]
             new_lbar = _lbar_for_professor(problem=problem, context=context, placements=placements_by_professor[t] + [j])
 
@@ -179,6 +199,8 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
         lbar_by_professor[chosen_t] = chosen_lbar
         omega = chosen_omega
 
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
 
     # Validación final de factibilidad de la asignación práctica-profesor (todas las prácticas asignadas, ningún profesor sobrecargado)
     if not _professor_assignment_is_feasible(problem, selected, professor_assignment):
