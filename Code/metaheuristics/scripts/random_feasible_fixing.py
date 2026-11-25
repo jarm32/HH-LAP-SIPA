@@ -4,7 +4,7 @@
 # Imports
 # ----------------------------
 import random
-
+import time
 from dataclasses import dataclass
 from typing import List
 
@@ -179,7 +179,7 @@ def _remove_random_block_any(selected_blocks, rng):
     return _remove_random_block_from_company(selected_blocks, k, rng) # True/False, dependiendo de la empresa
 
 
-def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 5000):
+def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 5000, deadline=None):
                              # Problema original, Problema preprocesado, generador de números aleatorios, diccionario de la selección actual de bloques de dependencias por empresa, límite de iteraciones del fixing
     """
     Arreglo de las siguientes dependencias:
@@ -189,6 +189,9 @@ def _fix_dependency_selection(problem, pre, rng, selected_blocks, max_iters = 50
       - total_selected + sum(can_send) >= n_students
     """
     for _ in range(max_iters):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Random Search: deadline alcanzada")
+
         # Recalcular contadores
         selected_from_company, total_selected, must_send, can_send, _, total_can = _recompute_counters(problem, pre, selected_blocks)
 
@@ -298,7 +301,7 @@ def _random_partition_to_fill(need, must_send, can_send, rng):
     return x # [3, 6, 1, ...]; donde cada elemento corresponde a cuántas plazas no dependientes se deben asignar a cada empresa
 
 
-def _choose_final_placements(problem, pre, rng):
+def _choose_final_placements(problem, pre, rng, deadline=None):
                             # Problema original, Problema preprocesado, generador de números aleatorios
     """
     Devuelve una lista de n_students placements (con todas las plazas de bloques
@@ -308,7 +311,7 @@ def _choose_final_placements(problem, pre, rng):
     selected_blocks = _random_initial_dep_selection(pre, rng)
 
     # Arreglar las dependencias
-    fixed = _fix_dependency_selection(problem, pre, rng, selected_blocks)
+    fixed = _fix_dependency_selection(problem, pre, rng, selected_blocks, deadline=deadline)
     if fixed is None:
         raise ValueError("Failed to fix dependency selection")
     selected_blocks, must_send, can_send = fixed
@@ -355,7 +358,7 @@ def _choose_final_placements(problem, pre, rng):
 # Asignación de profesores (constructivo aleatorizado + repair ligero)
 # ----------------------------
 
-def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
+def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000, deadline=None):
                                   # Problema original, objeto Solution que ya tiene las plazas de estudiantes asignadas, 
                                   # generador aleatorio, nº máximo de iteraciones del proceso de reparación
     """
@@ -377,6 +380,9 @@ def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
 
     # -------- Constructivo --------
     for j in assigned_placements:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Random Search: deadline alcanzada")
+    
         # Genera lista aleatoria de profesores
         cand = list(range(problem.n_professors))
         rng.shuffle(cand)
@@ -400,7 +406,9 @@ def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
 
     # -------- Reparación --------
     for _ in range(max_repair_iters):
-
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Random Search: deadline alcanzada")
+                    
         if not unassigned:
             return True
 
@@ -430,12 +438,18 @@ def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
         rng.shuffle(target_pool)
         moved = False
         for t_full in target_pool:
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("Random Search: deadline alcanzada")
+
             if not prof_to_pl[t_full]: # Ignorar profesores sin plazas
                 continue
             
             # Elegir una plaza j2 del profesor lleno para que a este le queja j
             rng.shuffle(prof_to_pl[t_full])
             for j2 in list(prof_to_pl[t_full]):
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise TimeoutError("Random Search: deadline alcanzada")
+                
                 cand2 = list(range(problem.n_professors))
                 rng.shuffle(cand2)
 
@@ -475,7 +489,7 @@ def _assign_professors_with_repair(problem, sol, rng, max_repair_iters = 3000):
 # Construcción final de Solution
 # ----------------------------
 
-def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50):
+def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50, deadline=None):
                                    # Problema original, semilla para reproducibilidad, nº máximo de iteraciones del proceso de reparación
     """
     Genera una Solution aleatoria y factible 
@@ -486,9 +500,14 @@ def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50):
 
     # Bucle de intentos
     for _ in range(max_attempts):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Random Search: deadline alcanzada")
+    
         try:
             # Elegir plazas finales
-            chosen_placements = _choose_final_placements(problem, pre, rng)
+            chosen_placements = _choose_final_placements(problem, pre, rng, deadline=deadline)
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("Random Search: deadline alcanzada")
 
             # --- Estudiante-plaza ---
             students = list(range(problem.n_students))
@@ -514,8 +533,10 @@ def generate_random_feasible_fixing(problem, seed = None, max_attempts = 50):
                 continue
 
             # --- Profesores-Plazas ---
-            if not _assign_professors_with_repair(problem, sol, rng):
+            if not _assign_professors_with_repair(problem, sol, rng, deadline=deadline):
                 continue
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("Random Search: deadline alcanzada")
 
             # Validación final
             if sol.validate():
