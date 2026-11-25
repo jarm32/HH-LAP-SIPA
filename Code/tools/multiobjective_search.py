@@ -7,7 +7,7 @@
 import time
 
 from tools.pareto_front import EvaluatedSolution, prune_pareto_set_by_size, update_pareto_set
-from tools.evaluator import evaluate_solution_multi, evaluate_solution_scalar
+from tools.evaluator import evaluate_solution_multi
 
 
 # -----------------------------------------------------------------
@@ -49,13 +49,22 @@ def register_solution_in_pareto(
         }
 
     # Evaluación escalar auxiliar
-    scalar_eval = precomputed_scalar_eval
-    if scalar_eval is None:
-        scalar_eval = evaluate_solution_scalar(sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
-    
-    # Combina evaluación multiobjetivo + escalar en un único diccionario para almacenar en el Pareto
+    if precomputed_scalar_eval is None:
+        weights.validate()
+        c = multi_eval["components"]
+
+        scalar_value = (
+            weights.alpha * c["tau_sum"]
+            + weights.beta * c["eta_sum"]
+            - weights.gamma * c["lbar_sum"]
+            - weights.delta * c["omega"]
+        )
+    else:
+        scalar_value = precomputed_scalar_eval["objective_value"]
+
+    # Combina evaluación multiobjetivo + escalar en un único dict para actualizar el Pareto
     eval_result = dict(multi_eval)
-    eval_result["objective_value"] = scalar_eval["objective_value"]
+    eval_result["objective_value"] = float(scalar_value)
 
     # Construcción del objeto evaluado
     candidate = EvaluatedSolution(sol=sol, evaluation=eval_result, iteration=iteration, seed=seed)
@@ -99,7 +108,10 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
         raise ValueError("time_limit_seconds must be > 0")
 
     generator_kwargs = generator_kwargs or {}
+    
     start = time.monotonic()
+    deadline = start + time_limit_seconds
+
     iteration = 0
     generated = 0
     feasible = 0
@@ -126,10 +138,16 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
 
         # Generación de solución
         try:
-            sol = generator_fn(problem, seed=seed, **generator_kwargs)
-        except Exception:
+            sol = generator_fn(problem, seed=seed, deadline=deadline, **generator_kwargs)
+        except TimeoutError: # Se ha agotado el tiempo: conservar el Pareto acumulado
+            break 
+        except ValueError: # No se ha conseguido generar una solución factible
             failures += 1
             continue
+
+        # No iniciar la evaluación si la deadline ya ha vencido
+        if time.monotonic() >= deadline:
+            break
         
         # Evalúa la solución y delega su registro/actualización en el Pareto externo
         reg = register_solution_in_pareto(sol=sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
@@ -149,6 +167,9 @@ def random_search_pareto(problem, generator_fn, weights, time_limit_seconds = 60
         # Cuenta cuántas soluciones llegaron a entrar en el Pareto
         if reg["was_inserted"]:
             inserted += 1
+
+        if time.monotonic() >= deadline:
+            break
 
         # Imprime estado cada 50 iteraciones
         if verbose and iteration % 50 == 0:

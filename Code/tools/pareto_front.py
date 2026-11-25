@@ -123,7 +123,7 @@ def update_pareto_set(pareto_set, candidate):
         survivors.append(current) # Current ha sobrevivido 
 
     if candidate_dominated: 
-        return survivors, False, removed_count
+        return pareto_set, False, 0
         # nuevo conjunto pareto, flag que indica que el candidato NO se ha añadido, cuántas soluciones del cjto pareto anterior se han eliminado (0)
 
     survivors.append(candidate) # candidate no ha sido vencida por ninguna current ni es igual a otra --> o ha ganado o no es comparable, por lo que se puede añadir
