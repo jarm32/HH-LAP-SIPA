@@ -12,6 +12,7 @@ import random
 import time
 from itertools import combinations
 import numpy as np
+from bisect import bisect_right
 
 from metaheuristics.scripts.random_feasible_fixing import _assign_professors_with_repair, generate_random_feasible_fixing
 from tools.evaluator import evaluate_solution_scalar
@@ -112,7 +113,7 @@ def _reset_professor_assignment(sol): # solución del problema
     sol.professor_load = [0] * sol.problem.n_professors
 
 
-def _build_solution_from_assignment_vector(problem, assignments, rng):
+def _build_solution_from_assignment_vector(problem, assignments, rng, deadline=None):
                                           # instancia del problema, vector student_to_placement, generador aleatorio
     """
     Reconstruye una Solution completa y válida desde student_to_placement -->
@@ -120,13 +121,14 @@ def _build_solution_from_assignment_vector(problem, assignments, rng):
     
     Devuelve None si no consigue una solución válida
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("GRASP: deadline alcanzada")
+    
     # Validaciones básicas
     if len(assignments) != problem.n_students: # tamaño correcto
         return None
-
     if any(j < 0 or j >= problem.n_placements for j in assignments): # plazas válidas
         return None
-
     if len(set(assignments)) != len(assignments): # sin duplicados
         return None
 
@@ -153,7 +155,7 @@ def _build_solution_from_assignment_vector(problem, assignments, rng):
 
     # Asignación de profesores
     _reset_professor_assignment(sol)
-    ok = _assign_professors_with_repair(problem, sol, rng)
+    ok = _assign_professors_with_repair(problem, sol, rng, deadline=deadline)
     if not ok:
         return None
 
@@ -203,22 +205,29 @@ def _is_candidate_locally_feasible(problem, j, company_load, used_placements, re
     return True
 
 
-def _compute_rcl(candidate_pairs, g_matrix, alpha_rcl):
-                # lista de tuplas (i, j) factibles, matriz g precalculada (g(i,j)), parámetro de control de la RCL
+def _choose_rcl_pair(unassigned_students, feasible_placements, g_matrix, alpha_rcl, rng):
+                    # alumnos y plazas factibles, matriz g precalculada (g(i,j)), parámetro de control de la RCL, random
     """
-    Selecciona las mejores candidatas según el score greedy, pero permitiendo cierta aleatoriedad controlada por el parámetro alpha_rcl.
+    Construye la RCL y selecciona aleatoriamente una pareja estudiante-plaza.
     alpha_rcl ∈ [0,1]; menor --> más greedy, mayor --> más aleatorio
     """
-    if not candidate_pairs: # Caso trivial
-        return []
+    if not unassigned_students or not feasible_placements:
+        return None
 
     # Calcular scores y umbral
-    scores = [float(g_matrix[i, j]) for i, j in candidate_pairs] # g(i,j) para cada par candidato
-    g_max, g_min = max(scores), min(scores)
+    scores = g_matrix[np.ix_(unassigned_students, feasible_placements)]
+    g_max, g_min = float(scores.max()), float(scores.min()) 
     threshold = g_max - alpha_rcl * (g_max - g_min)
 
-    rcl = [(i, j) for (i, j), s in zip(candidate_pairs, scores) if s >= threshold]
-    return rcl # lista de tuplas (i, j) que entran en la RCL
+    # Índices de las parejas pertenecientes a la RCL
+    rcl_indices = np.flatnonzero(scores >= threshold)
+    if rcl_indices.size == 0:
+        return None
+
+    # Selección aleatoria de una pareja
+    flat_idx = int(rng.choice(rcl_indices))
+    row, col = divmod(flat_idx, len(feasible_placements))
+    return unassigned_students[row], feasible_placements[col]
 
     
 def _balanced_scalar_score(eval_data, problem, weights):
@@ -262,6 +271,9 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
     Construye una solución factible (estudiantes, plazas, profesores) mediante un proceso greedy-randomized. 
     Si una construcción falla, reintenta desde cero hasta encontrar una solución válida, agotar tiempo o intentos
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("GRASP: deadline constructiva alcanzada")
+    
     # Validación e inicialización general (acelerar constructivo)
     if not (0.0 <= alpha_rcl <= 1.0): 
         raise ValueError(f"alpha_rcl must be in [0,1], got {alpha_rcl}") # Validar rango de alpha_rcl
@@ -276,7 +288,7 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
     # Reintentos completos de construcción
     for _ in range(max_attempts):
         if deadline is not None and time.monotonic() >= deadline:
-            break
+            raise TimeoutError("GRASP: deadline constructiva alcanzada")
         
         # Estado inicial de un intento
         assignments = [-1] * problem.n_students
@@ -294,8 +306,7 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
         # Bucle principal de construcción --> Cada vuelta de este bucle añade una nueva asignación estudiante–plaza a la solución
         while unassigned_students:
             if deadline is not None and time.monotonic() >= deadline:
-                success = False
-                break
+                raise TimeoutError("GRASP: deadline constructiva alcanzada")
 
             # Determinar qué plazas se pueden considerar en este momento
             if current_open_block is not None:
@@ -305,27 +316,23 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
 
             remaining_students_after = len(unassigned_students) - 1
 
-            # Generar todas las parejas factibles (i, j)
-            candidate_pairs = []
-            for i in unassigned_students:
-                for j in candidate_placements:
-                    if _is_candidate_locally_feasible(problem=problem, j=j, company_load=company_load, used_placements=used_placements, remaining_students_after=remaining_students_after, dep_data=dep_data,
-                                                      current_open_block=current_open_block): # Para cada estudiante pendiente y cada plaza candidata, comprueba si esa asignación es localmente viable
-                        candidate_pairs.append((i, j))
+            # Filtrar plazas localmente factibles
+            feasible_placements = [j for j in candidate_placements if _is_candidate_locally_feasible(problem=problem, j=j, company_load=company_load, used_placements=used_placements, 
+                                                                                                     remaining_students_after=remaining_students_after, 
+                                                                                                     dep_data=dep_data, current_open_block=current_open_block)]
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("GRASP: deadline constructiva alcanzada")
 
-            # Intento bloqueado porque no hay ninguna pareja localmente factible
-            if not candidate_pairs:
+            # Construcción de la RCL y selección de una pareja
+            selected_pair = _choose_rcl_pair(unassigned_students, feasible_placements, g_matrix, alpha_rcl, rng)
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("GRASP: deadline constructiva alcanzada")
+
+            if selected_pair is None:
                 success = False
                 break
 
-            # Construir la RCL a partir de las parejas factibles
-            rcl = _compute_rcl(candidate_pairs, g_matrix, alpha_rcl=alpha_rcl)
-            if not rcl:
-                success = False
-                break
-            
-            # Elección aleatoria dentro de la RCL
-            i_sel, j_sel = rng.choice(rcl)
+            i_sel, j_sel = selected_pair
 
             # Aplicar la asignación elegida (actualiza el estado de la construcción)
             assignments[i_sel] = j_sel
@@ -351,12 +358,15 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
             continue
 
         # Reconstrucción completa de la solución
-        sol = _build_solution_from_assignment_vector(problem, assignments, rng)
+        sol = _build_solution_from_assignment_vector(problem, assignments, rng, deadline=deadline)
 
         # Comprobar si el intento ha terminado con éxito --> si no, se reintenta desde cero
-        if sol is not None and sol.validate():
+        if sol is not None:
             return sol # solución factible completa, faltándole la optimización que añade la búsqueda local
 
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("GRASP: deadline constructiva alcanzada")
+    
     # Fallo final tras agotar intentos
     raise ValueError(f"Failed to construct a feasible GRASP solution after {max_attempts} attempts")
 
@@ -364,6 +374,36 @@ def construct_grasp_solution(problem, alpha_rcl = 0.3, seed = None, normalize_st
 # --------------------------------------------------
 # Búsqueda local
 # --------------------------------------------------
+
+def _sample_neighbor_pairs(n_students, max_neighbors_per_pass, rng):
+    """
+    Genera una muestra aleatoria de parejas distintas de
+    estudiantes, para no generar todas las combinaciones
+    """
+    total_pairs = n_students * (n_students - 1) // 2
+    if total_pairs == 0:
+        return []
+
+    # Si no existe límite, explorar todas las parejas
+    if max_neighbors_per_pass is None or max_neighbors_per_pass >= total_pairs:
+        pairs = list(combinations(range(n_students), 2))
+        rng.shuffle(pairs)
+        return pairs
+
+    # Seleccionar índices aleatorios de parejas sin reemplazo
+    selected_indices = rng.sample(range(total_pairs), max_neighbors_per_pass)
+
+    # Índice inicial de las parejas de cada estudiante
+    row_starts = [i * (2 * n_students - i - 1) // 2 for i in range(n_students)]
+
+    # Convertir los índices seleccionados en parejas (i, j)
+    pairs = []
+    for idx in selected_indices:
+        i = bisect_right(row_starts, idx) - 1
+        j = i + 1 + idx - row_starts[i]
+        pairs.append((i, j))
+    return pairs
+
 
 def local_search_swap_first_improvement(initial_sol, weights, seed = None, normalize_student_dist = True, normalize_supervision_dist = True, 
                                         deadline = None, max_neighbors_per_pass = 1000, max_local_improvements = 30):
@@ -379,12 +419,15 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
 
     El filtrado multiobjetivo real se delega en el Pareto externo
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("GRASP: deadline alcanzada")
+    
     # Inicialización y evaluación de la solución inicial
     rng = random.Random(seed)
     current_sol = _copy_solution(initial_sol)
     current_eval = evaluate_solution_scalar(current_sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
     if not current_eval.get("valid", False):
-        return current_sol, 0 # Si no es válida, no hace búsqueda local
+        return current_sol, 0, current_eval # Si no es válida, no hace búsqueda local
 
     # Inicialización de variables
     current_obj = _balanced_scalar_score(current_eval, current_sol.problem, weights)
@@ -402,15 +445,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
             
         # Generación de vecinos (pares de estudiantes)
         improved = False
-        students = list(range(current_sol.problem.n_students))
-        all_pairs = list(combinations(students, 2))
-        rng.shuffle(all_pairs)
-
-        # Limitar el número de vecinos evaluados en esta pasada para reducir coste temporal
-        if max_neighbors_per_pass is not None:
-            pairs = all_pairs[:max_neighbors_per_pass]
-        else:
-            pairs = all_pairs
+        pairs = _sample_neighbor_pairs(current_sol.problem.n_students, max_neighbors_per_pass, rng)
 
         # Copia de la asignación actual student_to_placement
         current_assignments = list(current_sol.student_to_placement)
@@ -425,10 +460,18 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
             neighbor_assignments = list(current_assignments)
             neighbor_assignments[i], neighbor_assignments[j] = neighbor_assignments[j], neighbor_assignments[i]
 
-            # Reconstrucción de la solución
-            neighbor_sol = _build_solution_from_assignment_vector(current_sol.problem, neighbor_assignments, rng)
-            if neighbor_sol is None: # Si no es factible, se descarta
+            # Reconstrucción de la solución con control temporal
+            try:
+                neighbor_sol = _build_solution_from_assignment_vector(current_sol.problem, neighbor_assignments, rng, deadline=deadline)
+            except TimeoutError:
+                return current_sol, improvements, current_eval
+
+            if neighbor_sol is None:
                 continue
+
+            # No iniciar una evaluación fuera de plazo
+            if deadline is not None and time.monotonic() >= deadline:
+                return current_sol, improvements, current_eval
             
             # Evaluación del vecino para comparar con la solución actual
             neighbor_eval = evaluate_solution_scalar(neighbor_sol, weights, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
@@ -441,6 +484,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
             if neighbor_obj > current_obj + 1e-12:
                 # Actualización de la solución
                 current_sol = neighbor_sol
+                current_eval = neighbor_eval
                 current_obj = neighbor_obj
                 improvements += 1
                 improved = True
@@ -450,7 +494,7 @@ def local_search_swap_first_improvement(initial_sol, weights, seed = None, norma
         if not improved:
             break
 
-    return current_sol, improvements # tupla: (solución mejorada tras búsqueda local, número de mejoras realizadas durante la búsqueda local)
+    return current_sol, improvements, current_eval # tupla: (solución mejorada tras búsqueda local, número de mejoras realizadas durante la búsqueda local)
 
 
 # --------------------------------------------------
@@ -545,7 +589,16 @@ def run_grasp(
                 # Intento constructivo normal
                 constructed_sol = construct_grasp_solution(problem=problem, alpha_rcl=alpha_rcl, seed=seed, normalize_student_dist=normalize_student_dist,
                                                            max_attempts=constructive_max_attempts, deadline=construct_deadline, tau_weight=tau_weight, eta_weight=eta_weight)
-            except Exception as e:
+            
+            except TimeoutError:
+                if time.monotonic() >= deadline:
+                    break
+                constructed_sol = None
+                if verbose:
+                    print(f"[GRASP constructive timeout] "
+                          f"iteration={iteration}, seed={seed}")
+
+            except ValueError as e:
                 constructed_sol = None
                 if verbose:
                     print(f"[GRASP constructive failure] "
@@ -560,19 +613,26 @@ def run_grasp(
 
                 try:
                     # Intento de fallback aleatorio
-                    constructed_sol = generate_random_feasible_fixing(problem, seed=fallback_seed, max_attempts=random_fallback_max_attempts)
+                    constructed_sol = generate_random_feasible_fixing(problem, seed=fallback_seed, max_attempts=random_fallback_max_attempts, deadline=deadline)
                     fallback_used += 1
 
                     if verbose:
                         print(f"[GRASP fallback used] "
                               f"iteration={iteration}, seed={fallback_seed}")
 
-                except Exception as e:
+                except TimeoutError:
+                    break
+
+                except ValueError as e:
                     constructed_sol = None
                     if verbose:
                         print(f"[GRASP fallback failure] "
                               f"iteration={iteration}, seed={fallback_seed}, error={repr(e)}")
 
+            # No iniciar una búsqueda local fuera de plazo
+            if time.monotonic() >= deadline:
+                break
+                
             # Si no se obtiene solución inicial, la iteración falla
             if constructed_sol is None:
                 failures += 1
@@ -585,41 +645,38 @@ def run_grasp(
             ls_seed = None if seed is None else seed + 1000000
 
             # Aplicar búsqueda local con límites de vecinos evaluados y control temporal
-            improved_sol, n_improvements = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist,
+            improved_sol, n_improvements, improved_eval = local_search_swap_first_improvement(initial_sol=constructed_sol, weights=weights, seed=ls_seed, normalize_student_dist=normalize_student_dist,
                                                                                normalize_supervision_dist=normalize_supervision_dist, deadline=deadline, max_neighbors_per_pass=local_max_neighbors_per_pass,
                                                                                max_local_improvements=local_max_improvements)
 
-            # Validación de la solución mejorada
-            if not improved_sol.validate():
+            # Comprobar la validez de la evaluación
+            if not improved_eval.get("valid", False):
                 failures += 1
                 continue
-
-            feasible += 1
-            local_improvements_total += n_improvements
-
 
             # -------- Registro en Pareto externo --------
 
             reg = register_solution_in_pareto(sol=improved_sol, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
-                                              normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
+                                              normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist, 
+                                              precomputed_multi_eval=improved_eval, precomputed_scalar_eval=improved_eval)
 
             # Si el registro no es válido, se cuenta como fallo
             if not reg["valid"]:
                 failures += 1
                 continue
 
+            feasible += 1
+            local_improvements_total += n_improvements
             pareto_set = reg["pareto_set"]
 
             # Si la solución se ha insertado en el Pareto, se cuenta como mejora real
             if reg["was_inserted"]:
                 inserted += 1
+            if time.monotonic() >= deadline:
+                break
 
-        except Exception as e:
-            failures += 1
-            if verbose:
-                print(f"[GRASP failure] "
-                     f"iteration={iteration}, seed={seed}, error={repr(e)}")
-            continue
+        except TimeoutError:
+            break
 
         # Salida de progreso
         if verbose and iteration % 10 == 0:
