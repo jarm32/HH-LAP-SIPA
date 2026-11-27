@@ -22,29 +22,40 @@ from scipy.optimize import linear_sum_assignment
 # Selección inicial factible de prácticas P'
 # -----------------------------------------------------------------------------
 
-def generate_random_feasible_placements(problem, seed = None, max_attempts = 50):
+def generate_random_feasible_placements(problem, seed = None, max_attempts = 50, deadline = None):
                                        # instancia del problema, semilla, nº máximo de intentos para generar P' válido 
     """
     Genera un subconjunto P' aleatorio y factible (|P'| = n_students, cuotas por empresa y dependencias completas). 
     Reutiliza funciones ya existentes de random_feasible_fixing (heurística aleatoria), pero en lugar de construir
     una solución completa, devuelve solo las prácticas seleccionadas
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+    
     # Inicialización
     rng = random.Random(seed)
     pre = _preprocess(problem)
 
     # Intentos de generación
     for _ in range(max_attempts):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
         try:
-            selected = list(_choose_final_placements(problem, pre, rng)) # Lista de índices de prácticas seleccionadas
+            selected = list(_choose_final_placements(problem, pre, rng, deadline=deadline)) # Lista de índices de prácticas seleccionadas
         except ValueError:
             continue
-        
-        # Validación estructural de factibilidad de P' antes de intentar asignar profesores o resolver LAP
-        if _selected_placements_are_structurally_feasible(problem, selected):
-            return selected # Lista de índices de prácticas seleccionadas
 
-    # Si no se encuentra un subconjunto factible después de max_attempts, se lanza una excepción
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
+        # Validación estructural de factibilidad de P'
+        if _selected_placements_are_structurally_feasible(problem, selected):
+            return selected
+
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
     raise ValueError(f"No feasible placement subset found after {max_attempts} attempts")
 
 
@@ -103,13 +114,16 @@ class _SupervisionCostContext:
 
 def assign_professors_with_guided_construction(problem, selected_placements, rng = None, lbar_weight = 1.0, omega_weight = 1.0, 
                                                # instancia del problema, lista de índices de prácticas seleccionadas, generador de nº aleatorios, pesos para lbar (dispersión) y omega (equilibrio), 
-                                               normalize_supervision_dist = True, supervision_context=None):
+                                               normalize_supervision_dist = True, supervision_context=None, deadline=None):
                                                # booleano para saber si se normalizan las distancias de supervisión, distancias de supervisión precomputadas
     """
     Recorre las prácticas seleccionadas y asigna cada una al profesor que menor
     incremento estimado produce en los objetivos de supervisión. Al final,
     valida que todas las prácticas tengan profesor y que ningún profesor supere su capacidad
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
     # Inicialización
     selected = list(selected_placements)
     rng = rng or random.Random()
@@ -134,8 +148,18 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
     lbar_by_professor = [0.0] * problem.n_professors
     omega = _omega_for_loads(problem, professor_load)
 
+    # Caché de Lbar por profesor y empresa candidata
+    lbar_cache = [{} for _ in range(problem.n_professors)]
+    placement_company = problem.placement_company
+
+    # Capacidades de profesores precalculadas
+    capacities = np.asarray(problem.prof_capacity, dtype=np.float64)
+
     # Búsqueda de candidatos
     for j in order:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+        
         candidates = [t for t in range(problem.n_professors) 
                       if professor_load[t] < int(problem.prof_capacity[t])] # Profesores con capacidad para supervisar una práctica más
 
@@ -148,16 +172,31 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
         
         # Evaluación de candidatos con coste incremental de Lbar y omega
         best_cost = float("inf")
-        best_candidates = []  # (profesor, nuevo_lbar, nuevo_omega)
+        best_candidates = []
+        company = int(placement_company[j])
 
-        for t in candidates:
+        # Cargas hipotéticas para todos los profesores candidatos
+        candidate_indices = np.asarray(candidates, dtype=np.intp)
+        rows = np.arange(len(candidates))
+
+        hypothetical_loads = np.tile(np.asarray(professor_load, dtype=np.float64), (len(candidates), 1))
+        hypothetical_loads[rows, candidate_indices] += 1.0
+
+        # Cálculo de omega por candidato
+        candidate_omegas = np.std(hypothetical_loads / capacities, axis=1)
+        for idx, t in enumerate(candidates):
+            if deadline is not None and time.monotonic() >= deadline:
+                raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
             current_lbar = lbar_by_professor[t]
-            new_lbar = _lbar_for_professor(problem=problem, context=context, placements=placements_by_professor[t] + [j])
 
-            # Calcula la nueva omega global si se asigna j al profesor t
-            new_loads = professor_load[:]
-            new_loads[t] += 1
-            new_omega = _omega_for_loads(problem, new_loads)
+            # Reutilizar Lbar si ya se ha calculado para esta empresa
+            cache = lbar_cache[t]
+            if company not in cache:
+                cache[company] = _lbar_for_professor(problem=problem, context=context, placements=placements_by_professor[t] + [j])
+            new_lbar = cache[company]
+
+            # Recuperar omega precalculada para este candidato
+            new_omega = float(candidate_omegas[idx])
 
             # Coste incremental combinado
             incremental_cost = (lbar_weight * (new_lbar - current_lbar) + omega_weight * (new_omega - omega))
@@ -179,6 +218,11 @@ def assign_professors_with_guided_construction(problem, selected_placements, rng
         lbar_by_professor[chosen_t] = chosen_lbar
         omega = chosen_omega
 
+        # La asignación de este profesor ha cambiado
+        lbar_cache[chosen_t].clear()
+
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
 
     # Validación final de factibilidad de la asignación práctica-profesor (todas las prácticas asignadas, ningún profesor sobrecargado)
     if not _professor_assignment_is_feasible(problem, selected, professor_assignment):
@@ -397,12 +441,15 @@ def _minmax_normalize_rows(a):
 # Resolución LAP estudiante-práctica
 # -----------------------------------------------------------------------------
 
-def solve_lapjv_max(benefit_matrix, solver = "lapjv"):
+def solve_lapjv_max(benefit_matrix, solver = "lapjv", deadline=None):
                    # Matriz de beneficios para el LAP (tau o eta), elección del solver ("lapjv" o "scipy")
     """
     Resuelve un LAP de maximización. Usa lapjv como solver principal y, si se indica "scipy" o si lapjv falla,
     usa scipy.optimize.linear_sum_assignment como alternativa
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+    
     # Conversión y validación de la matriz
     benefits = np.asarray(benefit_matrix, dtype=np.float64)
 
@@ -413,9 +460,7 @@ def solve_lapjv_max(benefit_matrix, solver = "lapjv"):
 
     # Si se ha indicado explícitamente usar scipy, se salta lapjv y se va directamente a scipy
     if solver == "scipy":
-        return _solve_lap_with_scipy(benefits)
-
-    # Validación del solver indicado
+        return _solve_lap_with_scipy(benefits, deadline=deadline)
     if solver != "lapjv":
         raise ValueError(f"Unknown LAP solver: {solver}")
 
@@ -423,6 +468,10 @@ def solve_lapjv_max(benefit_matrix, solver = "lapjv"):
     try:
         # Se convierte el problema de maximización en uno de minimización para resolverlo con lapjv
         cost_matrix = -benefits
+
+        # No iniciar el LAP fuera de plazo
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
 
         # lapjv devuelve row_ind, col_ind (_ para obviarlo) y el coste total (_ para obviarlo). row_ind[i] es la práctica (columna) asignada a la fila i
         row_ind, _, _ = lapjv(cost_matrix)
@@ -435,18 +484,29 @@ def solve_lapjv_max(benefit_matrix, solver = "lapjv"):
             raise ValueError("lapjv returned a non-bijective assignment")
 
         return row_to_col # Lista donde row_to_col[i] indica la práctica (columna) seleccionada asignada al estudiante i
+    
+    except TimeoutError:
+        raise
 
     # Si lapjv falla, se intenta resolver con scipy como alternativa más robusta pero lenta
     except Exception:
-        return _solve_lap_with_scipy(benefits)
+        # No iniciar el fallback si se ha agotado el tiempo
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+
+        return _solve_lap_with_scipy(benefits, deadline=deadline)
 
 
-def _solve_lap_with_scipy(benefits):
+def _solve_lap_with_scipy(benefits, deadline=None):
                          # Matriz de beneficios para el LAP (tau o eta)
     """
     Resuelve el LAP de maximización usando SciPy. 
     Se usa como fallback o cuando se seleccione explícitamente
     """
+    
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("HH-LAP-SIPA: deadline alcanzada")
+    
     # SciPy permite resolver directamente el LAP de maximización usando maximize=True
     row_ind, col_ind = linear_sum_assignment(benefits, maximize=True)
 
@@ -532,6 +592,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
 
     # Inicialización de estructuras y estadísticas
     start = time.monotonic()
+    deadline = start + time_limit_seconds
     pareto_set = []
     iteration = 0
     generated_subsets = 0
@@ -553,8 +614,7 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
     # Bucle principal de la heurística, que se ejecuta hasta alcanzar el límite de tiempo o el número máximo de iteraciones
     while True:
         # Comprobación de criterios de parada
-        elapsed = time.monotonic() - start
-        if elapsed >= time_limit_seconds:
+        if time.monotonic() >= deadline:
             break
         if max_iterations is not None and iteration >= max_iterations:
             break
@@ -566,43 +626,70 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
         
         # Generación de subconjunto factible P'
         try:
-            selected_placements = generate_random_feasible_placements(problem=problem, seed=seed, max_attempts=placement_max_attempts)
+            selected_placements = generate_random_feasible_placements(problem=problem, seed=seed, max_attempts=placement_max_attempts, deadline=deadline)
             generated_subsets += 1
+
+        except TimeoutError:
+            break
+
         except Exception as exc:
             generation_failures += 1
             if verbose:
-                print(f"[it={iteration}] Placement subset generation failed: {exc}")
+                print(f"[it={iteration}] "
+                      f"Placement subset generation failed: {exc}")
             continue
                 
         # Asignación práctica-profesor mediante construcción guiada
-        professor_assignment = assign_professors_with_guided_construction(
-            problem=problem,
-            selected_placements=selected_placements,
-            rng=rng,
-            lbar_weight=professor_lbar_weight,
-            omega_weight=professor_omega_weight,
-            normalize_supervision_dist=normalize_supervision_dist,
-            supervision_context=supervision_context
-        )
+        try:
+            professor_assignment = assign_professors_with_guided_construction(
+                problem=problem,
+                selected_placements=selected_placements,
+                rng=rng,
+                lbar_weight=professor_lbar_weight,
+                omega_weight=professor_omega_weight,
+                normalize_supervision_dist=normalize_supervision_dist,
+                supervision_context=supervision_context,
+                deadline=deadline
+            )
+
+        except TimeoutError:
+            break
 
         # Si no se ha podido asignar profesores de forma factible, se descarta este subconjunto y se continúa con la siguiente iteración
         if professor_assignment is None:
             professor_assignment_failures += 1
             continue
 
+        # No iniciar la construcción de tau fuera de plazo
+        if time.monotonic() >= deadline:
+            break
+
         # Construcción de la solución tau
         try:
             tau_matrix = build_tau_matrix(problem=problem, selected_placements=selected_placements, 
                                           normalize_student_dist=normalize_student_dist, student_dist_matrix=student_dist_matrix)
-            assignment_tau = solve_lapjv_max(tau_matrix, solver=lap_solver)
+            assignment_tau = solve_lapjv_max(tau_matrix, solver=lap_solver, deadline=deadline)
+
+            # No construir una solución fuera de plazo
+            if time.monotonic() >= deadline:
+                break
+            
             sol_tau = build_solution_from_lap_assignment(problem=problem, selected_placements=selected_placements, professor_assignment=professor_assignment, lap_assignment=assignment_tau)
+        
+        except TimeoutError:
+            break
+
         except Exception as exc:
             sol_tau = None
             if verbose:
                 print(f"[it={iteration}] Tau solution failed: {exc}")
 
+        # No iniciar una evaluación fuera de plazo
+        if time.monotonic() >= deadline:
+            break
+
         # Validación y registro de la solución tau en el Pareto externo si es factible
-        if sol_tau is not None and sol_tau.validate():
+        if sol_tau is not None:
             reg = register_solution_in_pareto(sol=sol_tau, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
                                               normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
             
@@ -618,18 +705,35 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
         else:
             invalid_solutions += 1
 
+        # No iniciar la construcción de eta fuera de plazo
+        if time.monotonic() >= deadline:
+            break
+
         # Construcción de la solución eta
         try:
             eta_matrix = build_eta_matrix(problem=problem, selected_placements=selected_placements)
-            assignment_eta = solve_lapjv_max(eta_matrix, solver=lap_solver)
+            assignment_eta = solve_lapjv_max(eta_matrix, solver=lap_solver, deadline=deadline)
+
+            # No construir una solución fuera de plazo
+            if time.monotonic() >= deadline:
+                break
+
             sol_eta = build_solution_from_lap_assignment(problem=problem, selected_placements=selected_placements, professor_assignment=professor_assignment, lap_assignment=assignment_eta)
+        
+        except TimeoutError:
+            break
+
         except Exception as exc:
             sol_eta = None
             if verbose:
                 print(f"[it={iteration}] Eta solution failed: {exc}")
 
+        # No iniciar una evaluación fuera de plazo
+        if time.monotonic() >= deadline:
+            break
+
         # Validación y registro de la solución eta en el Pareto externo si es factible
-        if sol_eta is not None and sol_eta.validate():
+        if sol_eta is not None:
             reg = register_solution_in_pareto(sol=sol_eta, pareto_set=pareto_set, iteration=iteration, seed=seed, weights=weights, max_pareto_size=max_pareto_size,
                                               normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist)
             
@@ -644,6 +748,10 @@ def run_hh_lap_sipa(problem, weights, time_limit_seconds = 300.0, max_iterations
                 invalid_solutions += 1
         else:
             invalid_solutions += 1
+
+        # Comprobación temporal después del registro
+        if time.monotonic() >= deadline:
+            break
 
         # Mensajes de progreso cada 10 iteraciones
         if verbose and iteration % 10 == 0:
