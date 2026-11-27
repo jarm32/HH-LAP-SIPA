@@ -89,7 +89,7 @@ def _reset_professor_assignment(sol): # objeto Solution
     sol.professor_load = [0] * sol.problem.n_professors
 
 
-def _build_solution_from_assignment_vector(problem, assignments, rng): # individual_to_solution
+def _build_solution_from_assignment_vector(problem, assignments, rng, deadline=None): # individual_to_solution
                                           # instancia del problema, lista de longitud n_students con la plaza asignada a cada estudiante, generador aleatorio 
     """
     Reconstruye una Solution completa a partir de un vector student_to_placement, comprobando primero sea viable. 
@@ -97,13 +97,14 @@ def _build_solution_from_assignment_vector(problem, assignments, rng): # individ
     En caso positivo, reconstruye la capa [plaza -> profesor] y devuelve la solución final si pasa todas las validaciones.
     En caso negativo, devuelve None
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("NSGA-III: deadline alcanzada")
+    
     # Validaciones básicas del vector
     if len(assignments) != problem.n_students: # 1 plaza por estudiante
         return None
-
     if any(j < 0 or j >= problem.n_placements for j in assignments): # Todas las plazas son índices válidos
         return None
-
     if len(set(assignments)) != len(assignments): # No hay plazas repetidas
         return None
 
@@ -134,7 +135,7 @@ def _build_solution_from_assignment_vector(problem, assignments, rng): # individ
     _reset_professor_assignment(sol)
 
     # Intenta asignar un profesor a cada plaza ocupada respetando capacidades
-    ok = _assign_professors_with_repair(problem, sol, rng)
+    ok = _assign_professors_with_repair(problem, sol, rng, deadline=deadline)
     if not ok:
         return None
 
@@ -225,89 +226,77 @@ def _try_align_assignments_with_template(problem, desired, template_sol, rng):
     return assignments # lista de plazas asignadas a cada estudiante más cercana a la deseada
 
 
-def repair_individual(problem, individual, rng, template_sol = None, seed = None):
+def repair_individual(problem, individual, rng, template_sol = None, seed = None, deadline=None):
                      # instancia del problema, cromosoma a reparar, generador aleatorio, solución factible base para intentar alinear, semilla
     """
-    Intenta reparar el individuo construyendo una solución válida a partir de una solución factible base:
-    1. Parte de una solución factible base
-    2. Intenta incorporar la información del individuo
-    3. Reconstruye profesores 
-    4. Si falla, cae a una solución factible generada de nuevo
-
-    No corrige directamente el cromosoma, sino que intenta proyectarlo sobre una solución factible
+    Repara un individuo utilizando primero la plantilla
+    heredada y generando alternativas solo si es necesario
     """
-    # Conversión del individuo a lista de plazas deseadas
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("NSGA-III: deadline alcanzada")
+    
+    # Conversión del individuo a plazas deseadas
     desired = []
     for x in individual:
         try:
             desired.append(int(x))
-        except Exception:
+        except (ValueError, TypeError, OverflowError):
             desired.append(-1)
 
-    # Construcción de plantillas candidatas
-    candidate_templates = []
+    # Intentar construir directamente el cromosoma resultante
+    repaired = _build_solution_from_assignment_vector(problem, desired, rng, deadline=deadline)
+    if repaired is not None:
+        return repaired
 
-    # Añade la solución plantilla heredada, si existe
+    # Primero intenta plantilla heredada
     if template_sol is not None:
-        candidate_templates.append(_copy_solution(template_sol))
+        assignments = _try_align_assignments_with_template(problem, desired, template_sol, rng)
+        repaired = _build_solution_from_assignment_vector(problem, assignments, rng, deadline=deadline)
+        
+        if repaired is not None:
+            return repaired
 
-    # Genera varias soluciones factibles auxiliares como posibles bases de repair
+    # Genera plantillas auxiliares solo cuando sean necesarias
     for extra in range(3):
-        local_seed = None if seed is None else seed + 1000 + extra
-        base_sol = generate_random_feasible_fixing(problem, seed=local_seed)
-        candidate_templates.append(base_sol)
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("NSGA-III: deadline alcanzada")
 
-    # Intento de alineación y reconstrucción de solución a partir de cada plantilla candidata hasta encontrar una solución válida
-    for base_sol in candidate_templates:
-        assignments = _try_align_assignments_with_template(problem, desired, base_sol, rng) # Intenta acercar la plantilla al individuo sin romper factibilidad
-        repaired = _build_solution_from_assignment_vector(problem, assignments, rng) # Reconstruye y valida una Solution a partir del intento de acercamiento anterior
-        if repaired is not None and repaired.validate():
-            return repaired # Si la solución es válida, la devuelve como resultado del repair
+        local_seed = None if seed is None else seed + 1000 + extra
+
+        base_sol = generate_random_feasible_fixing(problem, seed=local_seed, deadline=deadline)
+        assignments = _try_align_assignments_with_template(problem, desired, base_sol, rng)
+        repaired = _build_solution_from_assignment_vector(problem, assignments, rng, deadline=deadline)
+
+        if repaired is not None:
+            return repaired
 
     # Último recurso --> Si ninguna plantilla funciona, se devuelve una solución factible nueva
     fallback_seed = None if seed is None else seed + 999999
-    return generate_random_feasible_fixing(problem, seed=fallback_seed) # Solución factible garantizada, aunque sin relación con el individuo original (generada de nuevo)
+
+    return generate_random_feasible_fixing(problem, seed=fallback_seed, deadline=deadline) # Solución factible garantizada, aunque sin relación con el individuo original (generada de nuevo)
 
 
 # -----------------------------------------------------------------
 # Inicialización de individuos y población
 # -----------------------------------------------------------------
 
-def _init_individual(problem, seed=None):
+def _init_individual(problem, seed=None, deadline=None):
                     # instancia del problema, semilla
     """
     Genera una solución factible usando el generador existente y la convierte en un individuo del GA (DEAP)
     """
     # Genera una solución factible del problema
-    sol = generate_random_feasible_fixing(problem, seed=seed)
+    sol = generate_random_feasible_fixing(problem, seed=seed, deadline=deadline)
 
     # Convierte la solución en un individuo DEAP
     return solution_to_individual(sol) # IndividualSIPA factible
-
-
-def _init_population(problem, population_size, base_seed = None):
-                    # instancia del problema, nº de individuos a generar, semilla
-    """
-    Construye la población inicial generando múltiples individuos factibles
-    """
-    population = []
-
-    # Generación de individuos
-    for i in range(population_size):
-        # Si hay semilla base, cada individuo usa una semilla distinta (base_seed + i) para mantener reproducibilidad y evitar clones
-        seed = None if base_seed is None else base_seed + i
-        
-        # Se genera cada individuo como solución factible convertida a cromosoma
-        population.append(_init_individual(problem, seed=seed))
-
-    return population # lista de individuos DEAP (población inicial factible)
 
 
 # -----------------------------------------------------------------
 # Operadores genéticos
 # -----------------------------------------------------------------
 
-def crossover_simple(ind1, ind2, problem, rng, seed = None):
+def crossover_simple(ind1, ind2, problem, rng, seed = None, deadline=None):
                     # dos individuos padres a cruzar, instancia del problema, generador aleatorio, semilla
     """
     Cruza dos individuos mezclando los genes de los padres con una máscara aleatoria y repara los descendientes resultantes
@@ -326,8 +315,8 @@ def crossover_simple(ind1, ind2, problem, rng, seed = None):
             child1_genes[i], child2_genes[i] = child2_genes[i], child1_genes[i]
 
     # Repara ambos cromosomas descendientes para obtener soluciones válidas
-    child1_sol = repair_individual(problem=problem, individual=child1_genes, rng=rng, template_sol=parent1_sol, seed=seed)
-    child2_sol = repair_individual(problem=problem, individual=child2_genes, rng=rng, template_sol=parent2_sol, seed=None if seed is None else seed + 1)
+    child1_sol = repair_individual(problem=problem, individual=child1_genes, rng=rng, template_sol=parent1_sol, seed=seed, deadline=deadline)
+    child2_sol = repair_individual(problem=problem, individual=child2_genes, rng=rng, template_sol=parent2_sol, seed=None if seed is None else seed + 1, deadline=deadline)
 
     # Sustituye el contenido de los individuos por los genes reparados
     ind1[:] = list(child1_sol.student_to_placement)
@@ -348,7 +337,7 @@ def crossover_simple(ind1, ind2, problem, rng, seed = None):
     return ind1, ind2 # los dos individuos descendientes modificados
 
 
-def mutate_simple(individual, problem, rng, seed = None):
+def mutate_simple(individual, problem, rng, seed = None, deadline=None):
                  # cromosoma/individuo a mutar, instancia del problema, generador aleatorio, semilla
     """
     Aplica una mutación sencilla al cromosoma. Después aplica repair y actualiza la caché y el fitness
@@ -368,7 +357,7 @@ def mutate_simple(individual, problem, rng, seed = None):
     template_sol = getattr(individual, "cached_solution", None)
     
     # Repara el cromosoma mutado para obtener una solución válida
-    repaired_sol = repair_individual(problem=problem, individual=mutated, rng=rng, template_sol=template_sol, seed=seed)
+    repaired_sol = repair_individual(problem=problem, individual=mutated, rng=rng, template_sol=template_sol, seed=seed, deadline=deadline)
 
     # Sustituye el individuo por el resultado reparado
     individual[:] = list(repaired_sol.student_to_placement)
@@ -459,12 +448,33 @@ def _register_individual_in_global_pareto(
 # Selección de padres
 # -----------------------------------------------------------------
 
-def _select_parents(population, k, rng):
+def _copy_individual(individual):
+    """
+    Copia un individuo sin duplicar la instancia del problema
+    """
+    new_ind = creator.IndividualSIPA(list(individual))
+
+    # Copia independiente de la solución
+    new_ind.cached_solution = _copy_solution(individual.cached_solution)
+
+    # Copia de la evaluación cacheada
+    new_ind.cached_multi_eval = copy.deepcopy(individual.cached_multi_eval)
+
+    # Conserva el fitness del individuo original
+    if individual.fitness.valid:
+        new_ind.fitness.values = individual.fitness.values
+    return new_ind
+
+
+def _select_parents(population, k, rng, deadline=None):
                    # población actual, número de padres a seleccionar, generador aleatorio
     """
     Selecciona padres mediante torneos binarios usando como criterio el frente no dominado al que pertenece cada individuo.
     Gana el que esté en mejor frente; si ambos están en el mismo, se desempata aleatoriamente
     """
+    if deadline is not None and time.monotonic() >= deadline:
+        raise TimeoutError("NSGA-III: deadline alcanzada")
+    
     # Caso población vacía
     if not population:
         return []
@@ -482,6 +492,9 @@ def _select_parents(population, k, rng):
 
     # Realiza k torneos binarios para elegir los padres
     for _ in range(k):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("NSGA-III: deadline alcanzada")
+    
         if len(population) == 1:
             winner = population[0]
         else:
@@ -499,7 +512,7 @@ def _select_parents(population, k, rng):
                 winner = a if rng.random() < 0.5 else b
         
         # Añade una copia del ganador para evitar modificar los individuos originales durante la reproducción
-        selected.append(copy.deepcopy(winner))
+        selected.append(_copy_individual(winner))
 
     return selected # lista con k copias de individuos seleccionados
 
@@ -574,120 +587,144 @@ def run_nsga3(
     # Valida los pesos de la función objetivo escalar auxiliar para desempate
     weights.validate()
 
+    # Instante de inicio
+    start = time.monotonic()
+    deadline = start + time_limit_seconds
+
     # Inicializa el generador aleatorio global del algoritmo
     rng = random.Random(base_seed)
 
     # Construye el toolbox DEAP y genera los puntos de referencia de NSGA-III
     toolbox, ref_points = build_deap_toolbox(problem=problem, rng=rng, normalize_student_dist=normalize_student_dist, normalize_supervision_dist=normalize_supervision_dist, ref_points_p=ref_points_p)
-    
-    # Instante de inicio
-    start = time.time()
 
-    # Inicializa el Pareto global externo, la población inicial factible y los contadores de estadísticas
+    # Inicialización del Pareto, población y contadores
     pareto_set = []
-    population = _init_population(problem, population_size, base_seed=base_seed)
+    population = []
     generations, generated, feasible, failures, inserted = 0, 0, 0, 0, 0
 
-    # ------------------------------------------------------
-    # Evaluación inicial de la población + actualización del Pareto externo
-    # ------------------------------------------------------
-    for idx, ind in enumerate(population):
-        # Evalúa los individuos de la población inicial
+    # Generación, evaluación y registro progresivo de la población inicial
+    for idx in range(population_size):
+        if time.monotonic() >= deadline:
+            break
+
+        seed = None if base_seed is None else base_seed + idx
+
+        # Genera un individuo factible
+        try:
+            ind = _init_individual(problem, seed=seed, deadline=deadline)
+        except TimeoutError:
+            break
+
+        # No iniciar una evaluación fuera de plazo
+        if time.monotonic() >= deadline:
+            break
+
+        # Evalúa el individuo
         values = toolbox.evaluate(ind)
-        if values[0] <= -1e17:
+        if not ind.cached_multi_eval.get("valid", False):
             failures += 1
             continue
-        
-        # Guarda el fitness del individuo y actualiza contadores de evaluaciones factibles
+
+        # Guarda el fitness y actualiza contadores
         ind.fitness.values = values
         generated += 1
         feasible += 1
 
-        # Intenta registrar el individuo en el Pareto global externo
-        reg = _register_individual_in_global_pareto(
-            individual=ind,
-            pareto_set=pareto_set,
-            iteration=0,
-            seed=None if base_seed is None else base_seed + idx,
-            weights=weights,
-            max_pareto_size=max_pareto_size,
-            normalize_student_dist=normalize_student_dist,
-            normalize_supervision_dist=normalize_supervision_dist,
-        )
-
+        # Registra el individuo en el Pareto externo
+        reg = _register_individual_in_global_pareto(individual=ind, pareto_set=pareto_set, iteration=0, seed=seed, weights=weights, max_pareto_size=max_pareto_size, 
+                                                    normalize_student_dist=normalize_student_dist,normalize_supervision_dist=normalize_supervision_dist)
         pareto_set = reg["pareto_set"]
+
         if reg["was_inserted"]:
             inserted += 1
+
+        # Incorpora el individuo evaluado a la población
+        population.append(ind)
 
     # ---------------------------------------------------------
     # Bucle generacional principal (selección, cruce, mutación, evaluación y reemplazo hasta cumplir con el criterio de parada)
     # ---------------------------------------------------------
-    while True:
-        # Comprueba criterios de parada (tiempo o nº máximo de generaciones)
-        elapsed = time.time() - start
-        if elapsed >= time_limit_seconds:
+    while population:
+        # Criterios de parada
+        if time.monotonic() >= deadline:
             break
         if max_generations is not None and generations >= max_generations:
             break
         generations += 1
 
-        # Selección de padres desde la población actual
-        parents = _select_parents(population, offspring_size, rng)
-        offspring = parents
+        try:
+            # Selección de padres
+            parents = _select_parents(population, offspring_size, rng, deadline=deadline)
+            offspring = []
 
-        # Aplica cruce por parejas con probabilidad cx_prob
-        for i in range(0, len(offspring) - 1, 2):
-            if rng.random() < cx_prob:
-                seed = None if base_seed is None else base_seed + generations * 100000 + i
-                toolbox.mate(offspring[i], offspring[i + 1], seed=seed)
-        
-        # Aplica mutación individual con probabilidad mut_prob
-        for i in range(len(offspring)):
-            if rng.random() < mut_prob:
-                seed = None if base_seed is None else base_seed + generations * 200000 + i
-                toolbox.mutate(offspring[i], seed=seed)
+            # Aplica cruce por parejas con probabilidad cx_prob
+            for i in range(0, len(parents), 2):
+                if time.monotonic() >= deadline:
+                    raise TimeoutError("NSGA-III: deadline alcanzada")
+                pair = parents[i:i + 2]
 
-        # ---------------------------------------------------------
-        # Evaluación de la descendencia + actualización del Pareto externo
-        # ---------------------------------------------------------
-        for i, ind in enumerate(offspring):
-            # Solo evalúa si el fitness ha quedado invalidado tras la variación 
-            if not ind.fitness.valid:
-                values = toolbox.evaluate(ind)
+                if len(pair) == 2 and rng.random() < cx_prob:
+                    seed = None if base_seed is None else (base_seed + generations * 100000 + i)
+                    toolbox.mate(pair[0], pair[1], seed=seed, deadline=deadline)
 
-                if values[0] <= -1e17:
-                    failures += 1
-                    continue
-                
-                # Guarda el fitness del descendiente
-                ind.fitness.values = values
-                generated += 1
-                feasible += 1
+                # Mutación, evaluación y registro individual
+                for offset, ind in enumerate(pair):
+                    if time.monotonic() >= deadline:
+                        raise TimeoutError("NSGA-III: deadline alcanzada")
+                    idx = i + offset
 
-                # Intenta registrar el descendiente en el Pareto global externo
-                reg = _register_individual_in_global_pareto(
-                    individual=ind,
-                    pareto_set=pareto_set,
-                    iteration=generations,
-                    seed=None if base_seed is None else base_seed + generations * 1000 + i,
-                    weights=weights,
-                    max_pareto_size=max_pareto_size,
-                    normalize_student_dist=normalize_student_dist,
-                    normalize_supervision_dist=normalize_supervision_dist,
-                )
+                    # Mutación
+                    if rng.random() < mut_prob:
+                        seed = None if base_seed is None else (base_seed + generations * 200000 + idx)
+                        toolbox.mutate(ind, seed=seed, deadline=deadline)
 
-                pareto_set = reg["pareto_set"]
-                if reg["was_inserted"]:
-                    inserted += 1
+                    # No iniciar evaluaciones fuera de plazo
+                    if time.monotonic() >= deadline:
+                        raise TimeoutError("NSGA-III: deadline alcanzada")
 
-        # ---------------------------------------------------------
-        # Reemplazo ambiental NSGA-III
-        # ---------------------------------------------------------
-        # Une población actual y descendencia y selecciona los mejores individuos según NSGA-III para formar la nueva población
-        combined = population + offspring
-        population = toolbox.select_survivors(combined, population_size)
+                    # Evaluar únicamente individuos modificados
+                    if not ind.fitness.valid:
+                        values = toolbox.evaluate(ind)
+                        if not ind.cached_multi_eval.get("valid", False):
+                            failures += 1
+                            continue
 
-        # Muestra información de progreso cada 5 generaciones
+                        ind.fitness.values = values
+                        generated += 1
+                        feasible += 1
+
+                        # Registro en el Pareto externo
+                        reg = _register_individual_in_global_pareto(
+                            individual=ind,
+                            pareto_set=pareto_set,
+                            iteration=generations,
+                            seed=None if base_seed is None else (base_seed + generations * 1000 + idx),
+                            weights=weights,
+                            max_pareto_size=max_pareto_size,
+                            normalize_student_dist=normalize_student_dist,
+                            normalize_supervision_dist=normalize_supervision_dist,
+                        )
+
+                        pareto_set = reg["pareto_set"]
+                        if reg["was_inserted"]:
+                            inserted += 1
+
+                    # Incorporar descendiente válido
+                    offspring.append(ind)
+
+            # No iniciar el reemplazo fuera de plazo
+            if time.monotonic() >= deadline:
+                break
+
+            # Reemplazo ambiental NSGA-III
+            combined = population + offspring
+            population = toolbox.select_survivors(combined, population_size)
+
+        except TimeoutError:
+            # Conservar el Pareto acumulado y finalizar
+            break
+
+        # Información de progreso
         if verbose and generations % 5 == 0:
             print(
                 f"[gen={generations}] "
@@ -696,7 +733,7 @@ def run_nsga3(
             )
 
     # Calcula el tiempo total de ejecución
-    total_time = time.time() - start
+    total_time = time.monotonic() - start
 
     return {
         "pareto_set": pareto_set,
